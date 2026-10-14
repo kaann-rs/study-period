@@ -1,6 +1,6 @@
 # Study Period
 
-![Logo](assets/study.png)
+<img src="./assets/study.png" width="50" height="50" />
 
 I use this repository to collect my work as I improve my skills in Rust, C, and various areas of computer science.
 
