@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    name: Verify and publish release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+
+      - name: Verify SemVer tag matches Cargo.toml
+        shell: bash
+        run: |
+          version="$(sed -n 's/^version = "\([0-9][0-9.]*\)"/\1/p' Cargo.toml | head -n 1)"
+          test "v${version}" = "${GITHUB_REF_NAME}"
+
+      - name: Quality checks
+        run: |
+          cargo fmt --all -- --check
+          cargo test --all-targets --all-features
+          cargo clippy --all-targets --all-features -- -D warnings -A dead_code -A clippy::struct_field_names
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "lox-rs $GITHUB_REF_NAME" \
+            --generate-notes

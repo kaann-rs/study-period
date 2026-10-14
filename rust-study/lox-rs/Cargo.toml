@@ -1,0 +1,22 @@
+[package]
+name = "lox-rs"
+description = "A Rust learning implementation of the Lox interpreter from Crafting Interpreters"
+license = "MIT"
+repository = "https://git.kaanbora.dev/kaan-rs/lox-rs"
+readme = "README.md"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+
+[lib]
+name = "lox_rs"
+path = "src/lib.rs"
+crate-type = ["lib"]
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+must_use_candidate = "allow"
