@@ -17,7 +17,7 @@ Changes to this study workspace, newest first.
 
 ### Removed
 
-- The `c-study`, `cpp-study`, `lua-study`, `docker-study`, `git-study`, and `linux-study` directories.
+- The `c-study`, `cpp-study`, `lua-study`, `docker-study`, `git-study`, `linux-study`, `math-study`, and `eng-study` directories.
 
 ## 2026-10-14
 

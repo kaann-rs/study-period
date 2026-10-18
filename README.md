@@ -20,8 +20,6 @@ These are learning projects at different stages of completion. They may contain 
 | `rust-study/ahtapot-rs` | A personal CLI project for bulk image renaming, resizing, and format conversion. |
 | `rust-study/bird-lang` | Early experiments with building a programming language. |
 
-`math-study` and `eng-study` are placeholders for future study material.
-
 ## Running an exercise
 
 Each Rust project is a separate Cargo package. Open its directory and run Cargo there; this repository does not have a shared Cargo workspace.
