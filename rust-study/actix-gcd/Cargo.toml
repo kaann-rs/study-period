@@ -1,0 +1,9 @@
+[package]
+name = "actix-gcd"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+actix-web = "4.17.0"
+serde = { version = "1.0.229", features = ["derive"] }
+tokio = "1.53.3"

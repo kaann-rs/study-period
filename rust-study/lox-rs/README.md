@@ -17,7 +17,7 @@ cargo run
 cargo run -- main.lox
 ```
 
-Kontroller:
+Checks:
 
 ```bash
 cargo fmt --check

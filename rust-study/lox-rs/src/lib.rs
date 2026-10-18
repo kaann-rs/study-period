@@ -72,7 +72,7 @@ impl Lox {
 
         let expr = parser.expression();
 
-        println!("Sonuç: {:?}", evolute(expr));
+        println!("Result: {:?}", evolute(expr));
 
         let value = String::new();
 
