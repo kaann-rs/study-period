@@ -1,6 +1,23 @@
 # Changelog
 
-What was added to this repository, newest first.
+Changes to this study workspace, newest first.
+
+## 2026-10-18
+
+### Added
+
+- Rust exercises: command-line GCD, an Actix Web GCD calculator, a Mandelbrot renderer, and a regular-expression text replacement tool.
+- A README project index and instructions for running individual exercises.
+- A repository-wide ignore rule for Rust build output directories.
+
+### Changed
+
+- Clarified that this repository is a personal study workspace for book exercises and related experiments.
+- Translated Turkish notes and output text into English.
+
+### Removed
+
+- The `c-study`, `cpp-study`, `lua-study`, `docker-study`, `git-study`, and `linux-study` directories.
 
 ## 2026-10-14
 
