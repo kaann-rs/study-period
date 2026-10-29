@@ -4,7 +4,8 @@ use std::ptr;
 // Const generic example: struct S<const N: usize = 0> { data: [u8; N] }
 fn main() {
     // Related control-flow constructs: if let, while let, let ... else, and let chains.
-    // Bindings are immutable by default; mut allows reassignment.
+    // Rust favors immutable bindings by default to encourage safer code and
+    // make concurrent code easier to reason about; mut explicitly opts into mutation.
     let mut first_var: i32 = 10_i32;
     first_var = 101;
 
