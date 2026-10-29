@@ -9,6 +9,7 @@ mod util;
 use crate::expr::evolute;
 use crate::parser::Parser;
 use crate::scanner::Scanner;
+use std::f32::consts::PI;
 use std::io::Write;
 
 macro_rules! errs {
@@ -25,7 +26,7 @@ const TOKEN_TYPE: usize = size_of::<Scanner>();
 pub struct Lox;
 
 impl Lox {
-    pub const PI: f32 = 3.14;
+    pub const PI: f32 = PI;
 
     pub fn run_file(path: &str) -> Result<(), std::io::Error> {
         let byte: Vec<u8> = std::fs::read(path)?;

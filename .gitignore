@@ -1,1 +1,7 @@
 target/
+
+# C study build artifacts
+/c-study/build/
+/c-study/main
+/c-study/a.out
+/c-study/*.o
