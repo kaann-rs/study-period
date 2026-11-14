@@ -1,0 +1,7 @@
+[package]
+name = "cargo-and-crates"
+version = "0.1.0"
+edition = "2024"
+description = "Bölüm 14 örneği: doc yorumları, doc-test ve pub use ile yeniden dışa aktarma"
+
+[dependencies]
