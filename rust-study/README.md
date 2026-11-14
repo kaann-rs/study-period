@@ -46,6 +46,7 @@ Orendorff).
 | --- | --- | --- |
 | `learn/ileri-future` | Future gerçekte nedir: poll/wake döngüsü, Waker + vtable, Pin ve self-referential state machine | std (`core::future`, `core::task`) + RfR Böl. 9 |
 | `learn/ileri-variance` | Subtyping ve variance: covariant/invariant/contravariant, `&'a mut &'b T` neden iki lifetime ister | RfR Böl. 2 (Listing 2-11) |
+| `learn/ileri-sized-dst` | Sized, DST (`str`/`[T]`/`dyn`), fat pointer (ptr + uzunluk/vtable), `?Sized` | RfR Böl. 3 + std |
 
 ## Çalıştırma
 
