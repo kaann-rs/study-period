@@ -5,19 +5,10 @@
 use std::ptr;
 
 fn main() {
-    // 1. Mutable (değiştirilebilir) binding'ler
-    // binding = bir ismi bir değere bağlamak. `let x = 5;` dediğinde x ismini 5
-    // değerine BAĞLARSIN; o yüzden "değişken" yerine daha hassas terim "binding"
-    // (bağlama). Varsayılan olarak immutable'dır (değiştirilemez); değiştirmek
-    // için mut eklersin — first_var'da yaptığımız gibi.
-    // Neden varsayılan immutable? Sorun: her şey serbestçe değişebilir olsaydı, sabit
-    // tuttuğunu sandığın bir değeri başka bir kod sessizce değiştirebilir, `&T`
-    // paylaşımlı referansını tutanlar da ayaklarının altından değişen veriyle yanlış
-    // sonuç üretirdi — bulması zor hatalar. Çözüm: değişmezlik varsayılan; değiştirme
-    // niyetini `mut` ile AÇIKÇA belirtirsin, böylece ne değiştiği okurken görünür olur
-    // ve derleyici sabit değerlere güvenip optimize eder. (Binding'lerin çoğu zaten hiç
-    // değişmez; varsayılan, yaygın duruma uyar.)
-    // Hem tür açıklaması hem de literal son eki i32 belirtir.
+    // 1. Mutable binding (tam anlatım + "Neden immutable?" kök nedeni — Aliasing XOR
+    // Mutability — learn/common-concepts, Bölüm 3'te). Kısaca: let bir ismi bir değere
+    // bağlar, varsayılan immutable; mut ile değiştirilebilir olur. Tür açıklaması +
+    // i32 literal son eki türü belirtir.
     let mut first_var: i32 = 10_i32;
 
     first_var = 101;
