@@ -12,6 +12,8 @@ These are learning projects at different stages of completion. They may contain 
 
 | Directory | What I am working on |
 | --- | --- |
+| `lean-study` | A short Lean 4 course in simple English, with proofs and practice tasks. |
+| `cpp-study` | A short Turkish C++20 guide for C/Rust learners, with five runnable examples and CMake. |
 | `rust-study/programming-rust` | A command-line greatest common divisor calculator. |
 | `rust-study/actix-gcd` | A web-based greatest common divisor calculator using Actix Web. |
 | `rust-study/mandelbrot` | A Mandelbrot image renderer with parallel processing. |

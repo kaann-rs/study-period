@@ -1,0 +1,12 @@
+[package]
+name = "macros"
+version = "0.1.0"
+edition = "2024"
+
+# proc-macro crate'i: içinde `fn main` çalışmaz, yalnızca makro üretir.
+# Bu yüzden main.rs değil lib.rs ister ve kendisi çalıştırılamaz; başka bir
+# crate (burada tests/) onu kullanır. Denemek için: cargo test -p macros
+[lib]
+proc-macro = true
+
+[dependencies]

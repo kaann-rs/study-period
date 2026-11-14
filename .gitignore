@@ -5,3 +5,5 @@ target/
 /c-study/main
 /c-study/a.out
 /c-study/*.o
+rust-study/guide/
+rust-study/target/

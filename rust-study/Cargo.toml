@@ -1,0 +1,8 @@
+[workspace]
+resolver = "3"
+# Her yeni konu/bölüm kendi crate'i olur:
+#   learn/*   → kitap bölümleri ve kavram çalışmaları (basic-concepts, struct, ...)
+#   project/* → daha büyük, kendi başına projeler (lox-rs, ahtapot-rs, actix-gcd)
+# guide/ (rust-lang/rust) referans olarak durur, workspace'e dahil DEĞİL.
+members = ["learn/*", "project/*"]
+exclude = ["guide"]
