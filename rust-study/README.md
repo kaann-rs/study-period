@@ -50,6 +50,7 @@ Orendorff).
 | `learn/ileri-deref-metot` | Deref + metot çözümü: deref coercion, autoref/autoderef, inherent metot gölgeleme | RfR Böl. 4 + Reference + std |
 | `learn/ileri-send-sync` | UnsafeCell (iç değişkenliğin tek temeli) + Send/Sync auto-trait'leri, !Sync negatif impl | RfR Böl. 4 & 10 + std |
 | `learn/ileri-dropck` | Drop check: Drop + lifetime neden borrow'u aşmaya zorlar; PhantomData (ZST işaretçi); #[may_dangle] | RfR Böl. 10 + std |
+| `learn/ileri-coherence` | Coherence + orphan rule (tam kural), blanket impl, fundamental tipler, covered impl | RfR Böl. 3 + std |
 
 ## Çalıştırma
 
