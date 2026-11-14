@@ -45,7 +45,7 @@ Orendorff).
 | Crate | Konu | Ana kaynak |
 | --- | --- | --- |
 | `learn/ileri-future` | Future gerçekte nedir: poll/wake döngüsü, Waker + vtable, Pin ve self-referential state machine | std (`core::future`, `core::task`) + RfR Böl. 9 |
-| _(sırada)_ `learn/ileri-variance` | Subtyping ve variance: covariant/invariant/contravariant, `&'a mut &'b T` neden iki lifetime ister | RfR Böl. 2 (Listing 2-11) |
+| `learn/ileri-variance` | Subtyping ve variance: covariant/invariant/contravariant, `&'a mut &'b T` neden iki lifetime ister | RfR Böl. 2 (Listing 2-11) |
 
 ## Çalıştırma
 
