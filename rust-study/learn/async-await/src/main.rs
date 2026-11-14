@@ -80,6 +80,7 @@ fn cok_gorev(mut gorevler: Vec<Pin<Box<dyn Future<Output = ()>>>>) {
 struct BirKezBekle {
     hazir: bool,
 }
+
 impl Future for BirKezBekle {
     type Output = i32;
     fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<i32> {
@@ -162,7 +163,9 @@ async fn akis() -> i32 {
 
 async fn gorev(id: u32) {
     println!("  görev {id}: başladı");
+
     Teslim(false).await; // bu noktada kontrolü diğer göreve bırak
+    //
     println!("  görev {id}: bitti");
 }
 

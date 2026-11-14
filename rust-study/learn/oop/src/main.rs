@@ -26,6 +26,7 @@ pub struct OrtalamaListe {
     liste: Vec<i32>, // private
     ortalama: f64,   // private, önbellek (cache)
 }
+
 impl OrtalamaListe {
     pub fn yeni() -> OrtalamaListe {
         OrtalamaListe {

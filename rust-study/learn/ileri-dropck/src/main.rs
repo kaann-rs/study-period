@@ -26,6 +26,7 @@ impl<'a> Drop for Denetci<'a> {
         println!("  Denetci düşerken okuyor: {}", self.0);
     }
 }
+
 fn dropck_temel() {
     // ÇALIŞAN sıra: `gun` ÖNCE bildirildi → EN SON düşer. `denetci` sonra bildirildi → ÖNCE düşer.
     // denetci.drop() çalıştığında gun hâlâ yaşıyor → OK.

@@ -28,7 +28,10 @@ fn subtyping() {
     }
     let sabit: &'static str = "program boyu yaşarım"; // &'static str
     // &'static str, &'a str beklenen yere GEÇER (alt-tip): daha uzun ömürlü, daha "işe yarar".
-    println!("subtyping: &'static → &'a kabul edildi, len = {}", kisa_bekler(sabit));
+    println!(
+        "subtyping: &'static → &'a kabul edildi, len = {}",
+        kisa_bekler(sabit)
+    );
 }
 
 // ============================================================================
@@ -42,7 +45,10 @@ fn covariance() {
     }
     let depo: Vec<&'static str> = vec!["a", "b", "c"];
     // &Vec<&'static str> --covariant--> &Vec<&'a str>: sorun yok.
-    println!("covariance: paylaşımlı & esnek, eleman sayısı = {}", oku(&depo));
+    println!(
+        "covariance: paylaşımlı & esnek, eleman sayısı = {}",
+        oku(&depo)
+    );
     // Neden güvenli? Paylaşımlı & yalnız OKUR. Daha uzun ömürlü veriyi daha kısa süre okumak
     // hiçbir şeyi bozmaz → derleyici uzun'u kısa'ya zahmetsiz "kısaltır" (covariance).
 }
@@ -57,6 +63,7 @@ fn covariance() {
 struct MutStr<'a, 'b> {
     s: &'a mut &'b str, // dış &mut'un ömrü 'a, içteki &str'nin ömrü 'b — AYRI
 }
+
 fn invariance_mutstr() {
     // İKİ lifetime ile sorunsuz çalışır (DOĞRULANDI):
     let mut s = "hello";

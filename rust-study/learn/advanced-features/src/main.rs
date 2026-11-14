@@ -74,6 +74,7 @@ impl Add for Metre {
         Metre(self.0 + baska.0)
     }
 }
+
 fn operator_overload() {
     let toplam = Metre(3) + Metre(4); // artık `+` Metre'de çalışır
     println!("operator overload: {toplam:?}");
@@ -92,7 +93,11 @@ impl fmt::Display for Sarmal {
     }
 }
 fn newtype_display() {
-    let w = Sarmal(vec![String::from("a"), String::from("b"), String::from("c")]);
+    let w = Sarmal(vec![
+        String::from("a"),
+        String::from("b"),
+        String::from("c"),
+    ]);
     println!("newtype Display: {w}");
 }
 
@@ -123,7 +128,10 @@ fn tip_takma_ve_fn() {
     let s: Metin = String::from("alias"); // Metin == String
     println!("type alias: {s}");
 
-    println!("fn pointer: uygula(carp_iki, 10) = {}", uygula(carp_iki, 10));
+    println!(
+        "fn pointer: uygula(carp_iki, 10) = {}",
+        uygula(carp_iki, 10)
+    );
     let f1 = ekleyici_impl(100);
     let f2 = ekleyici_kutulu(1);
     println!("impl Fn closure döndürme: {}", f1(5)); // 105

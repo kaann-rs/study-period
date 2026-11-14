@@ -54,8 +54,8 @@ fn degiskenler_ve_mut() {
 // Aynı ismi `let` ile yeniden bağlamak eskisini "gölgeler": YENİ bir binding oluşur.
 // mut'tan farkı: (a) yeni değerin TÜRÜ farklı olabilir, (b) sonuç yine immutable kalır.
 fn golgeleme() {
-    let bosluk = "   ";          // tür: &str
-    let bosluk = bosluk.len();   // tür: usize — shadowing sayesinde tür değişti
+    let bosluk = "   "; // tür: &str
+    let bosluk = bosluk.len(); // tür: usize — shadowing sayesinde tür değişti
     println!("boşluk sayısı = {bosluk}");
 
     // Neden shadowing? Sorun: `mut` ile türü değiştiremezsin — `let mut s = "   "; s = s.len();`
@@ -70,10 +70,10 @@ fn golgeleme() {
 // 3. Veri türleri (data types)
 fn veri_turleri() {
     // Scalar türler: integer, float, bool, char
-    let tam: i32 = -42;      // işaretli 32-bit (i); işaretsiz için u32
-    let ondalik: f64 = 3.14; // varsayılan float f64 (f32 de var)
+    let tam: i32 = -42; // işaretli 32-bit (i); işaretsiz için u32
+    let ondalik: f64 = 3.15; // varsayılan float f64 (f32 de var)
     let dogru: bool = true;
-    let harf: char = 'ş';    // char = tek bir Unicode scalar değeri (4 byte), 'tek tırnak'
+    let harf: char = 'ş'; // char = tek bir Unicode scalar değeri (4 byte), 'tek tırnak'
     println!("{tam} {ondalik} {dogru} {harf}");
 
     // Integer overflow (taşma): debug derlemesinde PANİK eder, release'de sarar (wrap).
@@ -86,10 +86,10 @@ fn veri_turleri() {
 
     // Compound (bileşik) türler: tuple ve array
     let demet: (i32, f64, char) = (1, 2.0, 'x');
-    let (a, b, c) = demet;              // destructuring (parçalara ayırma)
+    let (a, b, c) = demet; // destructuring (parçalara ayırma)
     println!("{a} {b} {c}, .1 = {}", demet.1); // .indeks ile de erişilir
 
-    let dizi = [10, 20, 30];            // [tür; uzunluk] — SABİT uzunluk, stack'te durur
+    let dizi = [10, 20, 30]; // [tür; uzunluk] — SABİT uzunluk, stack'te durur
     println!("ilk = {}", dizi[0]);
     // dizi[5] yazsan çalışma anında PANİK: "index out of bounds".
     // Neden sınır denetlenir? Sorun: C'de dizi sınırını aşmak bellekte başka bir yeri

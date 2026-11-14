@@ -135,6 +135,15 @@ where
     }
 }
 
+impl<T: Future> Animal<i32> for T {
+    // OR &mut T OR &T
+    type Your = i32;
+
+    fn voice() -> i32 {
+        1
+    }
+}
+
 // 6. Inherent impl ve function pointer
 // inherent impl (kendine ait impl) = bir türe, bir trait üzerinden DEĞİL doğrudan
 // kendi metotlarını ekleyen impl bloğu. function pointer (fonksiyon işaretçisi) =
