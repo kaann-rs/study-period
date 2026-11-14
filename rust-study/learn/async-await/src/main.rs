@@ -109,7 +109,42 @@ impl Future for Teslim {
 }
 
 // ============================================================================
-// async fn'ler — derleyici bunları birer state machine'e çevirir (aşağıda)
+// async ve await KEYWORD'LERİ — tam olarak NE YAPAR, NASIL ÇALIŞIR?
+// ============================================================================
+// İki AYRI iş yapan iki keyword; karıştırma:
+//
+// • `async` (fn ya da blok önünde): gövdeyi ÇALIŞTIRMAZ. Onu, gövdeyi uygulayan bir FUTURE
+//   değerine çevirir (derleyici arka planda bir state machine üretir). `async fn f() -> T`'nin
+//   gerçek dönüş tipi `impl Future<Output = T>`'dir. Yani `f()` çağırmak SIFIR iş yapar — sadece
+//   "henüz başlamamış hesap"ı (future'ı) üretir; iş, biri onu poll edene dek BAŞLAMAZ (tembel).
+//   Fark: normal fonksiyon çağrılınca HEMEN koşar; async fonksiyon çağrılınca koşmaz, Future verir.
+//
+// • `.await` (bir future üzerinde): o future'ı, içinde bulunduğun async gövdeden SÜRER (poll eder).
+//   Anlamı kabaca şu desugaring'tir (gerçekte state machine'in bir DURUMU):
+//       let v = fut.await;
+//     ≈   // fut, state machine'in kendi (pinli) alanında saklanır
+//         loop {
+//             match fut.poll(cx) {                     // (fut makinenin içinde pinli tutulur)
+//                 Poll::Ready(v) => break v,           // hazır → değeri al, gövdeye DEVAM et
+//                 Poll::Pending  => return Poll::Pending, // durumu sakla, kontrolü ÜST'e (executor)
+//                     // geri ver; bu görev yeniden poll edilince TAM BU await noktasından sürer
+//                     // (loop en baştan değil — makine hangi durumda kaldığını hatırlar).
+//             }
+//         }
+//   Yani `.await` bir BUSY-LOOP DEĞİL: Pending'de geri döner (yield), executor başka iş yapar,
+//   future hazır olunca (waker.wake()) yeniden poll edilir ve makine bu noktadan devam eder.
+//   `.await`'in değeri = future'ın Output'u (Ready'den çıkan değer).
+//
+// • Neden `.await` yalnız `async` içinde kullanılabilir? Çünkü "Pending'de durumu saklayıp ÜST'e
+//   dön, sonra buradan devam et" davranışı ancak bir state machine'de mümkün. Normal fonksiyonda
+//   "geri dönüp sonra kaldığın yerden devam etme" diye bir şey yok → `.await` orada derleme hatası.
+//   (Bu yüzden düz `main` async olamaz; bir runtime'a ihtiyaç duyar — biz block_on ile köprü kurduk.)
+//
+// Aşağıdaki `akis`, tam da böyle bir state machine'e derlenir: iki await noktası (BirKezBekle ve
+// selam) = makinenin iki duraklama DURUMU. Yukarıda ELLE yazdığımız BirKezBekle Future'ı ise,
+// derleyicinin bu makineyi (poll → Pending/Ready → wake) NASIL kurduğunun küçük, elle yapılmış hâli.
+// ============================================================================
+// async fn'ler — derleyici bunları birer state machine'e çevirir
 // ============================================================================
 
 async fn selam(ad: &str) -> String {
