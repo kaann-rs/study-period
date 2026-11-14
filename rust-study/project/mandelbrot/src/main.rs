@@ -90,7 +90,8 @@ fn escape_time(c: Complex<f64>, limit: usize) -> Option<usize> {
     None
 }
 
-// For any type T that implements the FromStr trait...
+// FromStr trait'ini (metinden bir türe çeviren trait) implemente eden herhangi
+// bir T türü için...
 fn parse_pair<T: FromStr>(s: &str, separator: char) -> Option<(T, T)> {
     match s.find(separator) {
         None => None,
@@ -112,7 +113,8 @@ fn test_parse_pair() {
     assert_eq!(parse_pair::<f64>("0.5x1.5", 'x'), Some((0.5, 1.5)));
 }
 
-/// Parses two comma-separated floating-point numbers into a complex number.
+/// Virgülle ayrılmış iki floating-point (kayan noktalı ondalık) sayıyı bir karmaşık
+/// sayıya parse eder (ayrıştırma = metni çözümleyip bir değere çevirmek).
 fn parse_complex(s: &str) -> Option<Complex<f64>> {
     match parse_pair(s, ',') {
         Some((re, im)) => Some(Complex { re, im }),
@@ -133,12 +135,12 @@ fn test_parse_complex() {
     assert_eq!(parse_complex(",-0.0625"), None);
 }
 
-/// Returns the point on the complex plane corresponding to a pixel's row and column.
+/// Bir piksel'in satır ve sütununa karşılık gelen, karmaşık düzlemdeki noktayı döndürür.
 ///
-/// `bounds` gives the image width and height in pixels.
-/// `pixel` identifies a pixel as a (column, row) pair.
-/// `upper_left` and `lower_right` specify the corners of the region on the complex
-/// plane covered by the image.
+/// `bounds` görüntünün piksel cinsinden genişlik ve yüksekliğini verir.
+/// `pixel` bir piksel'i (sütun, satır) çifti olarak tanımlar.
+/// `upper_left` ve `lower_right`, görüntünün kapsadığı karmaşık düzlem bölgesinin
+/// köşelerini belirtir.
 fn pixel_to_point(
     bounds: (usize, usize),
     pixel: (usize, usize),
@@ -152,8 +154,8 @@ fn pixel_to_point(
 
     Complex {
         re: upper_left.re + pixel.0 as f64 * width / bounds.0 as f64,
-        // Subtract because pixel rows increase downward, while the imaginary
-        // component increases upward.
+        // Çıkarıyoruz: piksel satırları aşağı doğru artarken, sanal (imaginary)
+        // bileşen yukarı doğru artar.
         im: upper_left.im - pixel.1 as f64 * height / bounds.1 as f64,
     }
 }
@@ -174,12 +176,13 @@ fn test_pixel_to_point() {
     );
 }
 
-/// Renders a rectangular region of the Mandelbrot set into a pixel buffer.
+/// Mandelbrot kümesinin dikdörtgen bir bölgesini bir piksel buffer'ına (tampon =
+/// verinin geçici tutulduğu bellek bölgesi) render eder (hesaplayıp görüntü üretmek).
 ///
-/// `bounds` gives the width and height of the `pixels` buffer.
-/// `pixels` contains grayscale pixels, with one byte per pixel.
-/// `upper_left` and `lower_right` specify the points on the complex plane
-/// corresponding to the upper-left and lower-right corners of the buffer.
+/// `bounds`, `pixels` buffer'ının genişlik ve yüksekliğini verir.
+/// `pixels` gri tonlamalı piksel'ler tutar, piksel başına bir byte (bayt = 8 bit).
+/// `upper_left` ve `lower_right`, buffer'ın sol-üst ve sağ-alt köşelerine karşılık
+/// gelen karmaşık düzlem noktalarını belirtir.
 fn render(
     pixels: &mut [u8],
     bounds: (usize, usize),
@@ -200,8 +203,8 @@ fn render(
     }
 }
 
-/// Writes the `pixels` buffer, with dimensions given by `bounds`,
-/// to the file named `filename`.
+/// `pixels` buffer'ını, boyutları `bounds` ile verilen şekilde,
+/// `filename` adlı dosyaya yazar.
 fn write_image(
     filename: &str,
     pixels: &[u8],

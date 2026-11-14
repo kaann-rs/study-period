@@ -1,13 +1,22 @@
-// Küçük örneklerle Rust temelleri. Önce main'deki bağlamalar (binding) ve ham
-// işaretçiyle başla, sonra closure'lar ile trait'lerin nasıl oturduğunu görmek
-// için test'i takip et.
+// Küçük örneklerle Rust temelleri. Önce main'deki binding'ler ve raw pointer ile
+// başla, sonra closure'lar ile trait'lerin nasıl oturduğunu görmek için test'i
+// takip et. (Terimler aşağıda ilk geçtikleri yerde açıklanıyor.)
 
 use std::ptr;
 
 fn main() {
-    // 1. Değiştirilebilir bağlamalar (mutable bindings)
-    // let ile tanımlanan bir bağlama varsayılan olarak değişmezdir. Yeni bir
-    // değer atamak istiyorsan mut ekle; first_var'da yaptığımız gibi.
+    // 1. Mutable (değiştirilebilir) binding'ler
+    // binding = bir ismi bir değere bağlamak. `let x = 5;` dediğinde x ismini 5
+    // değerine BAĞLARSIN; o yüzden "değişken" yerine daha hassas terim "binding"
+    // (bağlama). Varsayılan olarak immutable'dır (değiştirilemez); değiştirmek
+    // için mut eklersin — first_var'da yaptığımız gibi.
+    // Neden varsayılan immutable? Sorun: her şey serbestçe değişebilir olsaydı, sabit
+    // tuttuğunu sandığın bir değeri başka bir kod sessizce değiştirebilir, `&T`
+    // paylaşımlı referansını tutanlar da ayaklarının altından değişen veriyle yanlış
+    // sonuç üretirdi — bulması zor hatalar. Çözüm: değişmezlik varsayılan; değiştirme
+    // niyetini `mut` ile AÇIKÇA belirtirsin, böylece ne değiştiği okurken görünür olur
+    // ve derleyici sabit değerlere güvenip optimize eder. (Binding'lerin çoğu zaten hiç
+    // değişmez; varsayılan, yaygın duruma uyar.)
     // Hem tür açıklaması hem de literal son eki i32 belirtir.
     let mut first_var: i32 = 10_i32;
 
@@ -15,19 +24,29 @@ fn main() {
 
     println!("First Variables {}", first_var);
 
-    // 2. Ham işaretçi (raw pointer) üzerinden okuma
-    // *const i32, bir i32'ye işaret eden ham işaretçidir. &s'den oluşturmak güvenlidir.
-    // Üzerinden okumak unsafe gerektirir; çünkü okumanın geçerli, hizasının doğru ve
+    // 2. Raw pointer (ham işaretçi) üzerinden okuma
+    // raw pointer = belleğe doğrudan işaret eden adres; "ham" çünkü normal
+    // referansların güvenlik ve ömür garantileri YOK. *const i32, bir i32'ye
+    // işaret eden raw pointer'dır; &s'den oluşturmak güvenlidir ama üzerinden
+    // okumak unsafe (güvensiz = derleyicinin denetleyemediği, doğruluğunu
+    // programcının garanti ettiği) gerektirir: okumanın geçerli, hizası doğru ve
     // başlatılmış bir i32'ye işaret ettiğini bizim garanti etmemiz gerekir.
-    // GÜVENLİK (SAFETY): s1, &s'den geliyor ve her iki okuma da s yaşarken oluyor.
+    // Neden ayrı bir `unsafe`? Sorun: C gibi her yerde serbest işaretçi/bellek işlemine
+    // izin veren dillerde bir bellek hatası KODUN HER YERİNDE olabilir; hata ararken her
+    // satırı şüpheli saymak zorundasın. Çözüm: Rust kodun çoğunu derleyici denetler,
+    // kanıtlayamadığı işleri yalnız `unsafe` bloklara hapseder. Böylece bir bellek hatası
+    // çıkınca sadece o bloklara bakman yeter — güven yüzeyi küçük kalır. (FFI ve düşük
+    // seviye işler derleyicinin kanıtlayamadığı şeylerdir.)
+    // SAFETY: s1, &s'den geliyor ve her iki okuma da s yaşarken oluyor.
     unsafe {
         let s: i32 = 10;
 
         let s1: *const i32 = &s as *const i32;
 
-        // ptr::read, belleği değiştirmeden bitlerin bir kopyasını döndürür.
+        // ptr::read, belleği değiştirmeden bit'lerin bir kopyasını döndürür.
         // Burada i32 Copy olduğundan, orijinal değeri tekrar okumak sorun değil.
-        // Bu çağrı sonucunu atar. Aşağıdaki dereference s'yi tekrar okur.
+        // Aşağıdaki dereference (içeriğe erişme = işaretçinin gösterdiği değere *s1
+        // ile ulaşmak) s'yi tekrar okur.
         ptr::read(s1);
 
         println!("{:?}", *s1);
@@ -36,18 +55,50 @@ fn main() {
     test();
 }
 
-// 3. Sabitler ve const generic'ler
-// Aşağıdaki N başlı başına bir sabittir. Şöyle bir tanımda:
+// 3. const (sabit) ve const generic
+// const = derleme zamanında bilinen, değişmeyen sabit. const generic ise tür
+// parametresi gibi ama TÜR değil DEĞER (sayı) alan bir parametre — ör. dizi
+// uzunluğu. Şöyle bir tanımda:
 // struct Buffer<const N: usize = 0> { data: [u8; N] }
-// N ise bir const generic parametresidir. Buffer<4>, dört baytlık bir diziye sahiptir.
+// N bir const generic parametresidir; Buffer<4>, dört baytlık bir diziye sahiptir.
 // Varsayılan = 0, const argüman verilmediğinde bir uzunluk sağlar.
+// Neden const generic? Sorun: [u8; 4] ile [u8; 8] ayrı türlerdir; eskiden tek bir
+// fonksiyon/tür ile FARKLI uzunlukları kapsayamazdın — ya her boyut için ayrı kod (ya
+// da makro) yazardın, ya da heap'teki Vec'e kaçıp çalışma anında maliyet + derleme
+// zamanı uzunluk bilgisini kaybederdin. Çözüm: const generic ile DEĞERİ (uzunluğu)
+// türün parçası yaparsın; tek kod tüm boyutları, sıfır ek maliyetle kapsar.
+// Aşağıdaki N ise başlı başına sıradan bir const.
 const N: usize = 0;
 
-// 4. Trait sınırı olan çağrılabilir bir değeri saklamak
-// Color<F>, F türünde bir değer saklar. where ifadesi F'nin Fn(i8) -> i8
-// implemente etmesini şart koşar; böylece bir i8 ile çağrılıp bir i8 döndürebilir.
-// Fn, paylaşımlı bir referans üzerinden çağrıya izin verir. Değer yakalayan bir
-// closure, gövdesi bu yakalananları uygun kullanıyorsa yine Fn'i karşılayabilir.
+// 4. Trait bound (trait sınırı) olan çağrılabilir bir değeri saklamak
+// trait bound = bir generic türün HANGİ trait'leri implemente etmesi gerektiğini
+// şart koşan kısıt. Color<F>, F türünde bir değer saklar; where'deki
+// F: Fn(i8) -> i8 bound'u, F'nin bir i8 ile çağrılıp i8 döndürebilmesini şart
+// koşar. Fn, paylaşımlı bir referans üzerinden çağrıya izin verir.
+// closure (kapanış) = çevresindeki değişkenleri "yakalayıp" (capture) içine
+// alabilen isimsiz fonksiyon; çevreyi içine "kapattığı" için kapanış denir.
+// Örn: let k = 3; let ekle = |x| x + k;  → buradaki closure dışarıdaki k'yı
+// yakalar. Böyle bir closure, yakaladıklarını uygun kullandığı sürece Fn'i de
+// karşılar.
+// Neden trait bound? Sorun: sınırsız bir generic F ile derleyici F hakkında hiçbir
+// şey bilmez, dolayısıyla x'i taşımak dışında onunla HİÇBİR ŞEY yapamazsın (metot
+// bile çağıramazsın). Bound'suz şablonların olduğu dillerde (eski C++) hata, türü
+// kullandığın derin bir yerde anlaşılmaz mesajlarla patlar. Çözüm: bound, F'nin
+// sözleşmesini ("i8 ile çağrılır, i8 döndürür") baştan belirtir — derleyici çağrı
+// yerinde net denetler ve her somut tür için ayrı, hızlı kod üretir.
+//
+// Fn/FnMut/FnOnce neden üçe ayrıldı? Sorun: bir closure çevresinden değer YAKALAR ve
+// onu NASIL kullandığı güvenliği etkiler:
+//   • sadece okuyorsa             → defalarca, paylaşarak çağrılabilir  (Fn)
+//   • yakaladığını DEĞİŞTİRİYORSA → çağırmak özel (&mut) erişim ister    (FnMut)
+//   • yakaladığını TÜKETİYORSA    → yalnızca BİR KEZ çağrılabilir        (FnOnce)
+// Bu ayrım olmasaydı: bir kez tüketen closure'ı iki kez çağırmak, taşınmış/serbest
+// bırakılmış değeri tekrar kullanırdı (use-after-move / double-free); değiştiren bir
+// closure'a aynı anda iki yerden erişmek veri yarışı (data race) olurdu. Üçlü ayrım
+// bu tehlikeli çağrıları derleyicinin DERLEME ZAMANINDA reddetmesini sağlar:
+//   let s = String::from("x");
+//   let tuket = move || drop(s);  // s'yi sahiplenir → FnOnce
+//   tuket(); tuket();             // ✗ 2. çağrı derlenmez — s zaten taşındı
 struct Color<F>
 where
     F: Fn(i8) -> i8,
@@ -55,18 +106,32 @@ where
     x: F,
 }
 
-// 5. Trait parametreleri, ilişkili türler (associated types) ve ilişkili fonksiyonlar
-// T, Animal'ın bir parametresidir; yani Animal<i32>, T = i32 belirtir.
-// Her implementasyon, ilişkili tür Your için somut bir tür sağlar.
+// 5. Trait parametreleri, associated type ve associated function
+// associated type (ilişkili tür) = bir trait'e bağlı, her implementasyonun kendi
+// somut türünü doldurduğu bir "tür yuvası". Örn: std'deki Iterator trait'inde
+// `type Item` vardır; Vec<i32>'yi gezen iterator için Item = i32 olur, satır satır
+// okuyan bir iterator için String olur. associated function (ilişkili fonksiyon) =
+// self almayan, bir örnek üzerinden değil doğrudan tür üzerinden çağrılan fonksiyon
+// (ör. String::new() — elindeki bir String'e değil, String türüne çağrı).
+// T, Animal'ın bir parametresidir; Animal<i32>, T = i32 belirtir. Her
+// implementasyon associated type Your için somut bir tür sağlar.
+// Neden bazen associated type bazen generic parametre? Sorun: Iterator `Iterator<Item>`
+// gibi generic parametreyle tasarlansaydı, bir tür hem Iterator<i32> hem
+// Iterator<String> implemente edebilirdi; o zaman `for x in it` ifadesinde hangi Item
+// olduğu belirsiz kalır ve her kullanımda türü elle yazman gerekirdi. Çözüm: associated
+// type "her implementasyon için TEK Item" der → belirsizlik yok, çağıran yazmak zorunda
+// değil. Gerçekten birden çok varyant anlamlıysa (Animal<i32>, Animal<String>) o zaman
+// generic parametre kullanılır.
 trait Animal<T> {
     type Your;
 
-    // self parametresi olmadığından voice, tür üzerinde ilişkili bir fonksiyon
-    // olarak çağrılır. Bir örnek (instance) oluşturmadan çağırabilirsin.
+    // self parametresi olmadığından voice bir associated function'dır: tür
+    // üzerinden, instance (örnek = bir türden üretilmiş somut değer) oluşturmadan
+    // çağrılır.
     fn voice() -> T;
 }
 
-// Bu trait impl'i, F üzerindeki sınırı karşılayan her Color<F> için Animal<i32>
+// Bu trait impl'i, F üzerindeki bound'u karşılayan her Color<F> için Animal<i32>
 // sağlar. Your'ı String yapar ve voice bir i32 döndürür.
 impl<F> Animal<i32> for Color<F>
 where
@@ -79,10 +144,19 @@ where
     }
 }
 
-// 6. Kendine ait (inherent) implementasyonlar ve fonksiyon işaretçileri
-// Bu inherent impl, hex'i doğrudan Color<F>'e ekler. İlk argüman generic
-// çağrılabilir tür F'ye sahiptir. İkincisi ise somut fonksiyon işaretçisi türü
-// fn(i8) -> i8'dir. Bu örnek her iki biçimi de kabul eder ama yalnızca f'yi çağırır.
+// 6. Inherent impl ve function pointer
+// inherent impl (kendine ait impl) = bir türe, bir trait üzerinden DEĞİL doğrudan
+// kendi metotlarını ekleyen impl bloğu. function pointer (fonksiyon işaretçisi) =
+// bir fonksiyonun adresini tutan, fn(i8) -> i8 türündeki değer. Bu impl, hex'i
+// doğrudan Color<F>'e ekler: ilk argüman generic çağrılabilir tür F, ikincisi
+// somut function pointer türü fn(i8) -> i8. Örnek her iki biçimi de kabul eder
+// ama yalnızca f'yi çağırır.
+// Neden hem generic F hem somut fn(i8)->i8? Sorun: her closure AYRI bir türdür; sadece
+// generic F olsaydı farklı fonksiyonları tek bir değişkende/koleksiyonda tutamaz
+// (Vec<F> tek closure türü alır) ve C'ye (FFI) geçiremezdin. Sadece fn pointer olsaydı
+// da çevre YAKALAYAMAZ (closure olamaz) ve inline edilemediği için yavaşlardın. Çözüm:
+// ikisi birlikte — generic F yakalar + inline hız verir; fn pointer tek somut tür olarak
+// depolanır + FFI'da kullanılır. Duruma göre seçersin.
 impl<F> Color<F>
 where
     F: Fn(i8) -> i8,
@@ -97,23 +171,23 @@ pub fn my_macro(_item: TokenStream) -> TokenStream {
     "fn answer() -> u32 { 42 }".parser().unwrap()
 }
 
-// Güvensiz (unsafe)
+// unsafe extern "C" fonksiyon (başka bir dilden, ör. C'den çağrılabilen fonksiyon)
 unsafe extern "C" fn noise() -> i8 {
     1
 }
 
-// Yüksek Dereceli (Higher-Ranked) Fonksiyonlar — HRTB
+// Higher-Ranked (yüksek dereceli) Fonksiyonlar — HRTB
 //
 // Doğrulama: Nomicon (HRTB) + Rust Reference (constant promotion); davranış
-// rustc ile de test edildi (aşağıdaki yerel-değişken örneği hex_v3'te E0597 verir).
+// rustc ile de test edildi (aşağıdaki yerel değişken örneği hex_v3'te E0597 verir).
 //
-// İki imza ömür (lifetime) bakımından farklı:
+// İki imza ömür (lifetime = bir referansın geçerli kaldığı süre) bakımından farklı:
 //   hex_v2: `for<'a> Fn(&'a i8)`    → HRTB. "for<'a>" = "HER 'a seçimi için"
 //           (Nomicon). f tüm ömürler için çalışmak zorunda; ömür kararı İÇERİDE.
 //   hex_v3: `<'a, F> ... Fn(&'a i8)` → 'a'yı ÇAĞIRAN dıştan seçer: tek, sabit bir
 //           ömür. f yalnız o 'a için çalışır.
 //
-// Neden biri patlar? Ömürleri iç-içe kutu gibi düşün:
+// Neden biri patlar? Ömürleri iç içe kutu gibi düşün:
 //
 //   {                 // DIŞ bölge = 'a (çağıran; çağrıyı kapsar, uzun yaşar)
 //       hex_v3(f) →
@@ -131,7 +205,8 @@ unsafe extern "C" fn noise() -> i8 {
 // f'in HER ömre uymasını şart koşarız ("dıştan beklemeyi kapatmak").
 //
 // Tuzak: aşağıdaki gövdeler `f(&1)` kullanıyor ve İKİSİ DE derlenir! Çünkü `&1`
-// literali 'static'e TERFİ eder (constant promotion, Rust Reference → &'static i8),
+// literali 'static'e TERFİ eder (constant promotion = derleyicinin sabit bir
+// literali kalıcı/'static ömre yükseltmesi, Rust Reference → &'static i8),
 // 'static de her ömrü karşılar. Fark ancak static'e terfi etmeyen yerelde (`&n`)
 // ortaya çıkar — bunu aşağıdaki hex_v3_yerel örneğinde görebilirsin.
 fn hex_v2<F>(f: F) -> i8
@@ -148,7 +223,7 @@ where
     f(&1)
 }
 
-// ÖRNEK —farkı yerel bir değişkenle canlı gör. Gövdeler `f(&1)` yerine
+// ÖRNEK — farkı yerel bir değişkenle canlı gör. Gövdeler `f(&1)` yerine
 // `let n = 1; f(&n)` kullanıyor; `&n` static'e terfi etmez, iç bölgede ölür.
 // Yorumdan çıkarıp `cargo check -p basic-concepts` ile deneyebilirsin:
 //
@@ -172,48 +247,93 @@ where
 //   }
 
 fn test() {
-    // Bu closure argümanını döndürür ve kapsamından (scope) hiçbir şey yakalamaz.
+    // Bu closure argümanını döndürür ve scope'undan (kapsam = bir ismin geçerli
+    // olduğu bölge) hiçbir şey capture etmez (yakalamaz).
     let x = |y: i8| -> i8 { y };
 
     // İlk x kendi closure türünü korur ve F'yi belirler. İkinci x hiçbir şey
-    // yakalamadığı için fonksiyon işaretçisine dönüşür (coerce).
+    // capture etmediği için function pointer'a coerce olur (örtük dönüşüm =
+    // derleyicinin sen yazmadan yaptığı otomatik tür dönüşümü).
     let a: i8 = Color::hex(x, x);
 
-    // Derleyici, i8'i hex'in dönüş türünden de çıkarsar.
+    // Derleyici, i8'i hex'in dönüş türünden de infer eder (çıkarsama = türü sen
+    // yazmadan bağlamdan bulmak).
     let b = Color::hex(x, x);
 
     // voice argüman almaz, bu yüzden ::<...> ile somut bir F belirtiriz.
-    // Bu imzaya sahip bir fonksiyon işaretçisi, Color üzerindeki sınırı karşılar.
+    // Bu imzaya sahip bir function pointer, Color üzerindeki bound'u karşılar.
     Color::<fn(i8) -> i8>::voice();
 
     println!("{:?}", a);
 }
 
-// 7. Auto trait'ler ve negatif implementasyonlar (nightly Rust)
-// Auto trait, bir işaretçi (marker) trait'tir. Varsayılan olarak bir struct,
-// tüm alan türleri onu implemente ediyorsa ve bunu geçersiz kılan açık bir impl
-// yoksa onu implemente eder.
+// 7. Auto trait ve negative impl (nightly Rust)
+// marker trait (işaretleyici trait) = metodu olmayan, bir türü sadece "şu
+// özelliğe sahiptir" diye işaretleyen trait. Örn: Copy = "bu değer atanırken bit
+// bit kopyalanabilir" işareti; Send = "bu tür thread'ler arasında güvenle
+// taşınabilir" işareti. auto trait = böyle bir marker'ı, bir struct'ın tüm
+// field'ları (alan) onu implemente ediyorsa ve bunu geçersiz kılan açık bir impl
+// yoksa, derleyicinin OTOMATİK verdiği trait. negative impl (negatif impl) = bir
+// türün bir trait'i implemente ETMEDİĞİNİ açıkça belirten impl.
+// Neden auto trait? Sorun: Send/Sync gibi özellikler KOMPOZİSYONEL'dir — bir tür, tüm
+// parçaları Send ise Send'dir. Elle yazsaydın her yeni struct'a "ben de Send'im" eklemen
+// gerekir; birini unutmak kütüphaneleri kullanılamaz yapar, daha kötüsü parçalarından
+// biri Send DEĞİLKEN yanlışlıkla "Send'im" dersen güvenlik çöker (veri yarışı). Çözüm:
+// derleyici bunu parçalardan OTOMATİK ve doğru çıkarır; negative impl ise istisnayı
+// ("bu tür özellikle karşılamıyor") açıkça belirtir.
 //
-// Bu örneği denemek için feature özniteliğini dosyanın en üstüne koy ve
-// aşağıdaki trait tanımı ile impl'i yorumdan çıkar.
+// Bu örneği denemek için feature attribute'unu (öznitelik) dosyanın en üstüne koy
+// ve aşağıdaki trait tanımı ile impl'i yorumdan çıkar.
 //
 // #![feature(auto_traits, negative_impls)]
 // auto trait Valid {}
 //
-// ! işareti negatif bir impl'i belirtir. F, Valid'i implemente etse bile her
-// Color<F>'i Valid'den çıkarır. where ifadesi Color'daki sınırı tekrar eder.
+// ! işareti negative bir impl'i belirtir: F, Valid'i implemente etse bile her
+// Color<F>'i Valid'den çıkarır. where ifadesi Color'daki bound'u tekrar eder.
 //
 // impl<F> !Valid for Color<F>
 // where
 //     F: Fn(i8) -> i8,
 // {}
 
-// 8. Trait implementasyonlarına nerede izin verilir
-// Rust'ın orphan (yetim) kurallarına göre, bir crate kendi tanımladığı bir
-// trait'i implemente edebilir. Yabancı bir trait için, impl'deki bir türün yerel
-// olması gerekir ve örtülmemiş (uncovered) generic parametrelerin nerede
-// görünebileceğine dair ek kurallar işler.
-// Yukarıdaki Animal impl'i, bu crate'te tanımlı bir trait ve bir tür kullanır.
+// 8. Bir trait'i bir tür için nerede implemente edebilirsin? (orphan rule)
+//
+// Kural: bir trait'i bir tür için implemente edebilmen için, İKİSİNDEN EN AZ
+// BİRİ senin crate'inde tanımlı olmalı — ya trait senin ya da tür senin.
+//
+// Neden böyle? Asıl amaç: tüm program boyunca her (trait, tür) ikilisi için EN
+// FAZLA BİR impl olsun (buna coherence denir). Yoksa derleyici "bu tür bu trait'i
+// nasıl yapıyor?" sorusuna tek ve kesin cevap veremezdi.
+// Peki crate'ler AYRI AYRI derlenirken bu nasıl garanti edilir? İşte orphan kuralı
+// bunun için: herhangi bir trait/tür tam olarak TEK bir crate'e ait olduğundan, o
+// impl'i yazabilecek tek aday o crate olur → iki farklı crate aynı impl'i yazamaz,
+// çakışma matematiksel olarak imkânsızlaşır. Dahası, şu an ortada hiç impl olmasa
+// bile yasaktır: std ileride ekleyebilir ya da başka bir crate ekleyebilir;
+// derleyici öbür crate'leri göremediği için "yabancı + yabancı" kategorisini
+// tedbiren komple kapatır. (Bu mekanizma olmasaydı A ve B crate'leri ayrı ayrı aynı
+// impl'i yazar, bir program ikisini birden kullanınca çakışırdı — ve aynı-crate
+// çakışma denetimi E0119 bunu yakalayamazdı, çünkü impl'ler ayrı derlenmiş
+// crate'lerde.) Adı "yetim (orphan)": ne trait'in ne de türün sahibi sen olduğunda
+// o impl ortada "sahipsiz" kalır — yasak olan bu.
+//
+// Örnek (Display std'nin trait'i, Vec de std'nin türü; ikisi de sana yabancı):
+//   impl std::fmt::Display for Vec<i32> {}   // ✗ YASAK — ikisi de yabancı (yetim)
+//   impl std::fmt::Display for Color<F> {}   // ✓ OLUR — tür (Color) senin
+//   impl KendiTraitin        for Vec<i32> {} // ✓ OLUR — trait senin
+//
+// Yabancı trait'i yabancı tür için gerçekten istiyorsan "newtype" hilesi: yabancı
+// türü kendi struct'ının içine sar, böylece tür artık senin olur:
+//   struct BenimVec(Vec<i32>);
+//   impl std::fmt::Display for BenimVec {}    // ✓ OLUR — BenimVec senin türün
+//
+// Yukarıdaki Animal impl'i bu kurala uyar: hem Animal trait'i hem Color türü bu
+// crate'te tanımlı.
+//
+// (İleri ayrıntı — şimdilik yukarıdaki "ya trait ya tür senin" kuralı yeter.)
+// Yabancı bir trait'i generic bir türle implemente ederken, generic parametrenin
+// yabancı bir türün İÇİNE sarılmış (covered) olması istenir; tek başına, sarılmamış
+// (uncovered) bir parametre yine iki crate'in çakışmasına yol açabileceği için ek
+// kurallarla kısıtlanır.
 //
 // RFC 3323, public bir trait'i kimin implemente edebileceğini sınırlamak için
 // ayrı bir özellik öneriyor. Örneğin pub impl(crate) trait Example {}, diğer
