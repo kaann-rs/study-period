@@ -44,7 +44,9 @@ fn dropck_temel() {
     //
     // KRİTİK FARK: Denetci'nin Drop impl'i OLMASAYDI, aynı ters-sıra kod DERLENİRDİ. Çünkü Drop yoksa
     // derleyici "düşerken referansa dokunulmayacak" bilir → NLL borrow'u son kullanımda bitirir.
-    // Yani lifetime + Drop birleşimi, borrow'un değeri AŞMASINI zorunlu kılan şeydir.
+    // Yani lifetime + Drop birleşimi şunu zorunlu kılar: ödünç ALINAN veri (gun), ödünç ALAN
+    // değerden (denetci) DAHA UZUN yaşamalı — çünkü denetci'nin &gun'a SON erişimi drop() içinde,
+    // yani denetci ölürken olur; borrow o ana kadar uzamak zorundadır, NLL onu erken bitiremez.
 }
 
 // ============================================================================

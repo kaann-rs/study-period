@@ -68,9 +68,13 @@ fn invariance_mutstr() {
     // borrowed as mutable". Mantık:
     //   - İçteki &str başta &'static ("hello" literal'i).
     //   - println! için derleyici s'in &mut borrow'unu KISALTMAK ister (ki paylaşımlı okuma sığsın).
-    //   - İki lifetime varsa: dış 'a kısalır (println'den önce biter), iç 'b = 'static kalır → OK.
-    //   - Tek lifetime varsa: dış ve iç AYNI 'a. Dışı kısaltmak içi de kısaltmayı gerektirir; ama iç
-    //     &str, &mut ARDINDA (invariant!) → kısaltılamaz. Derleyici pes eder: "hâlâ mutably borrowed".
+    //   - İki lifetime varsa: iç 'b invariant → 'static'e çivili kalır. `&'a mut &'b str`'in örtük
+    //     well-formedness kısıtı 'b: 'a'dır; 'b = 'static olunca bu  'static: 'a  olur → HER 'a için
+    //     doğru. Yani kısıt 'a'ya alttan hiç baskı yapmaz; dış 'a serbest kalıp println'den önce
+    //     bitecek kadar KISALIR (çünkü 'a covariant). Çakışma yok → OK.
+    //   - Tek lifetime varsa: dış ve iç AYNI 'a. İç konum invariant olduğundan 'a = 'static'e çivilenir
+    //     (tek parametre hem invariant hem covariant konumda → invariant kazanır). Artık 'a kısalamaz;
+    //     &mut borrow 'static yaşar → println'e taşar. Derleyici: "hâlâ mutably borrowed" (E0502).
     // Ders: &mut ardındaki ömür invariant olduğu için, DIŞ borrow ömrünü İÇ veri ömründen AYIRMAK
     // (ayrı lifetime) esnekliği geri kazandırır. "Gereksiz gibi duran ikinci lifetime"ın sebebi bu.
     println!("invariance: tek lifetime'da aynı kod E0502 verir (yorumda açıklandı)");
