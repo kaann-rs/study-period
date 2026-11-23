@@ -1176,7 +1176,15 @@ name = "ileri-dropck"
 version = "0.1.0"
 
 [[package]]
+name = "ileri-eszamanlilik-async"
+version = "0.1.0"
+
+[[package]]
 name = "ileri-future"
+version = "0.1.0"
+
+[[package]]
+name = "ileri-lifetime-hrtb-gat"
 version = "0.1.0"
 
 [[package]]

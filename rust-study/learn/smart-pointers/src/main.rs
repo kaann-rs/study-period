@@ -9,9 +9,47 @@
 // Doğrulanmış (rustc ile): Box'sız özyineli tip → E0072 "infinite size"; RefCell'de aynı anda
 // iki borrow_mut → ÇALIŞMA ANI panik (BorrowMutError "already borrowed"). Ayrıntı: en altta.
 
+// ============================================================================
+// SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
+// ============================================================================
+// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
+// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Bu crate'teki benzetmelerin hepsi aynı yerde, bir OKULDA geçer; derinlesme.rs de orada sürer.
+//
+// Bu bölümün tek cümlelik özeti: "Her verinin tek sahibi olur" kuralı bazen dar gelir; akıllı
+// işaretçiler o durumlar için hazır kutulardır ve her biri güvenliği kendi yoluyla korur.
+//
+// MİNİ SÖZLÜK (bu dosyada geçen kelimeler):
+//   işaretçi (pointer)       → verinin kendisi değil, nerede durduğunu yazan adres kâğıdı.
+//   akıllı işaretçi (smart pointer) → adres kâğıdı + ek iş: sayaç tutar, çıkarken temizler.
+//   metadata                 → verinin yanında tutulan ek bilgi (örneğin "kaç sahibi var" sayısı).
+//   heap / stack             → bellekteki iki bölge. Stack: küçük ve hızlı raf. Heap: büyük depo.
+//   Box<T>                   → veriyi depoya (heap) koyan, elinde yalnız adresini tutan kutu.
+//   özyineli tip (recursive type) → içinde kendi türünden bir parça taşıyan tür (iç içe kutular).
+//   cons list                → "bir değer + listenin geri kalanı" diye kurulan zincir liste.
+//   Deref ve `*`             → adres kâğıdından verinin kendisine gitmek ("adrese git, bak").
+//   deref coercion           → derleyicinin bu "adrese git" adımını senin yerine atması.
+//   Drop                     → bir değer silinirken kendiliğinden çalışan temizlik işi.
+//   RAII                     → "işi biten, arkasını kendi toplar" düzeninin kısa adı.
+//   Rc<T>                    → bir veriyi birden çok sahibin paylaşmasını sağlayan sayaçlı kutu.
+//   sayaç (strong_count)     → o veriyi şu anda kaç sahibin tuttuğunu gösteren sayı.
+//   RefCell<T>               → ödünç kuralını derlerken değil, program çalışırken denetleyen kutu.
+//   iç değişkenlik (interior mutability) → dışarıdan değişmez görünen şeyin içini değiştirebilmek.
+//   borrow() / borrow_mut()  → RefCell'den "bakmak için" / "değiştirmek için" izin istemek.
+//   Aliasing XOR Mutability  → "aynı anda ya çok bakan olur ya tek değiştiren" kuralının adı.
+//   panik (panic)            → programın "bu hatayla devam edemem" deyip kendini durdurması.
+//   Weak<T>                  → verinin yerini bilen ama sayaca yazılmayan, sahip olmayan işaretçi.
+//   referans döngüsü (reference cycle) → iki verinin birbirini tutup hiç silinememesi.
+//   bellek sızıntısı (memory leak) → işi biten verinin geri verilmeyip yer kaplamayı sürdürmesi.
+//   thread (iş parçacığı)    → programın içinde aynı anda yürüyen ayrı bir iş kolu.
+//   enum / match             → "şunlardan biri" türü / hangisi olduğuna bakıp ona göre davranmak.
+//   trait                    → bir türün yapabildiği işlerin listesi (Deref ve Drop birer trait).
+
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
+
+mod derinlesme;
 
 fn main() {
     box_ornegi();
@@ -19,6 +57,7 @@ fn main() {
     drop_ornegi();
     rc_ornegi();
     refcell_ornegi();
+    derinlesme::calistir();
 }
 
 // ============================================================================
@@ -27,6 +66,17 @@ fn main() {
 // En yaygın kullanımı: boyutu derleme anında bilinemeyen ÖZYİNELİ tipler. Bir enum kendini
 // doğrudan içerirse boyut sonsuz olur (E0072). Box ARAYA bir pointer koyar: pointer'ın boyutu
 // sabittir (bir adres), döngü kırılır.
+// SADE ANLATIM: Büyük bir maket yaptın ve sırana sığmıyor. Onu okulun deposuna koyarsın, sırana
+// da yalnız "3. raf, 2. göz" yazan küçük bir kâğıt bırakırsın. Maket ne kadar büyük olursa olsun
+// kâğıt hep aynı boydadır. Rust'ta `Box::new(x)` de böyledir: x depoya (heap) gider, elinde sabit
+// boylu bir adres kalır. Kâğıdın sahibi gidince depodaki maket de kendiliğinden kaldırılır.
+// Neden böyle? "İçinde yine kendinden olan" türlerin (liste, ağaç) boyu baştan bilinemez; araya
+// sabit boylu adres kâğıdı girmeseydi derleyici "bu kaç yer kaplar?" sorusunu cevaplayamazdı.
+//   Mini örnek:
+//     let b = Box::new(5);                           // 5 depoda, b elimizdeki adres kâğıdı
+//     println!("{}", *b + 1);                        // ✓ 6 — `*b`: adrese git, değeri al
+//     enum Zincir { Halka(i32, Box<Zincir>), Son }   // ✓ araya Box girdi, boyu belli
+//     enum Kotu { Halka(i32, Kotu), Son }            // ✗ derlenmez: boyu sonsuz olurdu
 #[derive(Debug)]
 enum Liste {
     Dugum(i32, Box<Liste>), // Box olmadan: "recursive type has infinite size"
@@ -34,6 +84,7 @@ enum Liste {
 }
 // Değerleri match ile GERÇEKTEN okuyan yürüyüş: hem toplamı verir hem de derive(Debug)
 // dead_code tuzağını önler (Böl. 5/8: Debug ile basmak alanları "okundu" saymaz).
+// (Sade: dead_code = derleyicinin "bunu yazmışsın ama hiç kullanmıyorsun" uyarısı demek.)
 fn topla(l: &Liste) -> i32 {
     match l {
         Liste::Dugum(deger, sonraki) => deger + topla(sonraki),
@@ -50,6 +101,17 @@ fn box_ornegi() {
 // ============================================================================
 // 2. Deref — `*` operatörünü ve "deref coercion"u özelleştir
 // ============================================================================
+// SADE ANLATIM: Elindeki adres kâğıdına bakarak maketi boyayamazsın; önce depoya gidip maketin
+// yanına varman gerekir. `*` işareti bu yürüyüştür: "kâğıtta yazan yere git, oradakini ver".
+// Deref, kendi yaptığın kutuya bu yürüyüşü öğretmenin yoludur. Derleyici çoğu zaman yolu senin
+// yerine yürür: `&str` isteyen yere `&Kutum<String>` verirsen kutuları sırayla açıp yazıya ulaşır.
+// Neden böyle? Bu kolaylık olmasaydı her kutu için açma adımlarını tek tek elle yazman gerekirdi.
+//   Mini örnek:
+//     let k = Box::new(String::from("Ada"));
+//     let uzunluk = k.len();   // ✓ k bir kutu ama içindeki String'in metodu doğrudan çağrılıyor
+//     selamla(&k);             // ✓ &Box<String> → &String → &str; derleyici kutuları kendi açar
+//     let x = Kutum::yeni(5);
+//     let y = *x + 1;          // ✓ Kutum için Deref yazıldığından; yazılmasaydı derlenmezdi
 struct Kutum<T>(T); // kendi mini akıllı işaretçimiz
 impl<T> Kutum<T> {
     fn yeni(x: T) -> Kutum<T> {
@@ -78,6 +140,18 @@ fn deref_ornegi() {
 // ============================================================================
 // 3. Drop — değer kapsam dışına çıkınca otomatik temizlik (RAII)
 // ============================================================================
+// SADE ANLATIM: Resim dersinden çıkarken fırçanı yıkayıp yerine koyarsın. Rust her değer için
+// toplama işini kendiliğinden yapar; Drop ile "çıkarken ŞUNU da yap" diye kendi işini eklersin.
+// Toplama sırası çıkarma sırasının tersidir: en son çıkardığın malzeme ilk önce kaldırılır.
+// Dersin bitmesini beklemeden toplamak istersen `drop(x)` yazarsın.
+// Neden böyle? Temizlik sana bırakılsaydı unutabilirdin (açık kalan dosya gibi) ya da aynı şeyi
+// iki kez toplamaya kalkardın; `x.drop()` yazmanın yasak olması bu ikinci hatayı önler.
+//   Mini örnek:
+//     let a = Kaynak { ad: String::from("A") };
+//     let b = Kaynak { ad: String::from("B") };
+//     drop(b);          // ✓ B şimdi toplandı, ekrana "Drop: 'B' ..." yazılır
+//     // b.drop();      // ✗ derlenmez: temizlik metodunu elle çağırmak yasak
+//     // fonksiyonun sonu: A kendiliğinden toplanır
 struct Kaynak {
     ad: String,
 }
@@ -103,6 +177,19 @@ fn drop_ornegi() {
 // ============================================================================
 // 4. Rc<T> — reference counting: TEK veriye ÇOK sahip (tek thread)
 // ============================================================================
+// SADE ANLATIM: Sınıfın tek bir topu var ve onu birkaç takım birlikte kullanıyor. Tahtada bir
+// sayı yazar: "topu kullanan takım sayısı". Katılan takım sayıyı bir artırır, ayrılan bir
+// azaltır; sayı 0 olunca top dolaba kaldırılır. Rust'ta Rc de böyledir: `Rc::clone` yeni bir top
+// YAPMAZ, yalnız sayacı artırır. Herkes topa bakabilir, ama Rc tek başına onu değiştirtmez.
+// Neden böyle? Sayaç olmasaydı topun ne zaman kaldırılacağını kimse bilemezdi: erken kaldırılırsa
+// oynayan takım topsuz kalır, hiç kaldırılmazsa top sonsuza dek ortada durur.
+// Dikkat: Rc yalnız TEK thread içindir; birden çok thread için aynı işi Arc yapar.
+//   Mini örnek:
+//     let top = Rc::new(String::from("top"));
+//     let takim = Rc::clone(&top);                // sayaç 2 — aynı top, kopya yok
+//     println!("{}", Rc::strong_count(&top));     // ✓ 2
+//     drop(takim);                                // sayaç yeniden 1
+//     // top.push('!');                           // ✗ derlenmez: Rc içindekini değiştirtmez
 #[derive(Debug)]
 enum RcListe {
     Dugum(i32, Rc<RcListe>),
@@ -134,6 +221,19 @@ fn rc_ornegi() {
 // ============================================================================
 // 5. RefCell<T> — iç değişkenlik: borrow kuralını ÇALIŞMA ANINA taşı
 // ============================================================================
+// SADE ANLATIM: Sınıf defterine herkes aynı anda bakabilir, ama yazarken tek kişi olmalıdır. Bu
+// kuralı normalde derleyici, daha ders başlamadan denetler. RefCell'de ise kapıda bir nöbetçi
+// durur ve kuralı ders SIRASINDA denetler: `borrow()` "bakacağım", `borrow_mut()` "yazacağım"
+// demektir. Biri yazarken ikinci kişi de yazmak isterse nöbetçi dersi durdurur: program panikler.
+// Kural kalkmaz; yalnız denetimin ZAMANI değişir.
+// Neden böyle? Derleyici temkinlidir, bazı doğru programları da geri çevirir. RefCell o
+// programları yazmana izin verir; bedeli, hatanın derlerken değil çalışırken ortaya çıkmasıdır.
+//   Mini örnek:
+//     let defter = RefCell::new(0);        // `mut` yok, yine de içi değişecek
+//     *defter.borrow_mut() += 1;           // ✓ yazdı, satır bitince kalemi bıraktı
+//     println!("{}", defter.borrow());     // ✓ 1
+//     let _yazan1 = defter.borrow_mut();   // kalem hâlâ _yazan1'de
+//     let _yazan2 = defter.borrow_mut();   // ✗ derlenir ama çalışırken panikler: iki yazan olmaz
 fn refcell_ornegi() {
     // Rc<RefCell<T>>: hem çok sahip (Rc) hem değiştirilebilir (RefCell) paylaşımlı durum.
     let ortak = Rc::new(RefCell::new(0_i32));
@@ -147,11 +247,20 @@ fn refcell_ornegi() {
     // ✗ ÇALIŞMA ANI kuralı: aynı anda iki aktif borrow_mut → panik (BorrowMutError):
     //     let _x = ortak.borrow_mut();
     //     let _y = ortak.borrow_mut(); // panik: "already borrowed: BorrowMutError"
+    // ↳ DÜZELTME NOTU (son gözden geçirme): güncel std'de panik mesajı "RefCell already borrowed"dur
+    //   (eski sürümlerde "already borrowed: BorrowMutError" idi); kaynak: core/src/cell.rs,
+    //   panic_already_borrowed.
     // Kural hâlâ "ya bir &mut ya çok &" — ama RefCell bunu derlemede DEĞİL çalışma anında
     // denetler. Neden? Aşağıda DERLEYİCİ PERSPEKTİFİ.
     println!("  (RefCell borrow kuralı çalışma anında denetlenir)");
 }
 
+// SADE ANLATIM (aşağıdaki bölüm için): Yukarıdaki beş aracın her biri güvenliği başka bir yerde
+// sağlar: Box ve Deref daha derlerken, Rc bir sayaçla, RefCell kapıdaki nöbetçiyle. Aşağıdaki
+// bölüm bunların standart kütüphanede nasıl kurulduğunu anlatır. Sonunda bir de tuzak var: iki
+// veri birbirini Rc ile tutarsa sayaç hiç 0 olmaz ve ikisi de silinemez; çaresi, yerini bilen ama
+// sayaca yazılmayan Weak'tir. İlk okuyuşta bu bölümü atlayabilirsin; döngü ve Weak konusu
+// derinlesme.rs'te örnekle yeniden anlatılıyor.
 // ============================================================================
 // DERLEYİCİ / KÜTÜPHANE PERSPEKTİFİ — her kaçış kapısı güvenliği NASIL koruyor?
 // ============================================================================

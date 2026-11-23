@@ -9,6 +9,29 @@
 // bozulurdu) + rustc: (derleyici hangi aşamada/dosyada zorluyor). Derleyici
 // perspektifi dosyanın sonunda.
 
+// ============================================================================
+// SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
+// ============================================================================
+// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
+// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+//
+// Bu bölümün tek cümlelik özeti: Rust'ta her verinin TEK bir sahibi vardır; sahibi gidince
+// veri de silinir. Başkaları o veriyi ancak "ödünç" alabilir.
+//
+// MİNİ SÖZLÜK (bu dosyada geçen kelimeler):
+//   sahip (owner)        → veriyi elinde tutan değişken. Oyuncağın sahibi gibi: tek kişidir.
+//   taşıma (move)        → veriyi başka bir değişkene VERMEK. Verdikten sonra sende kalmaz.
+//   kopya (copy)         → sayılar gibi küçük şeylerin fotokopisini çekmek. İkisi de kalır.
+//   klon (clone)         → büyük bir şeyin bire bir aynısını YENİDEN yapmak (emek ister).
+//   drop                 → verinin silinmesi, kapladığı yerin geri verilmesi.
+//   ödünç alma (borrow)  → sahibi değiştirmeden veriye bakmak ya da onu kullanmak.
+//   referans (&)         → verinin kendisi değil, "nerede durduğunu" gösteren ok işareti.
+//   scope (kapsam)       → bir değişkenin yaşadığı süslü parantez { ... } arası.
+//   heap / stack         → bellekteki iki bölge. Stack: küçük ve hızlı raf. Heap: büyük depo.
+//   derleyici (rustc)    → yazdığın kodu çalışan programa çeviren ve hataları önceden bulan araç.
+
+mod derinlesme;
+
 fn main() {
     sahiplik_ve_move();
     copy_vs_move();
@@ -18,11 +41,21 @@ fn main() {
     borrow_mut();
     sarkma_onleme();
     dilimler();
+    derinlesme::calistir();
 }
 
 // 1. Ownership kuralları ve move (taşıma)
 // Üç kural: (a) her değerin bir SAHİBİ (owner) vardır; (b) aynı anda tek sahip;
 // (c) sahip scope dışına çıkınca değer DÜŞÜRÜLÜR (drop → bellek serbest).
+// SADE ANLATIM: Elinde TEK bir oyuncak araba var. Onu arkadaşına verirsen araba artık onundur;
+// sen oynayamazsın. Rust'ta veri de böyledir: `let s2 = s1;` yazınca veri s1'den s2'ye GEÇER.
+// Neden böyle? İki kişi aynı arabanın sahibi olsaydı, ikisi de "işim bitti" deyip onu çöpe
+// atmaya çalışırdı. Aynı şeyi iki kez çöpe atmak programı bozar. Tek sahip = tek kez silme.
+//   Mini örnek:
+//     let s1 = String::from("araba");
+//     let s2 = s1;          // araba artık s2'de
+//     println!("{s2}");     // ✓ çalışır
+//     println!("{s1}");     // ✗ derlenmez: s1'in elinde artık bir şey yok
 fn sahiplik_ve_move() {
     let s1 = String::from("merhaba");
     let s2 = s1; // s1'in heap verisi s2'ye TAŞINIR (move); s1 artık GEÇERSİZ
@@ -44,6 +77,15 @@ fn sahiplik_ve_move() {
 // 2. Copy vs move
 // Yalnızca STACK'te duran sabit boyutlu türler (i32, bool, char, f64, ve tamamı Copy
 // olan tuple'lar) `Copy` trait'ini uygular: atama bit kopyası yapar, orijinal GEÇERLİ kalır.
+// SADE ANLATIM: Bazı şeyler o kadar küçüktür ki vermek yerine fotokopisini çekmek daha kolaydır.
+// "5" sayısını bir kâğıda yazıp arkadaşına verirsen, aynı sayıyı kendi kâğıdına da yazabilirsin;
+// kimse bir şey kaybetmez. Sayılar, doğru/yanlış değerleri ve tek harfler böyledir: kopyalanır.
+// Uzun bir yazı (String) ise büyük bir kutudur; her atamada fotokopisini çekmek pahalı olurdu,
+// o yüzden kopyalanmaz, TAŞINIR.
+//   Mini örnek:
+//     let x = 5;
+//     let y = x;            // fotokopi: ikisi de 5
+//     println!("{x} {y}");  // ✓ 5 5 — x hâlâ duruyor
 fn copy_vs_move() {
     let x = 5;
     let y = x; // Copy: x bit bit kopyalanır; x hâlâ geçerli
@@ -57,6 +99,14 @@ fn copy_vs_move() {
 }
 
 // 3. clone (derin kopya)
+// SADE ANLATIM: Arkadaşın da aynı legodan istiyorsa ona kendininkini vermek zorunda değilsin:
+// aynısından bir tane daha YAPABİLİRSİN. Buna klonlama denir. Ama yeni bir lego yapmak zaman
+// ve parça ister. Rust bu yüzden klonlamayı kendiliğinden yapmaz; sen `.clone()` yazarak
+// "evet, bu emeği harcamak istiyorum" dersin.
+//   Mini örnek:
+//     let s1 = String::from("lego");
+//     let s2 = s1.clone();      // ikinci bir lego yapıldı
+//     println!("{s1} {s2}");    // ✓ ikisi de duruyor
 fn klonlama() {
     let s1 = String::from("ada");
     let s2 = s1.clone(); // heap verisi DERİN kopyalanır (ayrı blok); s1 hâlâ geçerli
@@ -69,6 +119,15 @@ fn klonlama() {
 }
 
 // 4. Scope ve Drop (RAII — kaynak yönetiminin kalbi)
+// SADE ANLATIM: Oyun odasından çıkarken oyuncaklarını toplarsın. Rust'ta süslü parantez { }
+// bir odadır; odanın sonuna gelince içeride tanımlanan her şey KENDİLİĞİNDEN toplanır (silinir).
+// Senin "sil" demene gerek yoktur, unutma ihtimalin de yoktur.
+//   Mini örnek:
+//     {
+//         let s = String::from("oyuncak");
+//         println!("{s}");      // ✓ oda içindeyiz
+//     }                         // oda bitti: s burada silindi
+//     // println!("{s}");       // ✗ derlenmez: s artık yok
 fn kapsam_ve_drop() {
     {
         let s = String::from("geçici");
@@ -88,6 +147,13 @@ fn kapsam_ve_drop() {
 
 // 5. Shared borrow — &T (paylaşımlı ödünç)
 // & ile bir değeri "ödünç verirsin": fonksiyon onu KULLANIR ama sahipliği DEVRALMAZ.
+// SADE ANLATIM: Kitabını arkadaşına VERMEK istemiyorsun, sadece BAKSIN istiyorsun. Kitabı
+// masada tutarsın, o da gelip okur. Kitap hâlâ senindir. `&` işareti tam olarak bunu söyler:
+// "al değil, bak". Buna ödünç verme denir.
+//   Mini örnek:
+//     let kitap = String::from("masal");
+//     let uzunluk = uzunluk_hesapla(&kitap);  // & → sadece bakması için veriyoruz
+//     println!("{kitap} {uzunluk}");           // ✓ kitap hâlâ bizde
 fn borrow_paylasimli() {
     let s = String::from("kitap");
     let n = uzunluk_hesapla(&s); // &s: ödünç; sahiplik s'de kalır
@@ -101,6 +167,18 @@ fn uzunluk_hesapla(x: &String) -> usize {
 }
 
 // 6. Mutable borrow — &mut T ve BORÇ KURALLARI (Aliasing XOR Mutability'nin somut hali)
+// SADE ANLATIM: Bir boyama kitabı düşün. İsteyen herkes aynı anda BAKABİLİR; bunda sakınca yok.
+// Ama biri BOYARKEN başkası bakarsa yarım resim görür, iki kişi aynı anda boyarsa resim bozulur.
+// Rust'ın kuralı bu yüzden şudur: aynı anda ya istediğin kadar "bakan" (&) olur, ya da TEK bir
+// "boyayan" (&mut). İkisi birlikte olmaz. Bu kural sayesinde kimse ayağının altından değişen
+// bir veriyle karşılaşmaz.
+//   Mini örnek:
+//     let mut s = String::from("merhaba");
+//     let bakan1 = &s;
+//     let bakan2 = &s;              // ✓ iki kişi birlikte bakabilir
+//     println!("{bakan1} {bakan2}");
+//     let boyayan = &mut s;         // ✓ bakanların işi bitti, şimdi tek kişi değiştirebilir
+//     boyayan.push('!');
 fn borrow_mut() {
     let mut s = String::from("merhaba");
     ekle_dunya(&mut s); // &mut: değiştirmek için ödünç; s mut olmalı
@@ -132,6 +210,18 @@ fn ekle_dunya(x: &mut String) {
 }
 
 // 7. Dangling reference (sarkan referans) ÖNLENİR
+// SADE ANLATIM: Arkadaşına "defterim masamda duruyor, git bak" dedin. Ama o gidene kadar sen
+// defteri çöpe attın. Arkadaşın boş masaya bakar. Programlarda buna "sarkan referans" denir:
+// ok işareti duruyor ama gösterdiği şey artık yok. Çok tehlikelidir, çünkü program orada
+// duran rastgele şeyi veri sanar. Rust böyle bir kodu hiç derlemez.
+//   Mini örnek:
+//     fn kotu() -> &String {
+//         let s = String::from("defter");
+//         &s                // ✗ derlenmez: s fonksiyon bitince silinecek, ok boşu gösterecekti
+//     }
+//     fn iyi() -> String {
+//         String::from("defter")   // ✓ oku değil, defterin KENDİSİNİ ver
+//     }
 fn sarkma_onleme() {
     // ✗ Yerel bir değere referans döndürmek derlenmez:
     //   fn sarkan() -> &String {          // E0106: missing lifetime specifier
@@ -159,6 +249,14 @@ fn sarkmayan() -> String {
 
 // 8. Slice (dilim) — &str ve &[T]
 // Dilim = mevcut verinin bir bölümüne (pointer + uzunluk) referans; KOPYA DEĞİL.
+// SADE ANLATIM: Bir pastanın tamamını almadan "şu dilime bak" diyebilirsin. Dilim, pastadan
+// ayrı yeni bir pasta değildir; aynı pastanın bir parçasını gösterir. Rust'ta `&s[0..7]` de
+// böyledir: yazının bir parçasını gösterir, kopyasını çıkarmaz. Pasta ortadan kalkarsa dilim
+// de kalmaz; Rust bu yüzden dilim dururken pastayı değiştirmene izin vermez.
+//   Mini örnek:
+//     let s = String::from("merhaba dünya");
+//     let ilk = &s[0..7];       // "merhaba" — s'nin ilk 7 baytını gösterir, kopya değil
+//     println!("{ilk}");
 fn dilimler() {
     let s = String::from("merhaba dünya");
     let ilk = ilk_kelime(&s); // &str: s'in bir bölümüne bakar
@@ -186,6 +284,12 @@ fn ilk_kelime(s: &str) -> &str {
     }
 }
 
+// SADE ANLATIM (aşağıdaki bölüm için): Buraya kadar anlatılan kuralların hepsini program
+// ÇALIŞIRKEN değil, sen kodu DERLERKEN bir "kontrolcü" denetler. Okula girmeden önce çantana
+// bakan nöbetçi gibi: yanlış bir şey varsa içeri almaz. İçeri girdikten sonra kimse seni bir
+// daha durdurmaz; yani çalışan program bu kontroller yüzünden yavaşlamaz. Aşağıdaki bölüm bu
+// kontrolcünün iç işleyişini anlatır. İlk okuyuşta atlayabilirsin; yukarıdaki sekiz bölümü
+// anlamış olman yeter.
 // ============================================================================
 // DERLEYİCİ PERSPEKTİFİ — ownership nerede, nasıl zorlanıyor?
 // ============================================================================

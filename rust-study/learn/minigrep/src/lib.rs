@@ -1,6 +1,8 @@
 // Rust Book — Bölüm 12: An I/O Project — `minigrep` (küçük bir grep)
 // Çalıştır:  cargo run -p minigrep -- hiç siir.txt
 //            IGNORE_CASE=1 cargo run -p minigrep -- NE siir.txt
+// ↳ DÜZELTME NOTU (son gözden geçirme): workspace kökünden (rust-study/) çalıştırırken dosya yolu
+//   `learn/minigrep/siir.txt` olmalıdır; `siir.txt` yalnız learn/minigrep dizininden çalışır.
 // Test et:   cargo test -p minigrep
 //
 // Bu bölüm YENİ kavram öğretmez; önceki bölümleri (Result/?, lifetime, trait, closure/iterator,
@@ -9,10 +11,50 @@
 //
 // Doğrulama ve "neden böyle": DERLEYİCİ/TASARIM PERSPEKTİFİ (en altta).
 
+// ============================================================================
+// SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
+// ============================================================================
+// Bu dosyadaki her önemli parçanın üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
+// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Bu dosyadaki benzetmelerin hepsi aynı yerde geçer: bir kütüphanenin danışma masasında.
+//
+// Bu bölümün tek cümlelik özeti: Programa bir kelime ve bir dosya adı verirsin; o da dosyada o
+// kelimenin geçtiği satırları bulup ekrana yazar.
+//
+// MİNİ SÖZLÜK (bu dosyada geçen kelimeler):
+//   grep                    → metin içinde kelime arayan ünlü komut; minigrep onun küçüğüdür.
+//   komut satırı (CLI)      → programı fareyle değil, yazı yazarak çalıştırdığın pencere.
+//   argüman                 → komutta program adından sonra yazdıkların: `hiç siir.txt`.
+//   ortam değişkeni         → programa dışarıdan verilen adlı ayar: `IGNORE_CASE=1`.
+//   I/O (girdi/çıktı)       → programın dış dünyayla alışverişi: dosya okuma, ekrana yazma.
+//   Config                  → ayarların toplandığı struct (bu dosyada biz tanımlıyoruz).
+//   iterator, Item          → elemanları sırayla veren şey / verdiği her elemanın türü.
+//   closure                 → `|x| ...` biçiminde yazılan adsız, küçük fonksiyon.
+//   lines / filter / collect → satırlara böl / şarta uyanları seç / seçilenleri bir kapta topla.
+//   lifetime ('a)           → bir referansın geçerli kaldığı bölge (Böl. 10).
+//   Box<dyn Error>          → "herhangi bir hata" koyulabilen kutu (Böl. 9 ve 10).
+//   stdout / stderr         → programın iki ayrı çıkış kanalı: sonuçlar için / hatalar için.
+//   yönlendirme (>), boru   → çıktıyı ekran yerine dosyaya / başka bir programa göndermek.
+//   çıkış kodu              → programın biterken bıraktığı sayı: 0 = oldu, başka = olmadı.
+//   kabuk (shell), betik    → komutları yazdığın program / art arda komut çalıştıran dosya.
+//   TDD                     → önce testi yazıp sonra onu geçirecek kodu yazma alışkanlığı.
+//   tahsis (allocation)     → heap'ten yer istemek; gereksizse kaçınılır.
+
 use std::env;
 use std::error::Error;
 use std::fs;
 
+// SADE ANLATIM: Kütüphanenin danışma masasında bir istek fişi doldurursun: "hangi kelimeyi
+// arıyorum, hangi kitapta, büyük-küçük harf fark eder mi?" Görevli fişe bakarak çalışır; sana
+// her adımda yeniden sormaz. `Config` bu fiştir: üç bilgi tek bir struct'ta toplanır. Neden
+// böyle? Bilgiler dağınık dursaydı her fonksiyona üçünü ayrı ayrı taşırdın; biri eksik ya da
+// yanlış sırada gidebilirdi.
+//   Mini örnek:
+//     let fis = Config {
+//         sorgu: String::from("hiç"),             // aranan kelime
+//         dosya_yolu: String::from("siir.txt"),   // hangi dosyada
+//         harf_duyarsiz: false,                   // "Hiç" ile "hiç" ayrı sayılsın
+//     };
 // Ayarları tek yerde topla: ayrıştırma mantığı main'den çıkıp test edilebilir hale gelir.
 pub struct Config {
     pub sorgu: String,
@@ -21,6 +63,16 @@ pub struct Config {
 }
 
 impl Config {
+    // SADE ANLATIM: Fişi eksik doldurursan görevli sana bağırıp masayı kapatmaz; fişi geri uzatır
+    // ve "kitap adını yazmamışsın" der. `build` de böyledir: argüman eksikse programı çökertmez
+    // (paniklemez), nedenini söyleyen bir `Err` döndürür. Ne yapılacağına çağıran karar verir.
+    // Neden böyle? Eksik argüman kullanıcının yanlışıdır, programın değil; kullanıcıya anlaşılır
+    // bir cümle gerekir, çökme raporu değil.
+    //   Mini örnek (çağrı: `minigrep hiç siir.txt` → argümanlar: "minigrep", "hiç", "siir.txt"):
+    //     args.next();                    // "minigrep": programın kendi adı, atlanır
+    //     args.next()                     // Some("hiç")      → sorgu
+    //     args.next()                     // Some("siir.txt") → dosya yolu
+    //     // `minigrep hiç` yazılsaydı üçüncü next() None verirdi → Err("dosya yolu verilmedi")
     // Argüman ITERATOR'ı alır (Bölüm 13 kalıbı): sahipliği devralır, klonlamaya gerek kalmaz.
     // Hata olursa panic ETMEZ; Result döner → main düzgün bir mesajla çıkabilir.
     pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
@@ -46,6 +98,15 @@ impl Config {
     }
 }
 
+// SADE ANLATIM: Görevli fişi aldı. Önce kitabı raftan getirmeye gider; kitap yoksa geri gelip
+// "bulamadım" der ve iş orada biter. Kitap varsa satırları tek tek tarar, kelimenin geçtiği
+// satırları sana okur. `run` bu iki adımdır. Neden `Result` dönüyor? Kitabın rafta olup
+// olmadığını önceden bilemezsin; "olmadı" haberini çağırana iletmenin yolu budur.
+//   Mini örnek:
+//     let icerik = fs::read_to_string("siir.txt")?;   // dosya yoksa: Err ile hemen dön
+//     for satir in ara("hiç", &icerik) {              // dosya varsa: uyan satırları gez
+//         println!("{satir}");                        // her birini ekrana yaz
+//     }
 // Asıl iş. Box<dyn Error> = "Error uygulayan HERHANGİ bir hata" (trait object, Bölüm 10).
 // Böylece fs okuma hatası da başka hata da tek dönüş türünde ? ile yukarı taşınır.
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
@@ -63,6 +124,17 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+// SADE ANLATIM: Görevli bulduğu satırları deftere yeniden yazmaz; kitabın o sayfalarına ayraç
+// koyup sana gösterir. Ayraçlar kitaba aittir: kitap rafa dönünce işe yaramazlar. Aradığın
+// kelimeyi yazdığın kâğıt ise iş bitince atılabilir; ayraçların onunla bir bağı yoktur.
+// İmzadaki `'a` bunu söyler: "dönen satırlar `icerik`e bağlı, `sorgu`ya değil." Arama da üç
+// adımdır: satırlara böl, kelimeyi içerenleri seç, seçilenleri topla. Neden `'a` gerekli? İki
+// referans girdi olduğu için derleyici, sonucun hangisine bağlı olduğunu kendisi bilemez.
+//   Mini örnek:
+//     let icerik = "Ben bir hiçim\nSen kimsin\nHiç misin";
+//     ara("hiç", icerik)                  // ["Ben bir hiçim"] — "Hiç" büyük harfli, uymaz
+//     ara_harf_duyarsiz("hiç", icerik)    // ["Ben bir hiçim", "Hiç misin"]
+//     ara("yok", icerik)                  // [] — hiçbir satır uymadı; bu bir hata değildir
 // Lifetime 'a (Bölüm 10): dönen diliml(er) `icerik`ten gelir, o yüzden çıktı icerik kadar yaşar.
 // `sorgu`nun süresiyle ilişkisi yok — bu yüzden yalnız icerik'e 'a bağlanır.
 pub fn ara<'a>(sorgu: &str, icerik: &'a str) -> Vec<&'a str> {
@@ -80,6 +152,14 @@ pub fn ara_harf_duyarsiz<'a>(sorgu: &str, icerik: &'a str) -> Vec<&'a str> {
         .collect()
 }
 
+// SADE ANLATIM: Yeni görevli işe başlamadan önce ona küçük bir deneme yaptırılır: "şu üç
+// satırlık kâğıtta 'hiç' kelimesini bul." Doğru cevap önceden bellidir; görevli aynı cevabı
+// verirse deneme geçer. Aşağıdaki testler bu denemelerdir. TDD ise sırayı ters çevirir: önce
+// denemeyi yazarsın (henüz düşer), sonra onu geçirecek kodu yazarsın. Neden? Önce beklentiyi
+// yazınca "kod ne yapmalı" sorusu netleşir.
+//   Mini örnek:
+//     cargo test -p minigrep            // üç testi çalıştırır
+//     cargo test -p minigrep duyarsiz   // yalnız adında "duyarsiz" geçen testi çalıştırır
 // ---- Birim testleri (önce test, sonra kod: TDD kalıbı) ----
 #[cfg(test)]
 mod testler {
@@ -111,6 +191,11 @@ mod testler {
     }
 }
 
+// SADE ANLATIM (aşağıdaki bölüm için): Aşağısı "bu küçük program neden böyle düzenlendi?"
+// sorusunu cevaplar. Ana fikirler: görevli (lib.rs) işi yapar, kapıdaki kişi (main.rs) yalnız
+// fişi alır ve sonucu bildirir; bulunan satırlar ile hata mesajları iki ayrı kanaldan verilir ki
+// birbirine karışmasın; program biterken "oldu" ya da "olmadı" anlamına gelen bir sayı bırakır.
+// İlk okuyuşta atlayabilirsin; yukarıdaki dört parçayı anlamış olman yeter.
 // ============================================================================
 // DERLEYİCİ / TASARIM PERSPEKTİFİ — küçük bir CLI'ın doğru iskeleti
 // ============================================================================

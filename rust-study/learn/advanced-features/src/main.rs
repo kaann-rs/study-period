@@ -7,10 +7,51 @@
 // Doğrulanmış (rustc ile): unsafe fonksiyon/raw pointer deref'i `unsafe` blok dışında kullanmak
 // → E0133. Ayrıntı: DERLEYİCİ PERSPEKTİFİ (altta).
 
+// ============================================================================
+// SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
+// ============================================================================
+// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
+// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Bu dosyadaki benzetmeler bir ATÖLYE ve içindeki aletler çevresinde geçer.
+//
+// Bu bölümün tek cümlelik özeti: Rust'ın seyrek kullanılan güçlü aletleri vardır; doğru
+// kullanımı, tehlikeli kısmı küçük tutup dışarıya güvenli bir sap bırakmaktır.
+//
+// MİNİ SÖZLÜK (bu dosyada geçen kelimeler):
+//   unsafe                   → "buranın doğruluğunu derleyici değil, ben garanti ediyorum" bloğu.
+//   raw pointer (`*const T`, `*mut T`) → hiçbir güvencesi olmayan çıplak adres.
+//   dereference (`*r`)       → adrese gidip orada durana bakmak.
+//   null / dangling          → hiçbir yeri göstermeyen / silinmiş bir yeri gösteren adres.
+//   UB (tanımsız davranış)   → kural çiğnenince programın ne yapacağının artık bilinmemesi.
+//   soyutlama (abstraction)  → karmaşık içi saklayıp dışarıya basit bir kullanım sunmak.
+//   borrow checker           → ödünç kurallarını derlerken denetleyen derleyici parçası.
+//   assert!                  → "şu doğru olmalı; değilse programı durdur" denetimi.
+//   operatör aşırı yükleme   → `+` gibi işaretlere kendi türün için ne yapacağını öğretmek.
+//   generic tip parametresi  → sonradan doldurulan tür boşluğu; varsayılanı da olabilir.
+//   associated type          → bir trait'in içinde "sonucun türü şudur" diye adı konan tür.
+//   newtype                  → var olan bir türü tek alanlı kendi türünle sarmak.
+//   orphan rule              → "trait de tür de başkasınınsa ikisini sen bağlayamazsın" kuralı.
+//   Display                  → bir değerin `{}` ile nasıl yazdırılacağını söyleyen trait.
+//   tip takma adı (type alias) → var olan türe verilen ikinci ad; yeni tür oluşturmaz.
+//   fonksiyon pointer'ı (`fn`) → bir fonksiyonu değer gibi taşımak, başka fonksiyona vermek.
+//   closure, Fn/FnMut/FnOnce → yerinde yazılan adsız fonksiyon / onun üç çalışma biçimi.
+//   `impl Fn`, `Box<dyn Fn>` → closure döndürmenin iki yolu: türü derlerken belli / kutulu.
+//   makro, `macro_rules!`    → kod yazan kod / onu desenlerle tanımlamanın yolu.
+//   metaprogramlama          → program yazan program yazmak.
+//   genişleme (expand)       → makro çağrısının derlemeden önce gerçek koda çevrilmesi.
+//   declarative / procedural → desenle tanımlanan makro / kod parçalarını işleyen fonksiyon makro.
+//   TokenStream              → kaynak kodun sözcük parçalarına ayrılmış hâli.
+//   never type (`!`)         → geri dönmeyen ifadelerin türü (panic!, return gibi).
+//   DST ve Sized             → boyu derlerken bilinmeyen tür / boyu bilinen türlerin etiketi.
+//   static, union, DSL       → program boyunca yaşayan değişken / alanları üst üste duran tür /
+//                              belli bir iş için tasarlanmış küçük dil.
+
 use std::fmt;
 use std::ops::Add;
 use std::slice;
 
+// (Sade: aşağıdaki `benim_vec!` bir makrodur; ne yaptığı 5. bölümün kutusunda anlatılıyor.
+// `$( $x:expr ),*` kısmı "virgülle ayrılmış, istediğin kadar ifade" demektir.)
 // Bir makroyu KULLANILMADAN ÖNCE tanımlamak gerekir (ya da #[macro_use]); en üste koyuyoruz.
 macro_rules! benim_vec {
     // $( ... ),*  = virgülle ayrılmış SIFIR veya daha fazla tekrar. $x:expr bir ifade yakalar.
@@ -34,6 +75,18 @@ fn main() {
 // ============================================================================
 // Güvenli abstraction: dışarıya tamamen güvenli bir API; unsafe yalnız İÇERİDE, küçük ve
 // doğruluğu insan tarafından kanıtlanmış bir blokta. std'nin çoğu (Vec, split_at_mut...) böyledir.
+// SADE ANLATIM: Atölyedeki makinelerin üstünde koruyucu kapak vardır; kapak kapalıyken elini
+// kesemezsin. Bazı ince işler için usta kapağı açar. Kapak açıkken makine seni korumaz, dikkat
+// etmek ustanın işidir. `unsafe` bloğu o açık kapaktır: "buranın doğru olduğunu derleyici
+// göremiyor, ben garanti ediyorum". İyi usta kapağı kısa süre açar ve işi bitince kapatır;
+// dışarıdan kullanan kişi (`ikiye_bol`u çağıran) kapağın açıldığını bilmek zorunda kalmaz.
+// Neden böyle? Derleyici temkinlidir: "aynı diziden iki ayrı değiştirme izni" görünce, parçalar
+// hiç çakışmasa bile kodu geri çevirir. unsafe yalnız birkaç işlemi açar; öteki kurallar sürer.
+//   Mini örnek:
+//     let x = 42;
+//     let r = &x as *const i32;         // ✓ çıplak adres OLUŞTURMAK serbest
+//     // println!("{}", *r);            // ✗ derlenmez: çıplak adresin gösterdiğine bakmak unsafe
+//     unsafe { println!("{}", *r); }    // ✓ kapağı açtık: "adres geçerli, sorumluluk bende"
 fn ikiye_bol(dilim: &mut [i32], orta: usize) -> (&mut [i32], &mut [i32]) {
     let uzunluk = dilim.len();
     let isaretci = dilim.as_mut_ptr(); // raw pointer
@@ -64,6 +117,16 @@ fn unsafe_rust() {
 // ============================================================================
 // 2. GELİŞMİŞ TRAIT'LER — operatör aşırı yükleme (default generic type param)
 // ============================================================================
+// SADE ANLATIM: Terazi elma tartmayı bilir; kendi yaptığın bir şeyi tartabilmesi için ona nasıl
+// tartılacağını öğretmen gerekir. `+` işareti de sayıları toplamayı bilir; `Metre` gibi kendi
+// türün için ne yapacağını `impl Add for Metre` yazarak sen öğretirsin. Ondan sonra
+// `Metre(3) + Metre(4)` yazmak, aslında senin `add` fonksiyonunu çağırmaktır.
+// Neden böyle? Rust'ta işaretler birer trait'tir; böylece `+` yalnız senin izin verdiğin türler
+// arasında çalışır ve metre ile düz sayı yanlışlıkla toplanmaz.
+//   Mini örnek:
+//     let t = Metre(3) + Metre(4);      // ✓ Metre(7) — `+`, yazdığımız add'i çağırır
+//     // let k = Metre(3) + 4;          // ✗ derlenmez: Metre ile düz sayıyı toplamayı öğretmedik
+//     // let f = Metre(3) - Metre(1);   // ✗ derlenmez: çıkarmayı (Sub) hiç öğretmedik
 #[derive(Debug, PartialEq)]
 struct Metre(u32);
 // Add trait'i:  trait Add<Rhs = Self> { type Output; fn add(self, rhs: Rhs) -> Output; }
@@ -86,6 +149,19 @@ fn operator_overload() {
 // ============================================================================
 // Daha önce konuştuğumuz orphan rule: ne trait (Display) ne tip (Vec) bizimse impl yazamayız.
 // Çözüm: Vec'i ince bir newtype ile SAR — artık tip (Sarmal) bizim, impl serbest.
+// SADE ANLATIM: Atölyedeki ortak aletlere kendi etiketini yapıştıramazsın: alet de etiket
+// makinesi de başkasınındır. Ama aleti KENDİ kutuna koyabilir, etiketi kutuna yapıştırabilirsin.
+// Rust'ta da `Vec` ve `Display` ikisi birden başkasının (std'nin) olduğu için onları doğrudan
+// bağlayamazsın. `Vec`'i tek alanlı kendi türünle (`Sarmal`) sararsın; tür artık senin olduğu
+// için `Display` yazabilirsin. Bu sarmaya newtype denir.
+// Neden böyle? Herkes başkasının türüne başkasının trait'ini yazabilseydi, iki kütüphanenin
+// yazdıkları çakışır ve hangisinin geçerli olduğu bilinemezdi.
+//   Mini örnek:
+//     // impl fmt::Display for Vec<String> { ... }   // ✗ derlenmez: ne Display ne Vec bizim
+//     struct Sarmal(Vec<String>);                    // ✓ kendi kutumuz
+//     impl fmt::Display for Sarmal { ... }           // ✓ kutu bizim olduğu için serbest
+//     let w = Sarmal(vec![String::from("a")]);
+//     println!("{w} {}", w.0.len());                 // ✓ içteki Vec'e `.0` ile ulaşılır
 struct Sarmal(Vec<String>);
 impl fmt::Display for Sarmal {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -104,6 +180,21 @@ fn newtype_display() {
 // ============================================================================
 // 4. GELİŞMİŞ TİPLER + FONKSİYON POINTER'LARI + CLOSURE DÖNDÜRME
 // ============================================================================
+// SADE ANLATIM: Bu bölümde üç küçük alet var. Takma ad: uzun adlı bir alete kısa bir lakap
+// takmak; alet aynı alettir. Fonksiyon pointer'ı: bir tarif kartını başkasının eline vermek;
+// "şu sayıya ŞU işlemi uygula" derken işlemin kendisini de verirsin. Closure döndürmek: ayarı
+// önceden yapılmış bir alet üretmek; `ekleyici_impl(100)` içinde 100'ü saklayan yeni bir
+// fonksiyon verir.
+// Neden iki dönüş yolu var? Her closure'ın türü ayrıdır ve adı yoktur. `impl Fn` "tek bir tür
+// döndürüyorum, adını sen bilme" der ve hızlıdır; `Box<dyn Fn>` farklı closure'ları aynı kutuda
+// döndürmeni sağlar, bedeli heap'te bir kutudur.
+//   Mini örnek:
+//     let s: Metin = String::from("a");         // ✓ Metin yalnız lakap; String ile aynı tür
+//     let yirmi = uygula(carp_iki, 10);         // ✓ 20 — fonksiyonun adı değer gibi verildi
+//     let yuz_ekle = ekleyici_impl(100);        // ✓ içinde 100 saklı yeni bir fonksiyon
+//     println!("{}", yuz_ekle(5));              // ✓ 105
+//     // uygula(|x| x + yirmi, 1);              // ✗ derlenmez: dışarıdan değişken yakalayan
+//                                               //   closure, `fn` pointer'ına dönüşmez
 type Metin = String; // tip TAKMA ADI (alias): yeni tip değil, uzun imzalar için kısaltma
 
 // fn (küçük f): FONKSİYON POINTER'ı — bir fonksiyonu değer olarak al. Fn/FnMut/FnOnce'un üçünü
@@ -141,12 +232,28 @@ fn tip_takma_ve_fn() {
 // ============================================================================
 // 5. MAKROLAR — kod üreten kod (metaprogramlama)
 // ============================================================================
+// SADE ANLATIM: Lastik bir damga düşün: bir kez hazırlarsın, sonra her bastığında aynı yazıyı
+// senin yerine yazar. Makro, kod yazan bir damgadır. `benim_vec![10, 20, 30]` yazdığında
+// derleyici, programı derlemeden ÖNCE bu satırı "boş bir Vec aç, 10'u ekle, 20'yi ekle, 30'u
+// ekle" satırlarına çevirir. Adının sonundaki `!` "bu bir fonksiyon değil, makro" demektir.
+// Neden fonksiyon yetmez? Bir fonksiyonun kaç argüman alacağı baştan bellidir; makro istediğin
+// kadar argüman alabilir, çünkü çalışan bir şey değil, kod üreten bir kalıptır.
+//   Mini örnek:
+//     let v = benim_vec![10, 20, 30];
+//     // derleyici yukarıdaki satırı önce şuna çevirir:
+//     // { let mut v = Vec::new(); v.push(10); v.push(20); v.push(30); v }
+//     let bos: Vec<i32> = benim_vec![];     // ✓ sıfır argüman da olur
 fn makro() {
     // benim_vec! derleme ANINDA genişler: aşağıdaki çağrı tam da elle yazılmış push'lara döner.
     let v: Vec<i32> = benim_vec![10, 20, 30];
     println!("macro_rules! benim_vec![10,20,30] = {v:?}");
 }
 
+// SADE ANLATIM (aşağıdaki bölüm için): Aşağıdaki bölüm bu aletlerin sınırlarını derleyicinin
+// gözünden anlatır: unsafe'in tam olarak hangi beş işlemi açtığını (ve neleri AÇMADIĞINI),
+// newtype'ın neden bedava olduğunu, "geri dönmeyen" ifadelerin türünü ve makroların iki ailesini.
+// Aklında kalması gereken tek cümle: unsafe ödünç kurallarını kapatmaz; yalnız birkaç tehlikeli
+// işlem için "sorumluluk bende" dedirtir. İlk okuyuşta bu bölümü atlayabilirsin.
 // ============================================================================
 // DERLEYİCİ PERSPEKTİFİ — güç + güvenlik dengesi
 // ============================================================================
