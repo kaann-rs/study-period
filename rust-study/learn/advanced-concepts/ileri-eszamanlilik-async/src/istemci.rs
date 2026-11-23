@@ -1,3 +1,4 @@
+// Açıklama: learn/advanced-concepts/ileri-eszamanlilik-async/ACIKLAMA.md
 // BÖLÜM C — Gerçeğe yakın uygulama: asenkron API istemcisi + async kodda yaygın hatalar
 //
 // calisma_zamani.rs'teki parçaları (baslat, Uyku, zaman_asimi) bir araya getirip gerçek bir
@@ -117,16 +118,16 @@ pub async fn istek(sunucu: Arc<SahteSunucu>, yol: &'static str) -> Result<String
 }
 
 // Yeniden deneme. Parametre neden hazır bir future değil de future ÜRETEN bir closure?
-// Çünkü bir future yalnız BİR KEZ tamamlanır; bittikten sonra yeniden poll edilemez. Her
-// deneme taze bir future ister → `FnMut() -> Fut`. (Closure/trait ilişkisi: closures-iterators.)
+// Çünkü bir future yalnız BİR KEZ tamamlanır; bittikten sonra yeniden poll EDİLMEMELİDİR
+// (sözleşme ihlali; derlenir ama panik/askıda kalma olabilir). Her deneme taze bir future ister
+// → `FnMut() -> Fut`. (Closure/trait ilişkisi: closures-iterators.)
 //
 // Denemeler arasında artan bekleme (backoff): hata veren servise hemen yeniden yüklenmemek
 // için. Bekleme `uyu_ms(..).await` ile yapılıyor — thread::sleep DEĞİL (bkz. C2).
 //
-// Not (Rust 1.85+): aynı bound `impl AsyncFnMut() -> Result<T, IstekHatasi>` diye de
-// yazılabilir; çağıran o zaman `async move || istek(..).await` biçiminde bir async closure
-// verir. Burada klasik `F: FnMut() -> Fut, Fut: Future` biçimini kullandık çünkü "closure
-// çağrılır → bir future döner → o future beklenir" iki adımını açıkça gösteriyor.
+// Not (Rust 1.85+): aynı bound `impl AsyncFnMut() -> Result<T, IstekHatasi>` olarak da yazılabilir
+// (çağıran `async move || istek(..).await` verir). Burada klasik `F: FnMut() -> Fut, Fut: Future`
+// biçimini seçtik: "closure çağrılır → future döner → future beklenir" iki adımı açık görünsün diye.
 // SADE ANLATIM: Birini aradın, telefon meşgul çaldı. Biraz bekleyip yeniden ararsın; yine
 // meşgulse bu kez biraz daha uzun beklersin. "Böyle bir numara yok" denirse bir daha aramazsın,
 // çünkü tekrar aramak sonucu değiştirmez. `yeniden_dene` bunu yapar. Parametresi hazır bir

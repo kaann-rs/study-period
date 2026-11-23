@@ -1,3 +1,4 @@
+// Açıklama: learn/enums/ACIKLAMA.md
 // Rust Book — Bölüm 6: Enums (numaralandırma) ve Pattern Matching (desen eşleme)
 // Çalıştır: cargo run -p enums
 //
@@ -8,8 +9,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku, sonra teknik açıklamaya geç.
 // Benzetmelerin hepsi aynı kişiyle, bir POSTACIYLA kurulur.
 //
 // Bu bölümün tek cümlelik özeti: enum "bu değer şu seçeneklerden yalnız biridir" der; match de
@@ -36,7 +36,7 @@
 //   derive(Debug)          → türü `{:?}` ile yazdırılabilir yapar (structs bölümünde anlatıldı).
 //   impl, metot, &self     → türe bağlı fonksiyonlar (structs bölümünde anlatıldı).
 //   <T> (generic)          → "herhangi bir tür" için yer tutucu: Option<i32>, Option<String>.
-//   Copy                   → sayı gibi küçük değerler atanınca kopyalanır; eskisi de kullanılır.
+//   Copy                   → Copy trait'i olan türler kopyalanır (sayı, &T, Option<T>); eskisi de kullanılır.
 //   Box<T>                 → heap'te duran bir değeri gösteren, onun sahibi olan ok.
 //   discriminant (tag)     → değerin hangi varyant olduğunu söyleyen gizli küçük etiket.
 //   refactor               → kodun davranışını değiştirmeden düzenini iyileştirmek.
@@ -44,12 +44,9 @@
 //   E0004                  → "match'te eksik seçenek var" hatasının numarası.
 //   derleyici (rustc)      → kodu programa çeviren ve hataları önceden bulan araç.
 //
-// SADE ANLATIM (hemen aşağıdaki tanımlar için): Buradaki üç `enum` birer seçenek listesidir.
-// `IpAdres` üç seçenekten biridir, `Mesaj` dört, `Yon` dört. Bazı seçeneklerin yanında veri de
-// gider (ör. `Yaz` bir yazı taşır). `impl Mesaj` bloğundaki `calistir`, mesajın hangi seçenek
-// olduğuna `match` ile bakıp ona göre davranır. Hepsi aşağıdaki numaralı bölümlerde anlatılır.
-// Bir enum, bir değerin "şu OLASILIKLARDAN biri" olduğunu söyler. Her varyant veri
-// taşıyabilir — hiç (unit), tuple gibi, ya da struct gibi.
+// SADE ANLATIM (tanımlar için): Üç `enum` birer seçenek listesi; `IpAdres` üç, `Mesaj` dört,
+// `Yon` dört seçenek. Bazıları veri taşır (ör. `Yaz` bir yazı); `impl Mesaj::calistir` hangi seçenek
+// olduğunu `match` ile bulur. Her varyant unit, tuple ya da struct gibi olabilir; ayrıntı aşağıda.
 #[derive(Debug)]
 enum IpAdres {
     V4(u8, u8, u8, u8), // tuple-like varyant (veri taşır)
@@ -135,10 +132,8 @@ fn enum_ve_varyantlar() {
         m.calistir();
     }
 
-    // Neden enum? Sorun: bir değer "birkaç farklı biçimden biri" olabiliyorsa (IPv4 ya da
-    // IPv6), bunu ayrı alanlar + "hangisi geçerli?" bayrağıyla tutmak hataya açıktır
-    // (yanlış alanı okuma). enum, olasılıkları TEK TÜRDE toplar ve her varyantın kendi
-    // verisini taşır; match seni her olasılığı ele almaya zorlar.
+    // Neden enum? Ayrı alanlar + "hangisi geçerli?" bayrağı yanlış alanı okumaya açıktır; enum
+    // olasılıkları TEK TÜRDE toplar, her varyant kendi verisini taşır, match hepsini zorunlu kılar.
 }
 
 // 2. Option<T> — null'ın olmayışı ve nedeni
@@ -159,8 +154,7 @@ fn option_neden() {
     let bazi: Option<i32> = Some(5);
     let yok: Option<i32> = None;
 
-    // i32 ile Option<i32>'yi doğrudan toplayamazsın; önce None ihtimalini ELE ALMAK
-    // zorundasın. Bu, "unutulmuş null kontrolü"nü imkânsız kılar.
+    // i32 ile Option<i32> toplanamaz: None ihtimalini ELE ALMALISIN (unutulmuş null kontrolü yok).
     let sonuc = match bazi {
         Some(n) => n + 1,
         None => 0,
@@ -180,8 +174,7 @@ fn option_neden() {
 // çal, geri kalan her şeyi şubeye geri götür". Gönderiye bakar, uyan İLK satırı uygular. `match`
 // bu kâğıttır: her satır bir koldur. En alttaki "geri kalan her şey" satırı `_` ile yazılır.
 // `match` bir değer de verir; sonucu doğrudan bir değişkene koyabilirsin.
-// Neden böyle? Uzun `if ... else if ...` zincirlerinde bir ihtimali atlamak kolaydır; `match`te
-// bütün ihtimaller alt alta durur ve derleyici eksik olanı söyler.
+// Neden? Uzun if-else zincirinde ihtimal atlamak kolay; match'te derleyici eksik olanı söyler.
 //   Mini örnek:
 //     let zar = 6;
 //     let sonuc = match zar {
@@ -242,8 +235,7 @@ fn exhaustiveness() {
     //   } // E0004: non-exhaustive patterns: `Yon::Dogu` and `Yon::Bati` not covered
     // Neden derleyici bunu zorluyor? Sorun: C'de switch'te bir case'i unutmak SESSİZCE
     // atlanır (ya da yanlış default'a düşer) — fark edilmeyen mantık hatası. Dahası, enum'a
-    // İLERİDE yeni bir varyant eklersen, onu ele almayan TÜM match'ler derlenmez olur; yani
-    // derleyici seni her kullanımı güncellemeye zorlar → güvenli, derleyici-güdümlü refactor.
+    // İLERİDE yeni varyant eklenirse onu ele almayan TÜM match'ler derlenmez → derleyici-güdümlü refactor.
 }
 
 // 5. if let ve let-else — tek desen için match'in kısası
@@ -277,16 +269,13 @@ fn if_let_ornekleri() {
         return;
     };
     println!("let-else ile v = {v}");
-    // Neden if let / let-else? Sorun: tek bir varyantla ilgilenirken tam bir match + `_ => ()`
-    // yazmak gürültülü olur. Bunlar aynı güvenliği koruyan kısa yazımlardır (sugar).
+    // Neden? Tam match + `_ => ()` gürültülü; bunlar aynı güvenliği koruyan kısa yazımlar (sugar).
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Bu bölüm enum'un bellekte nasıl durduğunu anlatır. Her
-// gönderinin üstünde cinsini söyleyen küçük bir etiket vardır; postacı önce ona bakar. Derleyici
-// bazen bu etiket için ayrı yer bile harcamaz: "boş" bilgisini, türün zaten hiç kullanmadığı bir
-// değerin içine saklar. Bölüm ayrıca bütünlük denetiminin derleyicinin hangi adımında yapıldığını
-// söyler. Program yazarken bunları bilmen gerekmez. İlk okuyuşta atlayabilirsin; yukarıdaki beş
-// bölümü anlamış olman yeter.
+// SADE ANLATIM (aşağıdaki bölüm için): Her gönderinin cinsini söyleyen küçük bir etiket vardır;
+// postacı önce ona bakar. Derleyici bazen etikete hiç yer ayırmaz, "boş"u türün kullanmadığı bir
+// değere saklar. Bölüm ayrıca bütünlük denetiminin hangi adımda yapıldığını söyler. Program yazarken
+// gerekmez; ilk okuyuşta atla, beş bölüm yeter.
 // ============================================================================
 // DERLEYİCİ PERSPEKTİFİ — enum ve match nasıl çalışıyor?
 // ============================================================================
@@ -302,7 +291,7 @@ fn if_let_ornekleri() {
 //       i32        = 4,  Option<i32>        = 8   (i32 tüm desenleri kullanır → ayrı tag + hizalama)
 //       &i32       = 8,  Option<&i32>       = 8   (referans asla null olamaz → o desen None olur)
 //       Box<i32>   = 8,  Option<Box<i32>>   = 8   (aynı mantık)
-//       bool       = 1,  Option<bool>       = 1   (bool yalnız 0/1 → 2 deseni None olur)
+//       bool       = 1,  Option<bool>       = 1   (bool 1 byte'ta yalnız 0/1 kullanır; 254 geçersiz desenden biri None olur)
 //   Yani `Option<&T>` "null'lanabilir pointer" kadar ucuzdur ama güvenlidir.
 //
 // (Sade: THIR, derleyicinin kodu çevirirken kullandığı ara biçimlerden biridir.)
@@ -313,8 +302,7 @@ fn if_let_ornekleri() {
 //   crate'tedir: rustc_pattern_analysis.
 //
 // (Sade: lowering/indirgeme = kısa yazımı, daha temel bir yazıma çevirmek.)
-// • if let / while let / let-else: sözdizimsel şekerdir; derleyici bunları eşdeğer bir
-//   match'e indirger (lowering).
-// ↳ DÜZELTME NOTU (son gözden geçirme): ANLAMCA match'e eşdeğerdirler; ancak güncel rustc bunları HIR'da
-//   match'e açmaz, `Let` / `If` / let-else düğümleri olarak korur. (for → loop + match ve
-//   `?` → match indirgemeleri ise gerçekten yapılır.)
+// • if let / while let / let-else: sözdizimsel şekerdir; ANLAMCA match'e eşdeğerdirler ama güncel
+//   rustc bunları HIR'da match'e açmaz, `Let` / `If` / let-else düğümleri olarak korur
+//   (rustc_ast_lowering/src/expr.rs:324-325). `for` → loop + match ve `?` → match indirgemeleri
+//   ise gerçekten yapılır.

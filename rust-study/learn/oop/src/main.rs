@@ -1,3 +1,4 @@
+// Açıklama: learn/oop/ACIKLAMA.md
 // Rust Book — Bölüm 18: Object-Oriented Programming Features
 // Çalıştır: cargo run -p oop
 //
@@ -8,15 +9,13 @@
 //   2) Klasik "state pattern" yerine Rust-idiomatik TYPE-STATE: geçersiz durumu DERLEME ANINDA
 //      imkânsız kıl.
 //
-// (dyn/statik-dinamik dispatch temelini Böl. 10 ve 15'te kurmuştuk; burada tasarım kalıbı var.)
-// ↳ DÜZELTME NOTU (son gözden geçirme): dispatch/vtable konusu Böl. 10'da (generics-traits-lifetimes) ve
-//   ileri-sized-dst'de işlendi; Böl. 15 (smart-pointers) bu konuyu içermiyor.
+// (dyn/statik-dinamik dispatch temelini Böl. 10'da (generics-traits-lifetimes) ve
+//  ileri-sized-dst'de kurmuştuk; burada tasarım kalıbı var.)
 
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümün "SADE ANLATIM" kutusunu önce oku; teknik kısım zorsa ana fikir orada.
 // Bu crate'teki benzetmelerin çoğu bir OYUNCAK KUTUSU çevresinde geçer; derinlesme.rs de öyle.
 //
 // Bu bölümün tek cümlelik özeti: Rust'ta "sınıftan sınıf türetmek" (kalıtım) yoktur; onun yerine
@@ -64,10 +63,8 @@ fn main() {
 // yazar. İçini elle karıştıramadığın için gösterge hep doğrudur. Aşağıdaki türde de `liste` ve
 // `ortalama` içeride saklıdır; dışarıya açık tek yol `ekle` düğmesidir ve o her seferinde
 // ortalamayı da günceller.
-// Neden böyle? İçerisi herkese açık olsaydı biri listeye sayı ekleyip ortalamayı güncellemeyi
-// unutabilir, gösterge yanlış kalırdı.
-// Dikkat: Rust'ta gizlilik TÜRE değil MODÜLE göredir. Aynı modüldeki kod (kumbarayla aynı odada
-// duran herkes) private alana erişebilir; kilit, odanın kapısındadır.
+// İçerisi açık olsaydı biri ortalamayı güncellemeyi unutur, gösterge yanlış kalırdı.
+// Dikkat: gizlilik TÜRE değil MODÜLE göredir; aynı modüldeki kod private alana erişebilir.
 //   Mini örnek:
 //     let mut o = OrtalamaListe::yeni();
 //     o.ekle(10);                     // ✓ yarıktan at: liste ile ortalama birlikte güncellenir
@@ -104,11 +101,8 @@ fn encapsulation() {
     o.ekle(10);
     o.ekle(20);
     o.ekle(30);
-    // o.liste.push(999); // ✗ E0616: field `liste` is private — invariant'ı dışarıdan bozamazsın
-    // ↳ DÜZELTME NOTU (son gözden geçirme): bu satır BU DOSYADA açılırsa DERLENİR. Rust'ta gizlilik tür bazlı
-    //   değil MODÜL bazlıdır: OrtalamaListe ile bu fonksiyon aynı modülde (crate kökü) olduğu için
-    //   private alana erişebilir. E0616 yalnız tür ayrı bir `mod` içinde tanımlanıp DIŞINDAN erişilince
-    //   çıkar (rustc ile doğrulandı). Modülle korunan çalışan örnek: learn/structs/src/derinlesme.rs.
+    // Bu dosyada derlenir: gizlilik MODÜLE göredir (crate kökündeyiz). E0616 ancak tür ayrı bir
+    // `mod` içinde tanımlanıp dışından erişilince çıkar (örn. learn/structs/src/derinlesme.rs).
     println!("ortalama = {}", o.ortalama()); // 20
 }
 
@@ -120,8 +114,7 @@ fn encapsulation() {
 // KENDİ sesini çıkarır. Rust'ta `Box<dyn Ciz>` de böyledir: "türü ne olursa olsun, çizilebilen
 // bir şey". Hangi `ciz` fonksiyonunun çalışacağı program çalışırken, oyuncağın yanındaki küçük
 // tablodan (vtable) bulunur.
-// Neden böyle? Bir `Vec` normalde tek tür tutar. Bu kutu olmasaydı Buton ile OnayKutusu aynı
-// listeye giremezdi; her yeni bileşen türü için Ekran'ı baştan yazman gerekirdi.
+// Vec tek tür tutar; kutu olmasaydı Buton ile OnayKutusu aynı listeye giremezdi.
 //   Mini örnek:
 //     let kutu: Vec<Box<dyn Ciz>> = vec![
 //         Box::new(Buton { etiket: String::from("Tamam") }),
@@ -174,9 +167,8 @@ fn gui_trait_object() {
     };
     println!("ekran:");
     ekran.calistir();
-    // Neden generic <T: Ciz> yerine dyn? Sorun: Vec<T> tek bir T tutar — HETEROJEN liste olmaz.
-    // Buton + OnayKutusu'yu aynı Vec'te tutmak için trait object (dyn) şart. Bedel: vtable
-    // dolaylaması (Böl. 10/15'te kök neden).
+    // Neden dyn? Vec<T> tek tür tutar, heterojen liste olmaz. Bedel: vtable dolaylaması
+    // (kök neden Böl. 10 ve ileri-sized-dst'de).
 }
 
 // ============================================================================
@@ -191,8 +183,7 @@ fn gui_trait_object() {
 // ekleyemezsin, çünkü zarfın "yazı ekle" diye bir özelliği yoktur. Aşağıda da her hâl ayrı bir
 // türdür (Taslak, Inceleme, Yayin). Bir hâlden ötekine geçen metot eskisini tüketir (`self`
 // alır) ve yenisini verir.
-// Neden böyle? Durum tek bir alanda yazsaydı ("şu an: taslak") her metot çalışırken "doğru
-// durumda mıyım?" diye bakmak zorunda kalırdı; burada yanlış adım hiç derlenmez.
+// Durum tek alanda olsaydı her metot "doğru durumda mıyım?" diye bakardı; burada yanlış adım derlenmez.
 //   Mini örnek:
 //     let mut m = Taslak::yeni();
 //     m.ekle("Merhaba");                   // ✓ taslağa yazılır
@@ -257,9 +248,8 @@ fn type_state_blog() {
     tekrar_taslak.ekle(" (düzeltildi)");
     let yayinda = tekrar_taslak.incelemeye_gonder().onayla();
     println!("yayınlanan içerik: {}", yayinda.icerik()); // ancak ŞİMDİ okunabilir
-    // Neden? Sorun (klasik state pattern): durum bir alandaysa, derleyici "yanlış durumda yanlış
-    // metot" hatasını yakalayamaz; çalışma anı kontrolü + hata/panik gerekir. Type-state bunu
-    // TÜRE taşır → hata, kod derlenmeden önce yakalanır. "Make invalid states unrepresentable."
+    // Klasik state pattern'de derleyici "yanlış durumda yanlış metot"u yakalayamaz; type-state
+    // bunu TÜRE taşır → hata derlenmeden gelir ("Make invalid states unrepresentable.").
 }
 
 // SADE ANLATIM (aşağıdaki bölüm için): Aşağıdaki bölüm "Rust neden kalıtımı almadı?" sorusunu
@@ -278,11 +268,9 @@ fn type_state_blog() {
 //   istenmeyen davranış miras alma, "is-a" zorlaması getirir. trait+kompozisyon yalnız İHTİYAÇ
 //   duyulan davranışı seçer.
 //
-// • ENCAPSULATION tam destekli: alan/metot varsayılan PRIVATE, pub ile açılır (Böl. 7). Private
-//   alana dışarıdan erişim E0616. Bu, bir türün invariant'ını (OrtalamaListe'de "ortalama hep
-// ↳ DÜZELTME NOTU (son gözden geçirme): "dışarıdan" = tanımlandığı MODÜLÜN dışından. Aynı modüldeki kod private
-//   alana erişebilir; invariant'ı gerçekten korumak için türü kendi `mod`una koymak gerekir.
-//   güncel") garanti altına almanın yoludur — dış kod iç tutarlılığı bozamaz.
+// • ENCAPSULATION: alan/metot varsayılan PRIVATE, pub ile açılır (Böl. 7). MODÜL DIŞINDAN erişim E0616.
+//   Bu yüzden invariant'ı ("ortalama hep güncel") korumak için türü kendi `mod`una koyarsın — dış kod
+//   iç tutarlılığı bozamaz.
 //
 // • TRAIT OBJECT = fat pointer: Box<dyn Ciz>, (veri-pointer, vtable-pointer) ikilisidir. vtable
 //   her somut tür için ciz()'in adresini tutar; çağrı çalışma anında oradan bulunur (dinamik

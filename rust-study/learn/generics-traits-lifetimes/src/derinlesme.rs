@@ -1,3 +1,4 @@
+// Açıklama: learn/generics-traits-lifetimes/ACIKLAMA.md
 // Derinleşme — Bölüm 10: Generics, Trait Bounds, Lifetimes (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p generics-traits-lifetimes   |   Test: cargo test -p generics-traits-lifetimes
 //
@@ -61,13 +62,8 @@ pub fn calistir() {
 // ============================================================================
 // 1. NASIL ÇALIŞIR? — Lifetime bir süre değil, bir İLİŞKİ bildirimidir
 // ============================================================================
-// `'a` yazmak hiçbir şeyin ömrünü UZATMAZ ya da kısaltmaz. Yalnızca derleyiciye şunu söylersin:
-// "dönen referans, ŞU girdiden türetildi; onun kadar geçerli say." Derleyici bu sözü iki yerde
-// denetler: gövdede (gerçekten o girdiden mi dönüyorsun?) ve çağrı yerinde (çağıran, sonucu o
-// girdi ölmeden mi kullanıyor?).
-//
-// Bu yüzden imzadaki etiketler bir TASARIM KARARIDIR: hangi girdilerin çıktıyla bağlı olduğunu
-// ne kadar doğru söylersen çağıran o kadar özgür olur.
+// `'a` ömrü UZATMAZ; "dönen referans ŞU girdiden türetildi, onun kadar geçerli" der. Derleyici
+// bunu gövdede ve çağrı yerinde denetler. Etiket TASARIM KARARIDIR: doğru söylersen çağıran özgür olur.
 
 // SADE ANLATIM: Kütüphaneden bir kitap, arkadaşından da bir cetvel ödünç aldın. Cetveli yalnız
 // kitaptaki bir satırın altını çizmek için kullandın; işaretlediğin satır kitaba aittir, cetvelle
@@ -82,7 +78,7 @@ pub fn calistir() {
 //     //   dogru(&yol, &on_ek) sonucu   ✓ kullanılmaya devam eder
 //     //   siki(&yol, &on_ek) sonucu    ✗ derlenmez: on_ek'e de bağlı sayılır
 // ✗ Gereğinden sıkı: iki parametre de 'a. Sonuç yalnız `metin`den gelse bile imza "ikisinden
-//   de gelebilir" der; derleyici imzaya güvenir, gövdeye bakmaz.
+//   de gelebilir" der; çağrı yerinde derleyici yalnız imzaya bakar, gövde ayrıca denetlenir.
 fn on_eki_at_siki<'a>(metin: &'a str, on_ek: &'a str) -> &'a str {
     metin.strip_prefix(on_ek).unwrap_or(metin)
 }
@@ -290,10 +286,8 @@ fn static_ne_demek() {
 // Senaryo: pahalı bir hesabı (veritabanı sorgusu, dosya okuma) anahtara göre önbelleğe alan
 // yapı. Hangi anahtar/değer türüyle kullanılacağını bilmiyoruz → generic.
 //
-// Önemli nokta: bound'ları struct tanımına DEĞİL, onlara gerçekten ihtiyaç duyan impl bloğuna
-// koy. Struct'a konan bound, o türün adının geçtiği HER yere (her fonksiyon imzası, her impl)
-// kopyalanmak zorunda kalır; impl'e konan bound yalnız ilgili metotları kısıtlar. std de böyle
-// yapar: `HashMap<K, V>` tanımında bound yoktur, `K: Eq + Hash` yalnız insert/get impl'indedir.
+// Bound'ları struct'a DEĞİL, ihtiyacı olan impl'e koy: struct'a konan bound o türün geçtiği her
+// imzaya kopyalanır. std de böyle: `HashMap<K, V>`'de bound yok, `K: Eq + Hash` insert/get impl'inde.
 // SADE ANLATIM: Zor bir çarpma sorusunu çözünce cevabını defterinin arkasına yazarsın; aynı soru
 // yine gelirse hesaplamaz, deftere bakarsın. Önbellek bu defterdir; sorunun (K) ve cevabın (V)
 // türü önceden belli olmadığı için generic yazılır. Şartlara gelince: okula kayıt olurken kimse
@@ -355,8 +349,7 @@ impl<K: Eq + Hash, V> Onbellek<K, V> {
 
 // (Sade: havuz kapısındaki soru gibi: `dokum()` yalnız anahtarı sıralanabilen ve içeriği
 // yazdırılabilen defterlerde bulunur; öteki defterler yine kullanılır, yalnız bu metot görünmez.)
-// KOŞULLU metot: yalnız K sıralanabilir ve ikisi de yazdırılabilirse var. Bu bound'ları
-// sağlamayan türler için Onbellek yine kullanılır, sadece `dokum()` görünmez.
+// KOŞULLU metot: yalnız K: Ord + Display, V: Display için var; diğer türlerde `dokum()` görünmez.
 impl<K: Ord + Display, V: Display> Onbellek<K, V> {
     pub fn dokum(&self) -> String {
         let mut satirlar: Vec<(&K, &V)> = self.kayitlar.iter().collect();
@@ -408,7 +401,7 @@ fn generic_onbellek() {
     //     tahmin etmez. ✓ `let n: u32 = ...` ya da turbofish: `"5".parse::<u32>()`.
     //   ✗ struct Baslik { metin: &str }
     //       E0106: missing lifetime specifier
-    //     Alanlarda elision YOKTUR; referans tutan her struct lifetime parametresi bildirir.
+    //     Alanlarda elision YOKTUR; her struct alanı ya bir lifetime parametresi ya da açık 'static bildirir.
 }
 
 // ============================================================================
@@ -476,10 +469,8 @@ fn associated_type_mi_generic_mi() {
     println!("  cevaplar = {cevaplar:?}"); // [true, false, true]
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Buradan sonrası bu dosyanın özeti, kendi kendine
-// deneyeceğin alıştırmalar ve testlerdir. Özet maddeleri yukarıdaki beş kutunun kısa hâlidir;
-// bir madde yabancı gelirse ilgili bölümün sade kutusuna dön. Alıştırmalar zor gelirse ilk
-// okuyuşta atlayabilirsin.
+// SADE ANLATIM (aşağıdaki bölüm için): Özet, alıştırmalar ve testler. Özet maddeleri yukarıdaki
+// beş kutunun kısa hâlidir; bir madde yabancı gelirse ilgili kutuya dön, alıştırmaları atlayabilirsin.
 // ============================================================================
 // ÖNEMLİ NOKTALAR
 // ============================================================================

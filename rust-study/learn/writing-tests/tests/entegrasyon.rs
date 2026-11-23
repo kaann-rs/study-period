@@ -1,11 +1,10 @@
+// Açıklama: learn/writing-tests/ACIKLAMA.md
 // ENTEGRASYON TESTİ — tests/ dizininde, AYRI bir crate olarak derlenir.
 // Buradan crate'e, dışarıdaki bir kullanıcı gibi SADECE public API'dan erişebiliriz:
 // `kirp` (private) buradan görünmez; sadece pub olanlar.
-// SADE ANLATIM: lib.rs'teki testler atölyenin İÇİNDEN yapılan denemelerdi. Bu dosya ise oyuncağı
-// kutusundan çıkarıp deneyen MÜŞTERİDİR: atölyeye giremez, içerideki aletleri (private `kirp`)
-// göremez; yalnız kutudan çıkanı (`pub` fonksiyonları) kullanabilir. Neden ayrı bir deneme?
-// İçeride her parça tek tek sağlam olabilir, ama müşterinin eline geçen bütün çalışmayabilir.
-// Terimler için src/lib.rs'in başındaki mini sözlüğe bak.
+// SADE ANLATIM: lib.rs'teki testler atölyenin İÇİNDEN yapılan denemelerdi; bu dosya oyuncağı
+// kutusundan çıkarıp deneyen MÜŞTERİDİR. İçeride her parça sağlam olabilir, ama müşteriye
+// geçen bütün çalışmayabilir. Terimler için src/lib.rs'in mini sözlüğüne bak.
 //   Mini örnek:
 //     use writing_tests::topla;    // ✓ pub: dışarıdan görünür
 //     use writing_tests::kirp;     // ✗ derlenmez: kirp private, bu dosyadan görünmez

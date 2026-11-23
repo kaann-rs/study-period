@@ -1,3 +1,4 @@
+// Açıklama: learn/smart-pointers/ACIKLAMA.md
 // Rust Book — Bölüm 15: Smart Pointers (akıllı işaretçiler)
 // Çalıştır: cargo run -p smart-pointers
 //
@@ -7,14 +8,13 @@
 // girer — ama her biri güvenliği BAŞKA bir yolla korur.
 //
 // Doğrulanmış (rustc ile): Box'sız özyineli tip → E0072 "infinite size"; RefCell'de aynı anda
-// iki borrow_mut → ÇALIŞMA ANI panik (BorrowMutError "already borrowed"). Ayrıntı: en altta.
+// iki borrow_mut → ÇALIŞMA ANI panik (güncel mesaj: `RefCell already borrowed`). Ayrıntı: en altta.
 
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
-// Bu crate'teki benzetmelerin hepsi aynı yerde, bir OKULDA geçer; derinlesme.rs de orada sürer.
+// Her bölümün üstünde "SADE ANLATIM" kutusu var: önce onu oku; teknik kısım zor gelse de olur.
+// Benzetmeler bir OKULDA geçer; derinlesme.rs de orada sürer.
 //
 // Bu bölümün tek cümlelik özeti: "Her verinin tek sahibi olur" kuralı bazen dar gelir; akıllı
 // işaretçiler o durumlar için hazır kutulardır ve her biri güvenliği kendi yoluyla korur.
@@ -83,7 +83,7 @@ enum Liste {
     Son,
 }
 // Değerleri match ile GERÇEKTEN okuyan yürüyüş: hem toplamı verir hem de derive(Debug)
-// dead_code tuzağını önler (Böl. 5/8: Debug ile basmak alanları "okundu" saymaz).
+// dead_code tuzağını önler (derleyici notu: derived Debug, dead-code analizinde kasıtlı sayılmaz).
 // (Sade: dead_code = derleyicinin "bunu yazmışsın ama hiç kullanmıyorsun" uyarısı demek.)
 fn topla(l: &Liste) -> i32 {
     match l {
@@ -95,7 +95,6 @@ fn box_ornegi() {
     use Liste::*;
     let liste = Dugum(1, Box::new(Dugum(2, Box::new(Son))));
     println!("cons list (Box): {liste:?}, toplam = {}", topla(&liste));
-    // Box, tek sahiplik + Deref + Drop verir; heap'teki veri Box düşünce otomatik serbest kalır.
 }
 
 // ============================================================================
@@ -171,7 +170,6 @@ fn drop_ornegi() {
     // b'yi ERKEN düşürmek: `b.drop()` çağrılamaz (çift-drop olurdu); std::mem::drop kullanılır.
     drop(b);
     println!("  (drop_ornegi sonu — _a şimdi düşecek)");
-    // Düşme SIRASI: tanımın TERSİ. Burada _a, fonksiyon sonunda otomatik düşer.
 }
 
 // ============================================================================
@@ -215,7 +213,7 @@ fn rc_ornegi() {
         println!("  c toplamı = {}", rc_topla(&c));
     }
     println!("c düştü, sayaç = {}", Rc::strong_count(&a)); // 2
-    // Sayaç 0'a inince veri serbest kalır. Rc paylaşımlı ama SALT-OKUNUR verir; değiştirmek için →
+    // Sayaç 0'a inince veri serbest kalır; Rc salt-okunur verir, değiştirmek için RefCell gerekir.
 }
 
 // ============================================================================
@@ -244,23 +242,16 @@ fn refcell_ornegi() {
     *b.borrow_mut() += 5;
     println!("ortak sayaç = {}", ortak.borrow()); // 15
 
-    // ✗ ÇALIŞMA ANI kuralı: aynı anda iki aktif borrow_mut → panik (BorrowMutError):
+    // ✗ ÇALIŞMA ANI kuralı: aynı anda iki aktif borrow_mut → panik:
     //     let _x = ortak.borrow_mut();
-    //     let _y = ortak.borrow_mut(); // panik: "already borrowed: BorrowMutError"
-    // ↳ DÜZELTME NOTU (son gözden geçirme): güncel std'de panik mesajı "RefCell already borrowed"dur
-    //   (eski sürümlerde "already borrowed: BorrowMutError" idi); kaynak: core/src/cell.rs,
-    //   panic_already_borrowed.
-    // Kural hâlâ "ya bir &mut ya çok &" — ama RefCell bunu derlemede DEĞİL çalışma anında
-    // denetler. Neden? Aşağıda DERLEYİCİ PERSPEKTİFİ.
+    //     let _y = ortak.borrow_mut(); // panik: "RefCell already borrowed"
+    //   (kaynak: core/src/cell.rs:917-922, panic_already_borrowed)
     println!("  (RefCell borrow kuralı çalışma anında denetlenir)");
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Yukarıdaki beş aracın her biri güvenliği başka bir yerde
-// sağlar: Box ve Deref daha derlerken, Rc bir sayaçla, RefCell kapıdaki nöbetçiyle. Aşağıdaki
-// bölüm bunların standart kütüphanede nasıl kurulduğunu anlatır. Sonunda bir de tuzak var: iki
-// veri birbirini Rc ile tutarsa sayaç hiç 0 olmaz ve ikisi de silinemez; çaresi, yerini bilen ama
-// sayaca yazılmayan Weak'tir. İlk okuyuşta bu bölümü atlayabilirsin; döngü ve Weak konusu
-// derinlesme.rs'te örnekle yeniden anlatılıyor.
+// SADE ANLATIM (aşağıdaki bölüm için): Beş aracın her biri güvenliği başka yerde sağlar; aşağıda
+// standart kütüphanedeki kuruluşları var. Sonda bir tuzak: iki veri birbirini Rc ile tutarsa sayaç
+// hiç 0 olmaz; çaresi Weak. İlk okuyuşta atlayabilirsin — döngü/Weak derinlesme.rs'te yeniden var.
 // ============================================================================
 // DERLEYİCİ / KÜTÜPHANE PERSPEKTİFİ — her kaçış kapısı güvenliği NASIL koruyor?
 // ============================================================================
@@ -275,9 +266,10 @@ fn refcell_ornegi() {
 //   işaretçiler "içindeki değermiş gibi" API'lere geçer. Tamamen statik; runtime maliyeti yok.
 //
 // • Drop (library/core/src/ops/drop.rs): değer kapsam dışına çıkınca derleyici drop'u OTOMATİK
-//   çağırır (RAII) — Bölüm 4'teki "drop elaboration"ın MIR'e eklediği çağrı. Elle drop() yerine
-//   std::mem::drop gerekir çünkü değeri taşıyıp bırakır; .drop()'u sen çağırsan sonra bir de
-//   otomatik çağrı gelir, çift-drop olurdu — derleyici bu yüzden doğrudan .drop()'u yasaklar.
+//   çağırır (RAII) — rustc'nin MIR drop-elaboration aşamasının (bkz. rustc-dev-guide) eklediği
+//   çağrı. Elle drop() yerine std::mem::drop gerekir çünkü değeri taşıyıp bırakır; .drop()'u sen
+//   çağırsan sonra bir de otomatik çağrı gelir, çift-drop olurdu — derleyici bu yüzden doğrudan
+//   .drop()'u yasaklar.
 //
 // • Rc<T> (library/alloc/src/rcs/rc.rs): veriyle birlikte bir SAYAÇ (strong_count) tutar.
 //   Rc::clone sayacı +1 yapar (veriyi kopyalamaz — ucuz); bir Rc düşünce -1; sayaç 0 olunca veri
@@ -287,10 +279,10 @@ fn refcell_ornegi() {
 // • RefCell<T> (library/core/src/cell.rs): İÇ DEĞİŞKENLİK (interior mutability). Aliasing XOR
 //   Mutability kuralını KALDIRMAZ — denetimi derleme anından ÇALIŞMA anına taşır. borrow()
 //   /borrow_mut() içeride bir borrow sayacı tutar; "bir &mut VEYA çok &" ihlal edilirse derhal
-//   PANİK eder (BorrowMutError "already borrowed", cell.rs ~880). Neden böyle bir şey? Sorun:
-//   bazı doğru programları borrow checker (statik, temkinli) reddeder; RefCell "ben doğruluğu
-//   çalışma anı denetimiyle garanti ederim" demenin güvenli yoludur — hata olursa çökme, bellek
-//   bozulması değil. Klasik birleşim Rc<RefCell<T>>: çok sahipli + değiştirilebilir düğüm.
+//   PANİK eder (güncel mesaj: `RefCell already borrowed`, bkz. cell.rs:917-922).
+//   Neden? Statik borrow checker bazı doğru programları reddeder; RefCell "doğruluğu çalışma anı
+//   denetimiyle garanti ederim" demenin güvenli yoludur — hata olursa çökme, bellek bozulması
+//   değil. Klasik birleşim Rc<RefCell<T>>: çok sahipli + değiştirilebilir düğüm.
 //
 // • REFERANS DÖNGÜSÜ ve Weak: Rc<RefCell<...>> ile iki düğüm birbirini Rc ile tutarsa sayaç
 //   asla 0 olmaz → BELLEK SIZINTISI (Rust bunu güvensiz saymaz; UB değil, sadece sızıntı).

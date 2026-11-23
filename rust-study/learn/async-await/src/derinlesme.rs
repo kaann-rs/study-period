@@ -1,3 +1,4 @@
+// Açıklama: learn/async-await/ACIKLAMA.md
 // Derinleşme — Bölüm 17: Async/Await ve Future (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p async-await   |   Test: cargo test -p async-await
 //
@@ -63,16 +64,14 @@ pub fn calistir() {
 // yola çıkar; Promise yalnız SONUCU temsil eder. Rust'ta `getir()` çağrısı hiçbir şey yapmaz;
 // dönen Future İŞİN KENDİSİDİR ve biri onu poll edene dek tek satırı bile çalışmaz.
 //
-// Neden böyle? (1) Sıfır maliyet: arka planda gizli bir görev/tahsis oluşturulmaz; future
-// sıradan bir değerdir, istemezsen düşürürsün ve iş hiç yapılmamış olur (iptal = drop).
-// (2) Denetim sende: aynı future'ı sıralı mı, eşzamanlı mı, zaman aşımıyla mı koşturacağına
-// ÇAĞIRAN karar verir. Bedeli: `.await`i unutmak derleme hatası değil, sadece bir uyarıdır.
+// Neden böyle? (1) Sıfır maliyet: gizli görev/tahsis yok; future sıradan değerdir, istersen
+// düşürürsün (iptal = drop). (2) Denetim sende: sıralı mı, eşzamanlı mı, zaman aşımıyla mı
+// koşturacağına ÇAĞIRAN karar verir. Bedeli: `.await`i unutmak derleme hatası değil, uyarıdır.
 // SADE ANLATIM: Buzdolabındaki listeye "çamaşırı yıka" yazmak çamaşırı yıkamaz. Rust'ta async
 // fonksiyonu çağırmak da böyledir: elinde yalnız bir iş kartı (Future) olur. İş, biri o kartı
 // takip etmeye başlayınca (`.await` ya da `block_on`) çalışır.
-// Neden böyle? Kartı ne zaman, hangi sırayla, başka hangi işlerle birlikte yürüteceğine sen karar
-// verirsin; vazgeçersen kartı atarsın ve iş hiç yapılmamış olur. Bedeli şudur: `.await` yazmayı
-// unutursan kod derlenir, ama o satır hiçbir şey yapmaz.
+// Kartı ne zaman, hangi sırayla, kiminle yürüteceğine sen karar verirsin; `.await` yazmayı unutursan
+// kod derlenir ama o satır hiçbir şey yapmaz.
 //   Mini örnek:
 //     let kart = kaydet(&gunluk, "merhaba");   // kart hazır; günlük hâlâ boş
 //     block_on(kart);                          // ✓ şimdi çalıştı; günlükte 1 kayıt var
@@ -122,8 +121,7 @@ fn tembellik() {
 // 3 saat geçer: beklemeler üst üste biner. Rust'ta alt alta yazılan iki `.await` birinci yoldur
 // (sıralı); ikinci yol için iki kartı önce hazırlar, sonra birlikte bekleyen bir fonksiyona
 // (join) verirsin.
-// Neden önemli? İkisinde de çalışan tek kişidir (tek thread). Kazanç, BEKLEYEREK geçen işlerde
-// olur; baştan sona senin uğraşman gereken işlerde (ağır hesap) olmaz.
+// Kazanç, BEKLEYEREK geçen işlerde olur; ağır hesapta (senin uğraşman gerekende) olmaz.
 //   Mini örnek (async bir fonksiyonun içinde):
 //     let a = adim(&g, "A", 3).await;    // sıralı: önce A biter...
 //     let b = adim(&g, "B", 2).await;    // ...B ancak şimdi başlar → bekleme 3 + 2
@@ -146,11 +144,9 @@ impl Future for Gecikme {
     }
 }
 
-// Tur sayan executor. Gecikme her Pending'de kendini hemen uyandırdığı için park etmeye gerek
-// yok; uyandırma bilgisini kullanmayan en basit waker'ı (Waker::noop) veriyoruz. Dönen sayı:
-// kök future'ın kaç kez poll edildiği = "geçen süre"nin benzetimi.
-// (Sade: bu executor saat tutmaz, "kaç kez gidip baktım" diye sayar; tur sayısı geçen sürenin
-// yerine geçer. Hiç uyumadan durmadan baktığı için zile ihtiyacı yoktur: `Waker::noop()`.)
+// Tur sayan executor. Gecikme her Pending'de kendini uyandırdığı için park gerekmez; en basit
+// waker'ı (Waker::noop) veriyoruz. Dönen sayı, kök future'ın kaç kez poll edildiği = "geçen süre"
+// benzetimi (saat tutmaz, "kaç kez baktım" diye sayar).
 pub fn tur_sayarak_calistir<F: Future>(fut: F) -> (F::Output, u32) {
     let mut fut = pin!(fut);
     let mut cx = Context::from_waker(Waker::noop());
@@ -176,9 +172,7 @@ async fn adim(gunluk: &Gunluk, ad: &str, gecikme: u32) -> u32 {
 // SADE ANLATIM: join, ocaktaki iki tencereye sırayla bakan tek kişidir. Her turda önce birine,
 // sonra ötekine bakar. Pişen tencerenin yemeğini kenara koyar (`Option` içine) ve o tencereye
 // bir daha bakmaz. İkisi de pişince "hazır" der ve iki yemeği birlikte verir.
-// Neden biten işe bir daha bakılmaz? Ready demiş bir Future'ı yeniden poll etmenin sonucu
-// belirsizdir; paniklemesi bile mümkündür.
-// (Sade: `poll_fn` = "her bakışta şu closure'ı çalıştır" diyerek kısa yoldan Future yazmak.)
+// Ready demiş Future'ı yeniden poll etmek belirsizdir; paniklemesi bile mümkündür.
 //   Mini örnek (olay sırası):
 //     tur 1: A'ya bak → Pending    B'ye bak → Pending     → sonuç: Pending
 //     tur 2: A'ya bak → Pending    B'ye bak → Ready(y)    → y'yi sakla, sonuç: Pending
@@ -260,8 +254,7 @@ fn sirali_ve_eszamanli() {
 // yol: birini ara, paketi gelene kadar bekle, sonra ötekini ara. Eşzamanlı yol: üçünü de ara,
 // sonra paketleri birlikte bekle. Aşağıdaki kod aynı işi iki yolla yapar ve farkı ölçer (10 tura
 // karşı 5 tur). `?` işareti de şunu söyler: biri "elimizde yok" derse (Err) beklemeyi bırak ve
-// hatayı seni çağırana ilet.
-// Neden böyle? Üç istek birbirinden bağımsızdır; art arda beklemek süreleri boşuna toplar.
+// hatayı seni çağırana ilet. Üç istek bağımsız; art arda beklemek süreleri toplar.
 //   Mini örnek (async bir fonksiyonun içinde):
 //     let ad = getir("/kullanici/1").await?;   // ✓ Ok geldi: ad = "Ada", yola devam
 //     let yok = getir("/olmayan").await?;      // Err geldi: fonksiyon burada hatayla biter
@@ -296,13 +289,10 @@ pub async fn getir(yol: &str) -> Result<String, ApiHatasi> {
     cevap.map(String::from)
 }
 
-// N future'ı birlikte bekleyen birleştirici. Sayı çalışma anında belli olduğundan future'ları
-// bir Vec'te tutmamız gerekir; her async fn çağrısı FARKLI ve adsız bir tür ürettiği için
-// (ve Vec tek tür tuttuğu için) onları `dyn Future`a siliyoruz. dyn boyutsuzdur → Box;
-// poll edilecek → Pin. `Pin<Box<dyn Future<Output = T> + 'a>>` kalıbı buradan gelir.
-// (Sade: her async fn çağrısı ayrı ve adsız bir tür üretir, bir Vec ise tek tür tutar.
-// `Box<dyn Future>` "türü ne olursa olsun, beklenebilen bir şey" diyen ortak kutudur; `Pin` de
-// kutunun içindekinin yerinden oynamayacağını söyler. Aşağıdaki uzun tür adı bu ikisinin toplamı.)
+// N future'ı birlikte bekleyen birleştirici. Her async fn çağrısı FARKLI ve adsız bir tür üretir,
+// Vec ise tek tür tutar → `dyn Future`a sileriz; dyn boyutsuzdur → Box, poll edilecek → Pin.
+// `Pin<Box<dyn Future<Output = T> + 'a>>` kalıbı buradan gelir (kutu "türü ne olursa olsun
+// beklenebilen bir şey", Pin de içindekinin yerinden oynamayacağını söyler).
 pub type KutuluFuture<'a, T> = Pin<Box<dyn Future<Output = T> + 'a>>;
 
 pub async fn hepsini_bekle<T>(mut gorevler: Vec<KutuluFuture<'_, T>>) -> Vec<T> {
@@ -394,8 +384,7 @@ fn api_istemcisi_senaryosu() {
 // oynatmamak için iki yol var. `pin!`: defteri masana bantlarsın; bedavadır, ama defter o masadan
 // ayrılamaz. `Box::pin`: defteri bir kasaya koyup kasanın içinde sabitlersin; kasayı istediğin
 // yere taşırsın, defter kasanın içinde hiç kımıldamaz. Bedeli bir kasadır (heap'te yer ayırma).
-// Neden böyle? Bir Future'a elle bakabilmen (poll) için önce "bu artık taşınmayacak" sözünü
-// vermen gerekir. `.await` yazarken bu sözü derleyici senin yerine verir.
+// Elle poll için "bu artık taşınmayacak" sözü gerekir; `.await` yazarken derleyici o sözü verir.
 //   Mini örnek:
 //     let mut a = pin!(getir("/kullanici/1"));    // ✓ bu fonksiyonun içinde sabit; yer ayırma yok
 //     let b = Box::pin(getir("/kullanici/1"));    // ✓ heap'te sabit; kutu bir Vec'e konabilir

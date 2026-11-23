@@ -1,3 +1,4 @@
+// Açıklama: learn/advanced-concepts/ileri-eszamanlilik-async/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: İLERİ EŞZAMANLILIK ve ASYNC RUST
 // Çalıştır: cargo run -p ileri-eszamanlilik-async   |   Test: cargo test -p ileri-eszamanlilik-async
 //
@@ -5,8 +6,8 @@
 // (Mara Bos) + Rust for Rustaceans Böl. 8 (Asynchronous Programming) ve Böl. 10 (Concurrency).
 //
 // Önceki crate'ler parçaları tek tek kurdu:
-//   concurrency (Böl. 16)   → thread, kanal, Arc<Mutex>, scope, işçi havuzu
-//   async-await (Böl. 17)   → Future, elle executor, join, Pin'in gündelik yüzü
+//   concurrency (müfredat Böl. 16)   → thread, kanal, Arc<Mutex>, scope, işçi havuzu
+//   async-await (müfredat Böl. 17)   → Future, elle executor, join, Pin'in gündelik yüzü
 //   ileri-future            → poll/wake sözleşmesi, Waker'ın iç yapısı, self-referential + Pin
 //   ileri-send-sync         → UnsafeCell, Send/Sync auto-trait mekanizması
 // Bu crate onları "üretimde karşılaşılan" sorulara bağlar. Diğer ileri-* crate'lerinden farklı
@@ -37,10 +38,9 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu crate'in dört dosyasında da her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce
-// onu oku, sonra altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade
-// kutu ana fikri verir. Okuma sırası: bu dosya → threadler.rs → calisma_zamani.rs → istemci.rs.
-// Ana sözlük aşağıdadır; öteki üç dosya yalnız kendi yeni kelimelerini ekler.
+// Her bölümün "SADE ANLATIM" kutusunu önce oku; teknik kısım zor gelirse sorun değil. Okuma sırası:
+// bu dosya → threadler.rs → calisma_zamani.rs → istemci.rs. Ana sözlük aşağıda; öteki dosyalar
+// yalnız kendi yeni kelimelerini ekler.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/ownership`, `learn/smart-pointers` (Arc),
 // `learn/concurrency` (thread, Mutex, kanal), `learn/async-await` (async/await kullanımı) ve

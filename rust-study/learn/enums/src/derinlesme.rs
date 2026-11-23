@@ -1,3 +1,4 @@
+// Açıklama: learn/enums/ACIKLAMA.md
 // Derinleşme — Bölüm 6: Enums (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p enums   |   Test: cargo test -p enums
 //
@@ -11,8 +12,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Önce main.rs'i oku; bu dosya onun devamıdır. Buradaki her bölümün üstünde de bir "SADE ANLATIM"
-// kutusu var. Benzetmeler bu kez bir KARGO ŞUBESİNDE geçer: bir siparişin yolculuğunu izliyoruz.
+// Önce main.rs'i oku; benzetmeler bu kez bir KARGO ŞUBESİNDE, bir siparişin yolculuğunda geçer.
 //
 // Bu dosyanın tek cümlelik özeti: Bir şeyin "hangi aşamada" olduğunu enum ile yazarsan, saçma
 // aşamaları (ödenmemiş ama yola çıkmış paket) kimse yanlışlıkla bile oluşturamaz.
@@ -48,14 +48,10 @@ pub fn calistir() {
 }
 
 // 1. Bu konuyu neden öğreniyoruz? — Geçersiz durumları temsil edilemez kıl
-// Bir siparişi enum bilmeden modellemenin doğal yolu bayraklar ve "belki dolu" alanlardır:
-// SADE ANLATIM: Kargo fişinde üç ayrı kutucuk olsun: "ödendi", "yolda", "takip numarası". Üçü ayrı
-// ayrı işaretlendiği için saçma bir fiş doldurulabilir: "ödenmedi" ama "yolda". Şimdi fişe tek bir
-// DAMGA basıldığını düşün: SEPETTE, ÖDENDİ ya da YOLDA. Tek damga basılabildiği için saçma fiş
-// kesilemez; takip numarası da yalnız YOLDA damgasının yanında yazılır. Bayraklı struct ilk fiş,
-// enum ikinci fiştir.
-// Neden böyle? İlk fişte her kullanan "bu fiş tutarlı mı" diye bakmak zorundadır ve biri unutur.
-// İkincisinde bakılacak bir şey kalmaz, çünkü yanlış fiş yazılamaz.
+// SADE ANLATIM: Kargo fişinde üç kutucuk: "ödendi", "yolda", "takip no". Ayrı işaretlenince saçma
+// fiş yazılabilir: "ödenmedi" ama "yolda". Tek DAMGA (SEPETTE/ÖDENDİ/YOLDA) basılınca saçma fiş
+// kesilemez; takip no yalnız YOLDA'nın yanında yazılır. Bayraklı struct ilk fiş, enum ikinci fiş.
+// Neden? Bayraklı fişte her kullanan tutarlılığı denetler, biri unutur; enum'da yanlış fiş yazılamaz.
 //   Mini örnek:
 //     enum Durum { Sepette, Yolda { takip: String } }
 //     let d = Durum::Yolda { takip: String::from("TR1") };     // ✓ yoldaysa takip numarası var
@@ -91,9 +87,8 @@ fn gecersiz_durumlar() {
         tuhaf.tutarli_mi()
     ); // bayraklı model derlendi, tutarlı mı? false
 
-    // Enum modelinde aynı saçmalığı YAZAMAZSIN: takip numarası yalnız Kargoda/TeslimEdildi
-    // varyantlarının içinde vardır, Sepette'nin öyle bir alanı yok. Denetleyecek bir şey
-    // kalmadığı için tutarli_mi() gibi bir fonksiyona da gerek kalmaz.
+    // Enum modelinde aynı saçmalığı YAZAMAZSIN: takip no yalnız Kargoda/TeslimEdildi'de var.
+    // Denetleyecek şey kalmaz, tutarli_mi()'ye gerek kalmaz.
     let kargoda = SiparisDurumu::Kargoda {
         odeme_no: 4821,
         takip_no: String::from("TR123"),
@@ -102,7 +97,6 @@ fn gecersiz_durumlar() {
 }
 
 // 2. Gerçek hayattan örnek: sipariş durum makinesi
-// Her varyant YALNIZ o durumda anlamlı olan veriyi taşır.
 // SADE ANLATIM: Şubenin duvarında bir yol haritası asılıdır: "SEPETTE iken ödeme gelirse ÖDENDİ
 // olur", "ÖDENDİ iken kargoya verilirse YOLDA olur". Haritada çizilmemiş yol kapalıdır: SEPETTE
 // bir paket doğrudan TESLİM EDİLDİ olamaz. Aşağıdaki `gecis` fonksiyonu bu haritadır: elindeki
@@ -367,10 +361,9 @@ fn kombinatorler() {
 }
 
 // 4. Sık yapılan hatalar — Yanlış kullanım / Doğru kullanım
-// SADE ANLATIM: Buradaki altı hatanın çoğu aynı yanılgıdan doğar: kutuyu, içindeki şeyle bir
-// tutmak. `Option<u32>` bir sayı değildir; içinde sayı OLABİLEN bir kutudur. Sayı isteyen yere
-// kutu veremezsin, kutuyla toplama yapamazsın. Önce kutuyu güvenli bir yolla açarsın.
-// Neden böyle? Kutu sayı yerine geçebilseydi, boş kutu geldiğinde program çalışırken çökerdi.
+// SADE ANLATIM: Altı hatanın çoğu aynı yanılgıdan: kutuyu içindeki şeyle bir tutmak. `Option<u32>`
+// sayı değil, sayı OLABİLEN kutudur; önce güvenle açarsın. Kutu sayı yerine geçebilseydi boş kutu
+// geldiğinde program çökerdi.
 //   Mini örnek:
 //     let kutu: Option<u32> = Some(5);
 //     let n: u32 = kutu;                 // ✗ derlenmez: kutu, sayı değildir
@@ -476,9 +469,8 @@ fn sik_hatalar() {
 // anlatır. Result ve `?` operatörünün tamamı `learn/error-handling`de; gecis()'teki
 // `(durum, olay)` deseninin dayandığı desen dili ise `learn/patterns`te derinleşir.
 
-// SADE ANLATIM: Aşağıdaki `testler` bölümü programla birlikte çalışmaz; kodun doğru davrandığını
-// denetleyen küçük sınavlardır. `cargo test -p enums` yazınca her biri çalışır.
-// `assert_eq!(a, b)` "a ile b eşit olmalı" der; eşit değilse o sınav kalır ve sana haber verilir.
+// SADE ANLATIM: `testler` programla çalışmaz; `cargo test -p enums` ile sınavlar çalışır.
+// `assert_eq!(a, b)` eşitlik ister; eşit değilse sınav kalır ve haber verilir.
 #[cfg(test)]
 mod testler {
     use super::*;

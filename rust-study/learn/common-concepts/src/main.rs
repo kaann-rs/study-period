@@ -1,18 +1,17 @@
+// Açıklama: learn/common-concepts/ACIKLAMA.md
 // Rust Book — Bölüm 3: Yaygın Programlama Kavramları (Common Programming Concepts)
 // Değişkenler ve değişebilirlik, veri türleri, fonksiyonlar, kontrol akışı.
 // Çalıştır: cargo run -p common-concepts
 //
-// Stil: teknik terim İngilizce kalır, ilk geçtiği yerde kısa Türkçe açıklaması
-// verilir; önemli kararlarda "Neden?" + o tasarım olmasaydı çıkacak "Sorun" +
-// gerektiğinde "rustc:" notu (derleyici bunu hangi AŞAMADA, hangi kaynak dosyada
-// uyguluyor) yazılır. Dosyanın SONUNDA "DERLEYİCİ PERSPEKTİFİ" bölümü, rustc'nin
-// tüm boru hattını ve mut'un KÖK NEDENİNİ (Aliasing XOR Mutability) anlatır.
+// Stil: teknik terim İngilizce kalır, ilk geçtiğinde kısa Türkçe açıklaması verilir;
+// önemli kararlarda "Neden?" + o tasarım olmasaydı çıkacak "Sorun" + gerektiğinde
+// "rustc:" notu (hangi AŞAMADA, hangi kaynak dosyada) yazılır. Sondaki "DERLEYİCİ
+// PERSPEKTİFİ" boru hattını ve mut'un KÖK NEDENİNİ (Aliasing XOR Mutability) anlatır.
 
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce SADE ANLATIM kutusu, sonra teknik ayrıntı var.
 // Benzetmelerin hepsi aynı yerden, OKULDAN gelir: defter, kalem, çanta, sıra, yoklama.
 //
 // Bu bölümün tek cümlelik özeti: Bir program; isim verilmiş değerlerden (değişken), o değerlerin
@@ -71,14 +70,13 @@ fn main() {
 }
 
 // 1. Değişkenler ve değişebilirlik (variables & mutability)
-// binding = bir ismi bir değere bağlamak. `let x = 5;` x ismini 5 değerine BAĞLAR;
-// bu yüzden "değişken" yerine daha hassas terim "binding" (bağlama). Varsayılan
-// olarak immutable'dır (değiştirilemez); değiştirmek için `mut` eklersin.
+// binding = bir ismi bir değere bağlamak (`let x = 5;`); "değişken" yerine daha hassas
+// terim budur. Varsayılan immutable'dır (değiştirilemez); değiştirmek için `mut` eklersin.
 // SADE ANLATIM: Defterine tükenmez kalemle yazdığını silemezsin; kurşun kalemle yazdığını silip
 // yenisini yazabilirsin. Rust'ta `let x = 5;` tükenmez kalemdir: x hep 5 kalır. `let mut y = 5;`
 // kurşun kalemdir: sonradan `y = 6;` diyebilirsin.
-// Neden böyle? Her şey silinebilir olsaydı, uzun bir programda bir değeri kimin, nerede
-// değiştirdiğini bulmak zorlaşırdı. `mut` yazınca "burası değişecek" diye işaret koymuş olursun.
+// Neden? Her şey değiştirilebilir olsaydı bir değeri kimin, nerede değiştirdiğini bulmak
+// zorlaşırdı; `mut` "burası değişecek" işaretidir.
 //   Mini örnek:
 //     let x = 5;
 //     x = 6;            // ✗ derlenmez: x tükenmez kalemle yazıldı (mut yok)
@@ -99,17 +97,14 @@ fn degiskenler_ve_mut() {
     // tam anlatımı + derleyicinin nasıl zorladığı dosyanın sonundaki DERLEYİCİ
     // PERSPEKTİFİ bölümünde. (Çünkü mut'u gerçekten anlamak borrow checker'ı anlamak.)
     // (Sade: HIR ve MIR, derleyicinin kodu çevirirken kullandığı ara biçimlerdir; ayrıntı altta.)
-    // rustc: immutable bir binding'e atama hatası (E0384) tür/HIR denetiminde yakalanır;
-    // ↳ DÜZELTME NOTU (son gözden geçirme): E0384 de MIR üzerinde borrow checker (rustc_borrowck,
-    //   borrowck_errors.rs) tarafından üretilir. Kanıtı: aynı fonksiyonda bir tür hatası (E0308) varsa
-    //   E0384 hiç raporlanmaz, çünkü derleme borrowck aşamasına ulaşmaz.
-    //        ödünç (borrow) ihlalleri ise MIR üzerinde rustc_borrowck'ta yakalanır.
+    // rustc: immutable bir binding'e atama hatası (E0384), MIR üzerinde borrow checker
+    //        (rustc_borrowck, borrowck_errors.rs) tarafından üretilir (6. adım). Kanıtı:
+    //        aynı fonksiyonda bir tür hatası (E0308) varsa E0384 hiç raporlanmaz, çünkü
+    //        derleme borrowck aşamasına ulaşmaz. Ödünç ihlalleri de burada yakalanır.
 
     // SADE ANLATIM: Sınıf duvarındaki "Bu sınıfta 30 sıra var" levhasını düşün. Levha okul
     // açılmadan önce basılmıştır, dersin ortasında değişmez. `const` böyle bir levhadır: değeri
     // program daha derlenirken bellidir ve hiç değişmez; türünü de sen yazarsın.
-    // Neden böyle? Bazı bilgiler (ör. bir dizinin kaç elemanlı olduğu) program çalışmadan önce
-    // bilinmek zorundadır; oraya ancak böyle baştan belli bir değer yazılabilir.
     //   Mini örnek:
     //     const SIRA_SAYISI: usize = 3;       // tür yazıldı, değer baştan belli
     //     let siralar = [0; SIRA_SAYISI];     // ✓ dizi uzunluğu olarak kullanılabilir
@@ -119,9 +114,8 @@ fn degiskenler_ve_mut() {
     // türü ZORUNLU yazılır ve değeri DERLEME anında hesaplanır (çalışma anında değil).
     const MAX_PUAN: u32 = 100_000;
     println!("MAX_PUAN = {MAX_PUAN}");
-    // Neden const ayrı bir şey? Sorun: sıradan bir `let` çalışma anında hesaplanır ve
-    // yalnızca o an immutable'dır; oysa dizi uzunluğu gibi DERLEME ZAMANINDA bilinmesi
-    // gereken, asla değişmeyecek bir sabit gerekir. const tam bunu garanti eder.
+    // Neden const ayrı? Sorun: `let` çalışma anında hesaplanır ve yalnız o an immutable'dır;
+    // dizi uzunluğu gibi DERLEME ZAMANINDA bilinmesi gereken sabit için const gerekir.
     // rustc: const ifadeleri derleme anında "const evaluation" ile hesaplanır
     //        (rustc_const_eval crate'i; aynı motor dizi uzunluğu [u8; N] gibi yerlerde çalışır).
 }
@@ -145,9 +139,8 @@ fn golgeleme() {
     println!("boşluk sayısı = {bosluk}");
 
     // Neden shadowing? Sorun: `mut` ile türü değiştiremezsin — `let mut s = "   "; s = s.len();`
-    // "beklenen &str, bulunan usize" (E0308) verir. O zaman bir dönüşümün ara adımları için
-    // her seferinde yeni isim (bosluk_str, bosluk_sayi...) uydurman gerekirdi. Çözüm: aynı
-    // ismi yeniden bağlayıp hem türü değiştirir hem değeri immutable tutarsın.
+    // "beklenen &str, bulunan usize" (E0308) verir; her ara adım için yeni isim uydurmak gerekirdi.
+    // Çözüm: aynı ismi yeniden bağlayıp türü değiştirir, değeri immutable tutarsın.
     // (Sade: "isim çözümlemesi" = derleyicinin, yazdığın ismin hangi değeri kastettiğini bulması.)
     // rustc: her `let`, HIR/MIR seviyesinde AYRI bir yerel değişken (local) üretir; isim
     //        çözümlemesi (name resolution) sonraki kullanımı en son bağlanana yönlendirir.
@@ -177,7 +170,6 @@ fn veri_turleri() {
     // SADE ANLATIM: Parmaklarınla en çok 10'a kadar sayarsın; 11 için parmak kalmaz. Sayı türleri
     // de böyledir: `u8` en çok 255'i tutar. 255'e 1 eklemeye "taşma" denir. Rust, programı
     // denerken (debug) taşma olursa programı durdurur ki hatayı göresin.
-    // Neden böyle? Sayı sessizce 0'a dönseydi, puanın 255'ten 0'a düştüğünü fark etmeyebilirdin.
     //   Mini örnek:
     //     let puan: u8 = 255;                      // u8'in tutabildiği en büyük sayı
     //     println!("{:?}", puan.checked_add(1));   // None → "sığmadı" diye haber verir
@@ -216,10 +208,9 @@ fn veri_turleri() {
     //     println!("{:?}", siralar.get(1));   // ✓ Some(20) → orada bir sıra var
     //     println!("{:?}", siralar.get(5));   // None → öyle bir sıra yok; program durmaz
     //     siralar[i]                          // i çalışırken 5 çıkarsa program panikler
-    // dizi[5] yazsan çalışma anında PANİK: "index out of bounds".
-    // ↳ DÜZELTME NOTU (son gözden geçirme): indeks SABİT yazılırsa (`dizi[5]`) derleyici bunu
-    //   önceden görür ve hiç derlemez ("this operation will panic at runtime"). Çalışma anı
-    //   paniği, indeks ancak program çalışırken belli oluyorsa (`dizi[i]`) görülür.
+    // dizi[i] çalışma anında PANİK: "index out of bounds" (i program çalışırken belli olur).
+    // dizi[5] gibi SABİT indekse derleyici `deny(unconditional_panic)` ile izin vermez:
+    // "this operation will panic at runtime" diyerek DERLEME ZAMANINDA reddeder.
     // Neden sınır denetlenir? Sorun: C'de dizi sınırını aşmak bellekte başka bir yeri
     // okur/yazar (klasik güvenlik açığı); Rust sınırı denetleyip programı güvenle durdurur.
     // rustc: indeksleme, MIR kurulumunda bir sınır denetimine (bounds check) çevrilir.
@@ -301,7 +292,6 @@ fn kontrol_akisi() {
     //         tur += 1;
     //         if tur == 3 { break tur * 10; }   // ✓ 3. turda dur, 30 değerini ver
     //     };
-    // loop + break ile değer döndürme
     let mut sayac = 0;
     let sonuc = loop {
         sayac += 1;
@@ -362,14 +352,14 @@ fn kontrol_akisi() {
 //    (Sade: desugaring = kısa yazımı, derleyicinin anladığı uzun hâle açmak.)
 //    3. rustc_ast_lowering  : AST → HIR. "desugaring": for→loop+match, `?`→match, while→loop...
 //    4. rustc_hir_typeck +  : tür denetimi, tür çıkarımı (inference), trait çözümü.
-//       rustc_hir_analysis    Immutable binding'e atama (E0384), tür uyuşmazlığı (E0308) burada.
-// ↳ DÜZELTME NOTU (son gözden geçirme): E0308 bu adımda; E0384 ise 6. adımda (rustc_borrowck) üretilir.
+//       rustc_hir_analysis    Tür uyuşmazlığı (E0308) burada; E0384 ise 6. adımda üretilir.
 //    (Sade: kontrol-akış grafiği = "bu adımdan sonra hangi adımlara gidilebilir" haritası.)
 //    5. rustc_mir_build     : HIR → MIR. MIR = temel blokların (basic block) KONTROL-AKIŞ
 //                             GRAFİĞİ (CFG). DİZİ SINIR denetimi ve TAŞMA denetimi tam burada,
 //                             Assert düğümleri olarak EKLENİR (yukarıdaki kaynak satırları).
 //    6. rustc_borrowck      : MIR üzerinde ÖDÜNÇ DENETLEYİCİ (borrow checker). Aliasing XOR
-//                             Mutability kuralını ve ömürleri (NLL = non-lexical lifetimes) burada zorlar.
+//                             Mutability kuralını ve ömürleri (NLL = non-lexical lifetimes) burada zorlar;
+//                             immutable binding'e atama (E0384) de bu adımda üretilir.
 //    7. rustc_mir_transform : MIR optimizasyonları (gereksiz bounds check kaldırma vb.).
 //    (Sade: generic = her cinsle çalışan kalıp; derleyici, kullandığın her cins için kalıbın ayrı
 //     bir kopyasını üretir. Bu işe monomorphization denir.)
@@ -399,7 +389,8 @@ fn kontrol_akisi() {
 //    Sonuçları (tradeoff):
 //      + Derleme zamanında, SIFIR çalışma maliyetiyle: data race yok, use-after-free yok.
 //    (Sade: noalias = "bu veriye bakan başka ok yok" bilgisi; derleyici buna güvenip hızlanır.)
-//      + `&mut T`'nin tekliği LLVM'e `noalias` der → daha agresif optimizasyon.
+//      + `&mut T`'nin tekliği LLVM'e `noalias` der → daha agresif optimizasyon
+//        (yalnızca argüman konumunda ve `T: Unpin` için; dönüşte verilmez).
 //      − Bazen "borrow checker'la güreşirsin": C'de serbest olan (iki mutable alias) reddedilir.
 //        Bu bir kusur değil, kuralın bedeli; karşılığında yukarıdaki garantileri alırsın.
 //

@@ -58,21 +58,15 @@ Orendorff).
 
 | Crate | Konu | Ana kaynak |
 | --- | --- | --- |
-| `learn/advanced-concepts/ileri-future` | Future gerçekte nedir: poll/wake döngüsü, Waker + vtable, Pin ve self-referential state machine | std (`core::future`, `core::task`) + RfR Böl. 9 |
-| `learn/advanced-concepts/ileri-variance` | Subtyping ve variance: covariant/invariant/contravariant, `&'a mut &'b T` neden iki lifetime ister | RfR Böl. 2 (Listing 2-11) |
-| `learn/advanced-concepts/ileri-sized-dst` | Sized, DST (`str`/`[T]`/`dyn`), fat pointer (ptr + uzunluk/vtable), `?Sized` | RfR Böl. 3 + std |
-| `learn/advanced-concepts/ileri-deref-metot` | Deref + metot çözümü: deref coercion, autoref/autoderef, inherent metot gölgeleme | RfR Böl. 4 + Reference + std |
-| `learn/advanced-concepts/ileri-send-sync` | UnsafeCell (iç değişkenliğin tek temeli) + Send/Sync auto-trait'leri, !Sync negatif impl | RfR Böl. 4 & 10 + std |
-| `learn/advanced-concepts/ileri-dropck` | Drop check: Drop + lifetime neden borrow'u aşmaya zorlar; PhantomData (ZST işaretçi); #[may_dangle] | RfR Böl. 10 + std |
-| `learn/advanced-concepts/ileri-coherence` | Coherence + orphan rule (tam kural), blanket impl, fundamental tipler, covered impl | RfR Böl. 3 + std |
+| `learn/advanced-concepts/ileri-future` | Future gerçekte nedir: poll/wake döngüsü, Waker + vtable, Pin ve self-referential state machine | std (`core::future`, `core::task`) + RfR Böl. 8 |
+| `learn/advanced-concepts/ileri-variance` | Subtyping ve variance: covariant/invariant/contravariant, `&'a mut &'b T` neden iki lifetime ister | RfR Böl. 1 + Reference + Nomicon |
+| `learn/advanced-concepts/ileri-sized-dst` | Sized, DST (`str`/`[T]`/`dyn`), fat/wide pointer (ptr + uzunluk/vtable), `?Sized` | RfR Böl. 2 + std |
+| `learn/advanced-concepts/ileri-deref-metot` | Deref + metot çözümü: deref coercion, autoref/autoderef, inherent metot gölgeleme | RfR Böl. 3 + Reference + std |
+| `learn/advanced-concepts/ileri-send-sync` | UnsafeCell (iç değişkenliğin tek temeli) + Send/Sync auto-trait'leri, !Sync negatif impl | RfR Böl. 3 & 9 + std |
+| `learn/advanced-concepts/ileri-dropck` | Drop check: Drop + lifetime neden borrow'u aşmaya zorlar; PhantomData (ZST işaretçi); #[may_dangle] | RfR Böl. 9 + std |
+| `learn/advanced-concepts/ileri-coherence` | Coherence + orphan rule (tam kural), blanket impl, fundamental tipler, covered impl | RfR Böl. 2 + std |
 | `learn/advanced-concepts/ileri-lifetime-hrtb-gat` | İleri lifetime'lar: iki ayrı süre, `'a: 'b` / `T: 'a`, HRTB (`for<'a>`), GAT (ödünç veren iterator, tür ailesi), lifetime hata mesajı rehberi | Reference + Rustonomicon + RfR Böl. 1–2 |
 | `learn/advanced-concepts/ileri-eszamanlilik-async` | İleri eşzamanlılık + async: RwLock, Condvar, kilit sıralaması, atomikler; std ile mini runtime (görev kuyruğu, spawn, zamanlayıcı, zaman aşımı), Pin/Unpin pratikte, asenkron API istemcisi, yaygın async hataları | std + *Rust Atomics and Locks* + RfR Böl. 8 & 10 |
-
-> **Düzeltme notu (RfR bölüm numaraları):** yukarıdaki tabloda ilk yedi satırın *Rust for
-> Rustaceans* bölüm numaraları bir fazla yazılmıştır. Yayıncının ayrıntılı içindekiler listesine
-> göre doğrusu: variance → Böl. 1 (Listing 1-11), DST ve coherence → Böl. 2, Deref kutusu ve
-> auto-trait'ler → Böl. 3, async/Pin → Böl. 8, drop check ve UnsafeCell → Böl. 9. Son iki satır
-> (Böl. 1–2 ve Böl. 8 & 10) doğrudur. İlgili dosyaların başlıklarına da aynı not eklendi.
 
 ## Derinleşme modülleri (`src/derinlesme.rs`)
 

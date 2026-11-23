@@ -1,3 +1,4 @@
+// Açıklama: learn/modules/ACIKLAMA.md
 // Rust Book — Bölüm 7: Packages, Crates, Modules (paket, crate, modül), paths, use
 // Çalıştır: cargo run -p modules
 //
@@ -13,8 +14,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümün başındaki "SADE ANLATIM" kutusunu önce oku, sonra teknik açıklamaya geç.
 // Benzetmelerin hepsi koddaki örnekle aynı yerde, bir LOKANTADA geçer.
 //
 // Bu bölümün tek cümlelik özeti: Kod büyüyünce onu odalara (modül) bölersin; her odanın kapısı
@@ -68,8 +68,8 @@ mod lokanta {
             println!("salon: masa ayarlandı");
             // (Sade: `super::`, "bir üst odaya çık, oradan devam et" demektir. salon'dan bir üst
             //  oda lokanta'dır; mutfak da lokanta'nın içinde olduğu için oradan ulaşılır.)
-            // super:: → bir ÜST modül (burada lokanta). salon, lokanta'nın torunu olduğu için
-            // lokanta'nın private alt modülü mutfak'a buradan erişebilir.
+            // super:: → bir ÜST modül (burada lokanta). private öğeler tanımlandığı modül ve alt
+            // modülleri tarafından görülür; salon da lokanta'nın alt modülü olduğu için erişebilir.
             super::mutfak::hazirla();
         }
     }
@@ -90,7 +90,6 @@ mod lokanta {
 
     // (Sade: pub(crate), "lokantanın bütün çalışanlarına açık, müşteriye kapalı" gibidir: bu
     //  programın her yerinden çağrılır, bu programı kitaplık olarak kullanan başka kod göremez.)
-    // pub(crate): yalnız BU crate içinde görünür; crate dışına (başka paket) açılmaz.
     pub(crate) fn ic_rapor() {
         println!("lokanta: iç rapor (yalnız crate içi)");
     }
@@ -208,11 +207,8 @@ fn main() {
     cephe::eylem(); // re-export sayesinde cephe üzerinden de erişilebilir
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Bu bölüm üç şey söyler. Odalara bölmek programı
-// yavaşlatmaz; odalar yalnız kodu yazarken düzen sağlar, çalışan programda izleri kalmaz.
-// Derleyici önce "bu ad hangi odadaki neyi gösteriyor" sorusunu çözer, sonra "buna bakmaya iznin
-// var mı" diye bakar. Son olarak büyük bir odayı ayrı bir dosyaya taşımanın yolunu gösterir.
-// İlk okuyuşta atlayabilirsin; yukarıdaki kutuları anlamış olman yeter.
+// SADE ANLATIM (aşağıdaki bölüm için): Modüller çalışma anı maliyeti taşımaz; derleyici önce adı
+// çözer, sonra izni denetler; son olarak dosyalara bölmeyi görürüz. İlk okuyuşta atlayabilirsin.
 // ============================================================================
 // DERLEYİCİ PERSPEKTİFİ — modüller ve görünürlük
 // ============================================================================
@@ -224,16 +220,13 @@ fn main() {
 //  adları başka defterde durduğu için aynı ad ikisinde birden bulunabilir.)
 // • İsim çözümleme (name resolution): path'ler, `use`'lar ve isimler, TÜR DENETİMİNDEN
 //   ÖNCE çözülür — hangi ismin hangi tanıma işaret ettiği erken belirlenir. Kaynak crate:
-//   rustc_resolve. (İlginç ayrıntı: Rust'ta iki ayrı "namespace" vardır — türler ve
-//   değerler. Bu yüzden unit struct `struct S;` hem bir TÜR `S` hem bir DEĞER `S` tanımlar;
-//   çakışmazlar.)
-// ↳ DÜZELTME NOTU (son gözden geçirme): namespace sayısı üçtür: türler, değerler ve MAKROLAR.
+//   rustc_resolve. (İlginç ayrıntı: Rust'ta 5 namespace vardır — tür, değer, makro, lifetime ve
+//   label. Bu örnekte çakışmayı önleyenler TÜR ve DEĞER namespace'leridir: unit struct
+//   `struct S;` hem bir TÜR `S` hem bir DEĞER `S` tanımlar; çakışmazlar.)
 //
-// • Görünürlük (visibility/privacy) denetimi ayrı bir geçişte zorlanır (crate: rustc_privacy).
-//   Doğrulanmış hatalar: private öğeye erişim E0603; private alanla dışarıdan struct kurma
-//   E0451; private alana erişim E0616.
-// ↳ DÜZELTME NOTU (son gözden geçirme): üç hata üç ayrı yerde üretilir: E0603 isim çözümlemede
-//   (rustc_resolve), E0616 tür denetiminde (rustc_hir_typeck), yalnız E0451 rustc_privacy'de.
+// • Görünürlük (visibility/privacy) denetiminin kendisi ayrı bir geçişte zorlanır (crate:
+//   rustc_privacy). Hataların yayın yeri farklıdır: E0603 çoğunlukla rustc_resolve'da (tuple
+//   struct constructor için rustc_hir_typeck'te de), E0616 typeck/lower'da, E0451 rustc_privacy'de.
 //
 // • Neden VARSAYILAN private? Sorun: her şey otomatik public olsaydı, bir modülün tüm iç
 //   detayları onun DIŞ API'si sayılırdı; birini değiştirmek uzaktaki kodları kırabilirdi ve

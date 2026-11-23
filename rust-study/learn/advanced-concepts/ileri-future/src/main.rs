@@ -1,17 +1,16 @@
+// Açıklama: learn/advanced-concepts/ileri-future/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: FUTURE GERÇEKTE NEDİR, NASIL ÇALIŞIR?
 // Çalıştır: cargo run -p ileri-future
 //
-// Kaynaklar: std (core::future, core::task) + Rust for Rustaceans (Jon Gjengset), Böl. 9.
-// ↳ DÜZELTME NOTU (son gözden geçirme): kitapta async (Pin and Unpin, poll sözleşmesi,
-//   waker) Böl. 8'dedir (Asynchronous Programming); Böl. 9 Unsafe Code'dur.
-//   Yayıncının ayrıntılı içindekiler listesiyle doğrulandı.
-//   Dosyadaki "RfR Böl. 9" atıfları Böl. 8 olarak okunmalı.
+// Kaynaklar: std (core::future, core::task) + Rust for Rustaceans (Jon Gjengset), Böl. 8
+//   (Asynchronous Programming: Pin/Unpin, poll sözleşmesi, waker). Yayıncının ayrıntılı
+//   içindekiler listesiyle doğrulandı.
 // Böl. 17'de async'i KULLANDIK; burada MEKANİZMAYI açıyoruz: poll nedir, wake ne yapar,
 // Waker gerçekte nedir, Pin neden var. Her şey std ile, bağımlılıksız; döngüyü GÖZLE göreceğiz.
 //
 // ÖZET ZİHİNSEL MODEL (gerisi bunun ayrıntısı):
 //   Future = "henüz bitmemiş bir hesap". Onu bir EXECUTOR poll eder. poll ya Ready(değer) ya
-//   Pending döner. Pending dönerken future, "ilerleyebilir hale gelince beni uyandır" diye bir
+//   Pending döner. Pending dönerken future, "ilerleyebilir hâle gelince beni uyandır" diye bir
 //   WAKER saklar. İş hazır olunca waker.wake() çağrılır → executor future'ı YENİDEN poll eder.
 //   Boşa dönen bekleme (busy-wait) YOK: haber verilince devam. async fn, derleyici tarafından
 //   her .await'te duraklayıp devam eden bir STATE MACHINE'e çevrilir; bu state machine = Future.
@@ -19,8 +18,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümün üstündeki "SADE ANLATIM" kutusunu önce oku; teknik kısım zor gelirse sorun değil.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/ownership` (taşıma ve ödünç alma),
 // `learn/generics-traits-lifetimes` (trait nedir), `learn/smart-pointers` (Box, Arc) ve
@@ -83,7 +81,7 @@ fn main() {
     println!("== 2) Waker gerçekte nedir? ==");
     waker_nedir();
 
-    println!("\n== 3) Pin ve self-referential (RfR Böl. 9) ==");
+    println!("\n== 3) Pin ve self-referential (RfR Böl. 8) ==");
     pin_ve_self_referential();
 }
 
@@ -194,8 +192,6 @@ where
 // Ham RawWaker/RawWakerVTable yazmak unsafe'tir; std::task::Wake trait'i (Arc<impl Wake> →
 // Waker) bunu güvenli sarar — biz de onu kullandık. Waker'ın iki garantisi: Clone (çoğaltılıp
 // farklı yerlere dağıtılabilir) ve Send+Sync (başka thread'den uyandırılabilir).
-// (Sade: "trait object gibi" = gerçek türü gizli, yalnız dört düğmesi görünen bir kutu demek.)
-// (Sade: "vtable" = o dört düğmenin hangi fonksiyona bağlı olduğunu yazan liste demek.)
 // SADE ANLATIM: Kalabalık bir kafede sipariş verince eline titreyen bir çağrı cihazı verirler.
 // Mutfağın içini bilmezsin; bilmen gereken tek şey şudur: cihaz titrerse siparişin hazırdır.
 // Waker işte bu cihazdır. Future onu "iş hazır olunca çal" diye saklar; çalınca executor
@@ -218,7 +214,7 @@ fn waker_nedir() {
 }
 
 // ============================================================================
-// 3) PIN NEDEN VAR? — self-referential state machine sorunu (RfR Böl. 9)
+// 3) PIN NEDEN VAR? — self-referential state machine sorunu (RfR Böl. 8)
 // ============================================================================
 // RfR'nin anlattığı sorun: async fn bir state machine'e derlenir ve bu makine, bir .await
 // noktasında KENDİ yerel değişkenine REFERANS tutabilir (ör. bir alt-future, argümanına işaret
@@ -230,9 +226,7 @@ fn waker_nedir() {
 // Çözüm: Pin<P>. "Pinli" bir değer artık (güvenle) TAŞINAMAZ; adresi sabit kalır, iç referanslar
 // geçerli kalır. Unpin ise "beni pinlemek bir şey ifade etmez, taşınsam da sorun yok" diyen
 // işaret trait'idir (çoğu sıradan tür Unpin'dir; asıl self-referential generator'lar DEĞİLDİR).
-// poll'un imzası bu yüzden `self: Pin<&mut Self>`: future bir kez poll'lanıp iç referans kurulduktan
-// sonra taşınmayacağının GARANTİSİ altında ilerler.
-// (Sade: "self-referential" = değerin içindeki bir ok, yine o değerin içini gösteriyor demek.)
+// poll'un imzası bu yüzden `Pin<&mut Self>`: iç referans kurulduktan sonra taşınmayacağı garanti altında.
 // SADE ANLATIM: Bir karavanın içine "anahtar şu adresteki karavanın çekmecesinde" yazan bir
 // not astığını düşün. Karavanı başka bir yere çekersen not hâlâ eski adresi gösterir; oraya
 // giden boş araziyi bulur. Bazı future'lar böyledir: içlerindeki bir ok, kendi içlerindeki
@@ -299,9 +293,9 @@ fn pin_ve_self_referential() {
 //     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output>   (:113)
 //   Poll enum: core/src/task/poll.rs:13 → Ready(T) | Pending.
 //
-// • async fn/async {} → STATE MACHINE (generator). RfR Böl. 9: makine, her yield/await noktasındaki
+// • async fn/async {} → STATE MACHINE (generator). RfR Böl. 8: makine, her yield/await noktasındaki
 //   TÜM yerel durumu (awaitlediği alt-future'lar dahil) içinde tutar; bu yüzden async fn'ler görünmez
-//   şekilde büyüyebilir (içindeki [u8; 8192] generator'da saklanır) ve büyük future'ları Box::pin ile
+//   şekilde büyüyebilir (örneğin büyük bir dizi generator'da saklanır) ve büyük future'ları Box::pin ile
 //   heap'e alıp taşımayı ucuzlatmak gerekebilir. Bu makine Future'ı uygular; onu executor poll eder.
 //
 // • Waker: core/src/task/wake.rs. Waker (:411) = RawWaker (:22) = (data: *const (), vtable:

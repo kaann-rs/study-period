@@ -1,3 +1,4 @@
+// Açıklama: learn/collections/ACIKLAMA.md
 // Rust Book — Bölüm 8: Common Collections (Vec, String, HashMap)
 // Çalıştır: cargo run -p collections
 //
@@ -11,8 +12,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku, sonra teknik açıklamaya geç.
 // Benzetmelerin hepsi bir ÇOCUK ODASINDAN: oyuncak tren, boncuk kolye, etiketli çekmeceler.
 //
 // Bu bölümün tek cümlelik özeti: Birden çok değeri bir arada tutmanın üç yaygın yolu vardır:
@@ -47,7 +47,7 @@
 //   insert                 → bir anahtarla birlikte değer koymak; anahtar varsa değeri değişir.
 //   entry, or_insert       → "bu anahtar varsa onu ver, yoksa şu değerle oluştur" kısayolu.
 //   hash                   → anahtardan, değerin saklanacağı yeri hesaplayan işlem.
-//   Copy / move            → küçük değerler kopyalanır; String gibi büyükler taşınır.
+//   Copy / move            → Copy trait'i olan türler kopyalanır; String/Vec gibi heap sahipleri taşınır.
 //   idiomatic (deyimsel)   → o dili bilenlerin alıştığı, yerleşik yazım biçimi.
 //   deterministik          → her çalıştırmada aynı sonucu veren.
 //   standart kütüphane     → Rust ile birlikte gelen hazır kod; `std::` ile başlar.
@@ -104,8 +104,7 @@ fn vektorler() {
     // SADE ANLATIM: Tren uzayıp rayına sığmayınca bütün vagonlar daha uzun bir raya taşınır, eski
     // ray kaldırılır. Parmağınla eski raydaki ilk vagonu gösteriyorsan parmağın boşu gösterir.
     // Rust bu yüzden şunu der: bir vagonu gösteren parmak dururken trene vagon takamazsın.
-    // Neden böyle? Boşu gösteren parmakla okunan şey rastgele bir veridir; program sessizce
-    // yanlış çalışır. Kural bunu program daha derlenirken engeller.
+    // Neden? Boş parmak rastgele veri okur; kural bunu derlenirken engeller.
     //   Mini örnek:
     //     let mut tren = vec![10, 20];
     //     let ilk = &tren[0];      // parmak ilk vagonda
@@ -128,7 +127,6 @@ fn vektorler() {
     //     enum Kutu { Sayi(i32), Yazi(String) }
     //     let tren = vec![Kutu::Sayi(3), Kutu::Yazi(String::from("top"))];   // ✓ hepsi Kutu
     //     let karisik = vec![3, "top"];        // ✗ derlenmez: biri sayı, öteki yazı
-    // Vec'te "farklı türler" tutmak: hepsini saran bir enum kullan.
     #[derive(Debug)]
     enum Hucre {
         Sayi(i32),
@@ -154,7 +152,6 @@ fn vektorler() {
 // kolyenin boyu 5 birimdir. "Kolyenin 0. birimini ver" dersen uzun boncuğun yarısı gelirdi; yarım
 // boncuk bir harf değildir. Rust bu yüzden yazıda `t[0]` yazdırmaz; harfleri `chars()` ile tek tek
 // gezersin. Buradaki "birim" byte'tır, boncuk ise char.
-// Neden böyle? Dünyadaki bütün harfler tek byte'a sığmaz; bazı harfler 2, 3 ya da 4 byte tutar.
 //   Mini örnek:
 //     let t = "şema";
 //     println!("{}", t.len());               // ✓ 5 → kolyenin boyu (byte)
@@ -203,8 +200,7 @@ fn stringler() {
 // çekmecede 50 duruyor. Bir şeyi sıra numarasıyla değil ETİKETİYLE bulursun. `HashMap` budur:
 // etiket anahtardır, çekmecenin içindeki de değerdir. Aynı etiketten iki çekmece olmaz; aynı
 // etiketle yeniden koyarsan eskisinin yerine geçer. Olmayan bir etiketi sorarsan None alırsın.
-// Neden böyle? Listede (Vec) bir şeyi bulmak için baştan sona tek tek bakarsın; etiketli
-// çekmecede doğrudan doğru çekmeceye gidersin.
+// Neden? Vec'te baştan sona bakarsın; etiketli çekmecede doğrudan gidersin.
 //   Mini örnek:
 //     let mut puan = HashMap::new();
 //     puan.insert("mavi", 10);                  // "mavi" çekmecesine 10 kondu
@@ -239,8 +235,7 @@ fn hashmapler() {
     for kelime in metin.split_whitespace() {
         *say.entry(kelime).or_insert(0) += 1;
     }
-    // (Sade: çekmeceler odada etiket sırasıyla dizili durmaz; hepsini gezdiğinde hangisinin önce
-    //  geleceği belli değildir. Sıralı bir çıktı istiyorsan önce kendin sıralarsın.)
+    // (Sade: çekmecelerin gezinme sırası belli değildir; sıralı çıktı için kendin sıralarsın.)
     // Gezinme SIRASI garantili DEĞİL; deterministik çıktı için sıralayıp basalım.
     let mut ciftler: Vec<_> = say.iter().collect();
     ciftler.sort();
@@ -248,18 +243,17 @@ fn hashmapler() {
     println!("puan tablosu eleman sayısı: {}", puan.len());
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Bu bölüm üç koleksiyonun perde arkasını anlatır. Trenin
-// neden bazen başka raya taşındığını (Vec), kolyenin aslında byte'lardan oluşan bir tren olduğunu
-// (String) ve çekmecelerin neden her çalıştırmada başka sırayla gezildiğini (HashMap) söyler.
-// Program yazarken bilmen gereken kurallar yukarıdaki üç bölümdedir. İlk okuyuşta bu bölümü
-// atlayabilirsin.
+// SADE ANLATIM (aşağıdaki bölüm için): Tren neden başka raya taşınır (Vec), kolye aslında
+// byte'lardan oluşur (String), çekmeceler neden her çalıştırmada başka sırayla gezilir (HashMap).
+// Program yazarken gereken kurallar yukarıda; ilk okuyuşta bu bölümü atla.
 // ============================================================================
 // DERLEYİCİ / KÜTÜPHANE PERSPEKTİFİ
 // ============================================================================
 //
 // (Sade: amortize O(1) = arada bir pahalı taşınma olsa da ortalamada her ekleme ucuzdur.)
 // • Vec<T> bellekte üç alandır: (heap'e pointer, len = eleman sayısı, cap = ayrılmış yer).
-//   push, cap dolmuşsa daha büyük yeni bir heap bloğu ayırır, eski elemanları kopyalar, eskiyi
+//   push, cap dolmuşsa daha büyük yeni bir heap bloğu ayırır, eski elemanları bit düzeyinde
+//   taşır ("kopyalar" pedagojik sadeleştirmedir; Rust'ın Copy trait'iyle ilgisi yoktur), eskiyi
 //   serbest bırakır (amortize O(1)). İşte bu YENİDEN TAHSİS yüzünden, bir elemana & borç
 //   tutarken push (&mut) yasaktır — eski bloğa işaret eden referans dangling olurdu. Bunu
 //   zorlayan derleyicidir: borrow checker (rustc_borrowck), E0502. Yani güvenlik kütüphanede

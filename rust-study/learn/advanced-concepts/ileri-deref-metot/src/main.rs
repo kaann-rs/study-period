@@ -1,12 +1,11 @@
+// Açıklama: learn/advanced-concepts/ileri-deref-metot/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: DEREF ve METOT ÇÖZÜMÜ (autoref/autoderef) — "." operatörünün sihri
 // Çalıştır: cargo run -p ileri-deref-metot
 //
-// Kaynak: Rust for Rustaceans Böl. 4 ("Deref and Inherent Methods" kutusu) + The Rust Reference
-// (method-call expression) + std (core::ops::Deref). Böl. 5 (alıcılar) ve Böl. 15 (Deref) burada
-// birleşiyor: `x.metot()` yazınca derleyici GERÇEKTE ne yapar?
-// ↳ DÜZELTME NOTU (son gözden geçirme): kitabın 4. bölümü Error Handling'dir; "Deref and
-//   Inherent Methods" kutusu Böl. 3'tedir (Designing Interfaces → Wrapper Types). Bölüm listesi
-//   yayıncının içindekiler sayfasıyla doğrulandı; kutu orada ayrıca listelenmiyor.
+// Kaynak: RfR Böl. 3 (Designing Interfaces → Wrapper Types burada ele alınır; "Deref and
+// Inherent Methods" kutusunun tam adı/yeri DOĞRULANAMADI) + The Rust Reference (method-call
+// expression) + std (core::ops::Deref). Böl. 5 (alıcılar) ve Böl. 15 (Deref) (kurs bölümleri)
+// burada birleşiyor: `x.metot()` yazınca derleyici GERÇEKTE ne yapar?
 //
 // Doğrulanmış (rustc ile): Box<Vec>.len() autoderef'le çalışır; immutable `v.push()` → E0596
 // (autoref &mut gerektirir); inherent metot, Deref-hedefindeki aynı adlı metodu GÖLGELER.
@@ -14,8 +13,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku; teknik kısım zor gelse de ana fikir orada.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/ownership` (`&` ve `&mut`),
 // `learn/structs` (metot ve `self`), `learn/generics-traits-lifetimes` (trait) ve
@@ -81,12 +79,9 @@ fn deref_ve_coercion() {
     // `*k` aslında `*(k.deref())` demektir: Deref::deref &T verir, * onu açar.
     println!("*Kutu(5) = {}", *k);
 
-    // DEREF COERCION: fonksiyon çağrısı/metot alıcısı sırasında derleyici, tür uyması için
-    // OTOMATİK deref zinciri uygular. &Kutu<String> -> &String -> &str:
+    // DEREF COERCION: çağrıda tür uyması için otomatik zincir: &Kutu<String> -> &String -> &str:
     let isim = Kutu(String::from("Kaan"));
     selamla(&isim); // &Kutu<String> --deref--> &String --deref--> &str  (hepsi derleme anında)
-    // Neden? Sorun olmasaydı her sarmalı elle açman gerekirdi: selamla(&(*isim)[..]) gibi.
-    // Deref coercion sarmal türleri (Box, Rc, String...) "içindeki değermiş gibi" kullandırır.
 }
 
 // ============================================================================
@@ -114,11 +109,9 @@ fn deref_ve_coercion() {
 //     let w = vec![1];
 //     // w.push(2);             // ✗ derlenmez: w `mut` değil, &mut alınamaz
 fn autoderef_autoref() {
-    // AUTODEREF: Box<Vec<i32>> üzerinde len() → Box'ı deref et (Vec), Vec'i deref et (slice),
-    // slice::len bulundu. Üç seviye zinciri derleyici kendi yürür.
-    // ↳ DÜZELTME NOTU (son gözden geçirme): `len` için zincir Vec'te DURUR — Vec'in kendi (inherent)
-    //   `len` metodu vardır, slice'a inilmez (Box → Vec, iki seviye). Slice'a gerçekten inen çağrılar,
-    //   yalnız `[T]`de tanımlı metotlardır: `kutulu.first()`, `kutulu.iter()`, `kutulu.contains(&1)`.
+    // AUTODEREF: Box<Vec<i32>> üzerinde len() → Box'ı deref et (Vec); Vec'in kendi (inherent) `len`
+    // metodu bulunur, zincir burada DURUR (iki seviye). Slice'a gerçekten inen çağrılar yalnız `[T]`de
+    // tanımlı metotlardır: `kutulu.first()`, `kutulu.iter()`, `kutulu.contains(&1)`.
     let kutulu = Box::new(vec![1, 2, 3]);
     println!("autoderef: Box<Vec<i32>>.len() = {}", kutulu.len()); // 3
 
@@ -169,15 +162,10 @@ impl Sarmal {
 }
 fn inherent_golgeleme() {
     let s = Sarmal(Ic);
-    // Algoritma önce ADAYIN KENDİ türünü (Sarmal) dener; ad() orada BULUNUR → Deref'e hiç inmez.
     println!("s.ad()      = {} (inherent kazanır, Deref'e inilmez)", s.ad()); // SARMAL
     // İç tipin metoduna ulaşmak için ya elle deref ya tam-nitelikli çağrı:
     println!("(*s).ad()   = {} (elle deref → Ic)", (*s).ad()); // IC
     println!("Ic::ad(&s)  = {} (tam-nitelikli, &Sarmal coerce)", Ic::ad(&s)); // IC
-    // Neden önemli? Sorun (RfR): bir gün Ic'e ya da Sarmal'a aynı adlı yeni bir metot eklenirse,
-    // `s.ad()`'ın HANGİSİNİ çağırdığı sessizce değişebilir. Bu yüzden "şeffaf sarmal" türlerde
-    // (Box/Rc gibi, kullanıcı tipine deref eden) inherent metottan kaçın; fn ad(s: &Sarmal)
-    // biçiminde serbest/static fonksiyon tercih et ki belirsizlik olmasın.
 }
 
 // SADE ANLATIM (aşağıdaki bölüm için): Yukarıda noktanın (`.`) senin yerine üç iş yaptığını

@@ -1,3 +1,4 @@
+// Açıklama: learn/generics-traits-lifetimes/ACIKLAMA.md
 // Rust Book — Bölüm 10: Generic Types, Traits, and Lifetimes
 // Çalıştır: cargo run -p generics-traits-lifetimes
 //
@@ -7,14 +8,12 @@
 //
 // Doğrulanmış (rustc ile): trait bound sağlanmazsa E0277; olmayan metot E0599; elision
 // başarısız → E0106; `dyn` için uygun olmayan trait → E0038; orphan rule → E0117.
-// (Lifetime/HRTB ve orphan rule'u daha önce ayrıca derinlemesine konuşmuştuk; burada
-// kitabın çerçevesine oturtuyorum.)
+// (Lifetime/HRTB ve orphan rule ayrıca derinlemesine işlendi; burada kitap çerçevesinde.)
 
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümün başındaki "SADE ANLATIM" kutusunu önce oku, sonra teknik açıklamaya geç.
 // Bu dosyadaki benzetmelerin hepsi aynı yerde geçer: bir okulda (sınıf, belge, kütüphane).
 //
 // Bu bölümün tek cümlelik özeti: Aynı kodu farklı türler için bir kez yazarsın (generics), o
@@ -119,7 +118,7 @@ fn generikler() {
     // SADECE belirli bir tür için metot: impl Nokta<f64> { ... } (koşullu metot).
     impl Nokta<f64> {
         fn uzaklik(&self) -> f64 {
-            (self.x * self.x + self.y * self.y).sqrt() // sqrt yalnız f64'te var
+            (self.x * self.x + self.y * self.y).sqrt() // sqrt f32'de de var, tam sayılarda yok; burada Nokta<f64>
         }
     }
     let ni = Nokta { x: 3, y: 4 };
@@ -128,8 +127,6 @@ fn generikler() {
     // self.y'yi de okuyalım ki derive(Debug) dead_code tuzağına düşmeyelim (Bölüm 5 nugget'ı).
     println!("ni = {ni:?} (y = {})", ni.y);
 
-    // Neden generics? Sorun: generics olmasaydı her tür için AYNI mantığı kopyalamak gerekirdi
-    // (en_buyuk_i32, en_buyuk_char ...). Hem tekrar, hem bir yerde düzeltip ötekini unutma riski.
     // Neden "zero-cost"? Çünkü runtime'da tür bilgisi taşınmaz — bkz. DERLEYİCİ PERSPEKTİFİ.
 }
 
@@ -242,10 +239,8 @@ fn traitler() {
     for oge in &karisik {
         println!("liste: {}", oge.ozetle()); // dinamik dispatch (vtable)
     }
-    // Neden iki yol? Sorun: tek yol olsaydı ya hep tür başına kod şişmesi (generic'in bedeli)
-    // ya hep dolaylama (dyn'in bedeli) yaşardık. Rust seçimi SANA bırakır: homojen + sıcak yol →
-    // generic; heterojen koleksiyon/eklenti → dyn. (dyn olabilmesi için trait "dyn compatible"
-    // olmalı; neden, DERLEYİCİ PERSPEKTİFİ'nde.)
+    // Seçim SANA ait: homojen + sıcak yol → generic; heterojen koleksiyon/eklenti → dyn.
+    // (dyn olabilmesi için trait "dyn compatible" olmalı; neden, DERLEYİCİ PERSPEKTİFİ'nde.)
 }
 
 // SADE ANLATIM: Okul kuralı: "Okumayı bilen herkes kütüphane kartı alır." Kartı her öğrenci
@@ -409,4 +404,5 @@ fn lifetimelar() {
 //   Kurallar çıktıyı tek bir süreye bağlayamazsa derleyici PES eder ve senden etiket ister
 //   (E0106). Yani elision bir TAHMİN değil, deterministik 3 kuraldır; belirsizlikte sessiz
 //   kalmaz, hata verir. Lifetime'lar yalnız derleme anında denetlenir — üretilen makine
-//   kodunda lifetime diye bir şey YOKTUR (tür silme / "erasure").
+//   kodunda lifetime diye bir şey YOKTUR (ömür silme / lifetime erasure). Generics'te türler
+//   silinmez, monomorphization ile kopyalanır; "tür silme" trait object'ler için kullanılır.

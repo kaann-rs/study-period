@@ -1,3 +1,4 @@
+// Açıklama: learn/structs/ACIKLAMA.md
 // Rust Book — Bölüm 5: Structs (yapılar), metotlar, associated function'lar
 // Çalıştır: cargo run -p structs
 //
@@ -9,8 +10,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku, sonra teknik açıklamaya geç.
 // Benzetmelerin hepsi aynı şeyle, bir ÖĞRENCİ KARTIYLA kurulur.
 //
 // Bu bölümün tek cümlelik özeti: struct, birbiriyle ilgili birkaç bilgiyi (ad, sınıf, numara)
@@ -33,7 +33,7 @@
 //   constructor (yapıcı)   → yeni kart üreten fonksiyon; adı çoğunlukla `new` ya da `yeni` olur.
 //   String, &str           → sahibi olunan yazı / başka yerdeki bir yazıya bakış.
 //   u8, u32, u64           → eksi olamayan tam sayı türleri (8, 32, 64 bitlik).
-//   Copy, move             → küçük değerler kopyalanır (Copy); String gibi büyükler taşınır (move).
+//   Copy, move             → Copy trait'i olan türler kopyalanır (sayı, &T, Option<T>); String/Vec taşınır (move).
 //   lifetime ('a)          → "bu ok, gösterdiği veri yaşadığı sürece geçerlidir" diyen etiket.
 //   dangling               → gösterdiği veri silinmiş, boşu gösteren ok.
 //   trait                  → türlerin ortak yeteneği. Debug: "ekrana yazdırılabilir" yeteneği.
@@ -44,10 +44,9 @@
 //   layout, padding        → kartın bellekteki yerleşimi ve gözler arasında kalan boşluk.
 //   derleyici (rustc)      → kodu programa çeviren ve hataları önceden bulan araç.
 //
-// SADE ANLATIM (hemen aşağıdaki tanımlar için): Buradaki beş `struct` satırı henüz kart değil,
-// kart KALIPLARIDIR: "bir Kullanici kartında şu dört göz bulunur" der. Kalıp bir kez tanımlanır,
-// ondan istediğin kadar kart doldurulur. Her kalıbın ne işe yaradığı aşağıdaki numaralı bölümlerde
-// örnekle anlatılır; şimdilik adlarına göz atman yeter.
+// SADE ANLATIM (tanımlar için): Buradaki beş `struct` satırı kart değil, kart KALIPLARIDIR:
+// "bir Kullanici kartında şu dört göz bulunur" der. Kalıp bir kez tanımlanır, ondan istediğin
+// kadar kart doldurulur; işi aşağıdaki bölümlerde anlatılır, şimdilik adlarına bak.
 
 #[derive(Debug)]
 struct Kullanici {
@@ -74,9 +73,8 @@ struct Dikdortgen {
     boy: u32,
 }
 
-// SADE ANLATIM: `impl` bloğu, bir kartla neler yapılabileceğinin listesidir. Her biri bir metottur.
-// Hangisinin kartı yalnız okuduğunu, hangisinin değiştirdiğini, hangisinin kartı elinden aldığını
-// 5. bölümdeki kutu örnekle anlatır.
+// SADE ANLATIM: `impl` bloğu kartla yapılabilecek işlerin listesidir, her biri bir metottur.
+// Hangi receiver'ın okuduğunu, değiştirdiğini ya da kartı aldığını 5. bölümdeki kutu anlatır.
 impl Dikdortgen {
     // associated function (self YOK): tür üzerinden çağrılır, genelde yapıcı (constructor).
     fn yeni(en: u32, boy: u32) -> Self {
@@ -109,7 +107,6 @@ fn main() {
 }
 
 // 1. Tanımlama ve örnekleme (defining & instantiating)
-// field init shorthand: parametre adı alan adıyla aynıysa `ad: ad` yerine yalnız `ad` yazılır.
 // SADE ANLATIM: Okul, öğrenci kartları için bir KALIP hazırlar: "ad" gözü, "sınıf" gözü. Bu kalıp
 // `struct` tanımıdır. Kalıptan bir kart çıkarıp gözlerini doldurunca elinde gerçek bir kart
 // (instance) olur. Gözlere nokta ile ulaşırsın: `kart.ad`.
@@ -143,8 +140,9 @@ fn tanimla_ve_olustur() {
 
     // Neden tek bir alanı "mut" işaretleyemiyorum? Rust'ta mutability bir ALANIN değil,
     // BINDING'in (sahipliğin) özelliğidir: ya tüm instance mut'tur ya hiçbiri. Çünkü
-    // `&mut u` elde eden, instance'ın TÜM alanlarına yazma hakkı kazanır — bu, ch4'teki
-    // "tek &mut = tek yazar" kuralıyla tutarlıdır. Alan bazlı mut, içsel değişebilirlik
+    // `&mut u` elde eden, ödünç kuralları gereği instance'ın TÜM alanlarına yazabilir
+    // (standart kurallardan çıkarım; özel repro yok) — bu, ch4'teki "tek &mut = tek yazar"
+    // kuralıyla tutarlıdır. Alan bazlı mut, içsel değişebilirlik
     // (Cell/RefCell) gibi ayrı araçlarla yapılır, o da ileride.
 }
 
@@ -163,7 +161,6 @@ fn tanimla_ve_olustur() {
 //     println!("{}", eski.ad);     // ✗ derlenmez: ad artık yeni kartta
 fn guncelleme_sozdizimi() {
     let u1 = kullanici_olustur("Ada".into(), "a@x.com".into());
-    // Kalan alanları u1'den al: struct update syntax.
     let u2 = Kullanici {
         ad: "Ada II".into(),
         ..u1
@@ -197,9 +194,8 @@ fn tuple_ve_unit() {
 
     let _b = Birim; // alanı yok; genelde bir trait'i implemente etmek için "marker" olarak kullanılır
 
-    // Neden tuple struct, sıradan tuple yerine? (u8, u8, u8) ile Renk(u8, u8, u8) farkı:
-    // Renk kendi TÜRÜdür. Renk isteyen bir fonksiyona yanlışlıkla rastgele bir üçlü tuple
-    // (ya da bir Konum(u8,u8,u8)) veremezsin → tür güvenliği (type safety).
+    // Neden tuple struct, sıradan tuple yerine? Renk kendi TÜRÜdür: Renk isteyen bir fonksiyona
+    // rastgele bir üçlü ya da Konum(u8,u8,u8) veremezsin → tür güvenliği (type safety).
 }
 
 // 4. Struct alanları sahipliği + referans alan için lifetime
@@ -213,8 +209,7 @@ fn tuple_ve_unit() {
 //     struct Notlu<'a> { ad: &'a str }          // ✓ bilgi başka yerde; 'a sözü verildi
 //     struct Eksik { ad: &str }                 // ✗ derlenmez: ok var ama söz ('a) yok
 fn alanlar_sahiplenir() {
-    // Alanlar varsayılan olarak veriyi SAHİPLENİR (ad: String gibi). Böylece struct yaşadığı
-    // sürece alanları da geçerli kalır — struct, verisinin sahibidir.
+    // Alanlar varsayılan olarak veriyi SAHİPLENİR (ad: String gibi), struct yaşadığı sürece geçerli.
     let s = String::from("merhaba dünya");
     let a = Alinti { metin: &s[0..7] }; // referans tutan alan → 'a ömrü = s'in ömrü
     println!("alıntı: {}", a.metin);
@@ -222,9 +217,8 @@ fn alanlar_sahiplenir() {
     // Referans alan neden lifetime İSTER?
     //   struct S { r: &str }        // ✗ E0106: missing lifetime specifier
     //   struct S<'a> { r: &'a str } // ✓  'a: "r'nin işaret ettiği veri, S'ten uzun yaşamalı"
-    // Sorun: referans veriyi sahiplenmez; işaret ettiği veri (burada s) struct'tan önce
-    // ölürse referans dangling olur. Lifetime, derleyiciye "bu referans en az struct kadar
-    // yaşayacak" sözünü verdirtir; borrowck bunu denetler. (Alinti<'a> burada tam bu yüzden var.)
+    // Sorun: referans veriyi sahiplenmez; veri (burada s) struct'tan önce ölürse dangling olur.
+    // Lifetime bu sözü verdirtir; borrowck denetler. (Alinti<'a> tam bu yüzden var.)
     // rustc: lifetime'lar da tür denetiminin parçası; ihlali MIR üzerinde rustc_borrowck yakalar.
 }
 
@@ -260,8 +254,7 @@ fn metotlar() {
     // Otomatik referanslama/deref (automatic referencing & dereferencing): `d.alan()` yazınca
     // Rust, metodun &self istediğini görüp çağrıyı `(&d).alan()` diye düzenler; & yazmana gerek
     // yok. &mut ve * için de aynı otomatik ayarı yapar.
-    // Neden metotların çoğu &self? Sorun: her metot self alsaydı (tüketseydi), bir nesne
-    // üzerinde iki metot çağıramazdın (ilki onu yerdi). &self sahiplenmeden okur → nesne yaşar.
+    // Neden çoğu metot &self? Sorun: her metot self alsaydı ilki nesneyi yerdi; &self sahiplenmeden okur.
 }
 
 // 6. #[derive(Debug)] ve hata ayıklama çıktısı
@@ -280,19 +273,15 @@ fn debug_cikti() {
     println!("{d:?}");  // tek satır
     println!("{d:#?}"); // "pretty" çok satırlı
     // (Sade: proc-macro = derleme sırasında çalışıp senin yerine kod yazan küçük program.)
-    // Neden #[derive(Debug)]? Sorun: Debug'ı elle yazmak (impl std::fmt::Debug for ...) her
-    // struct için tekrar eden, hataya açık bir iştir. derive bir PROC-MACRO'dur: derleme
-    // ↳ DÜZELTME NOTU (son gözden geçirme): Debug/Clone/PartialEq gibi STANDART derive'lar derleyiciye gömülü
-    //   (built-in) makrolardır; ayrı bir proc-macro crate'i değildir. Kullanıcıların yazdığı derive'lar
-    //   (serde::Serialize gibi) ise gerçekten proc-macro'dur — mekanizma aynı, konum farklı.
-    // anında fmt::Debug implementasyonunu SENİN İÇİN üretir (makrolar bölümüne bağlanır).
+    // Neden #[derive(Debug)]? Sorun: Debug'ı elle yazmak (impl std::fmt::Debug for ...) her struct için
+    // tekrar eden, hataya açık iştir. Debug/Clone/PartialEq gibi STANDART derive'lar derleyiciye gömülü
+    // (built-in) makrolardır; kullanıcıların yazdığı derive'lar (serde::Serialize gibi) gerçek proc-macro'dur.
+    // Derleme anında fmt::Debug implementasyonunu SENİN İÇİN üretir (makrolar bölümüne bağlanır).
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Bu bölüm kartların perde arkasını anlatır. Dört şey söyler:
-// `&self` gibi yazımlar aslında birer kısaltmadır; `kart.goster()` yazınca derleyici gereken `&`
-// işaretini senin yerine koyar; kartın gözleri bellekte senin yazdığın sırayla durmak zorunda
-// değildir (derleyici yer kazanmak için dizer); `derive` kodu derleme sırasında üretir. Program
-// yazarken bunları bilmen gerekmez. İlk okuyuşta atlayabilirsin; yukarıdaki altı bölüm yeter.
+// SADE ANLATIM (aşağıdaki bölüm için): Perde arkası: `&self` kısaltmadır, `kart.goster()` yazınca
+// derleyici `&` koyar; alan sırası garanti değildir (yer kazanmak için değişir); derive kodu derleme
+// sırasında üretilir. Program yazarken gerekmez; ilk okuyuşta atla, altı bölüm yeter.
 // ============================================================================
 // DERLEYİCİ PERSPEKTİFİ — struct ve metotlar nasıl çalışıyor?
 // ============================================================================
@@ -316,5 +305,6 @@ fn debug_cikti() {
 //   Sabit, C-uyumlu sıra gerekiyorsa `#[repr(C)]` kullanılır. Hesaplama: rustc_abi/src/
 //   layout.rs (satır ~35 yorumu: sıra yalnız repr(C) struct'larda korunur).
 //
-// • derive(Debug): bir procedural macro; kaynağa fmt::Debug impl'ini makro genişletme
-//   aşamasında enjekte eder (sen yazmazsın).
+// • derive(Debug): derleyiciye gömülü (built-in) derive makrosu; kaynağa fmt::Debug impl'ini
+//   makro genişletme aşamasında enjekte eder (sen yazmazsın). Kullanıcı derive'ları (serde vb.)
+//   ise gerçek proc-macro crate'lerindendir.

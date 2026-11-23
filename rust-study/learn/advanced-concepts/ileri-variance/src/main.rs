@@ -1,11 +1,11 @@
+// Açıklama: learn/advanced-concepts/ileri-variance/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: SUBTYPING ve VARIANCE (alt-tip ve değişkenlik)
 // Çalıştır: cargo run -p ileri-variance
 //
-// Kaynak: Rust for Rustaceans (Jon Gjengset), Böl. 2 "Lifetime Variance" (Listing 2-11).
-// ↳ DÜZELTME NOTU (son gözden geçirme): kitapta bu konu Böl. 1'dedir (Foundations →
-//   Borrowing and Lifetimes → Lifetimes). Yayıncının ayrıntılı içindekiler listesiyle doğrulandı.
-//   Listeler bölüme göre numaralandığından buradaki "Listing 2-11" aslında Listing 1-11'dir.
-// Bu konu Rust Book'ta neredeyse yok ama lifetime hatalarının görünmez sebebi çoğu zaman budur.
+// Kaynak: RfR Böl. 1 (Foundations → Borrowing and Lifetimes → Lifetimes). Kesin listing no.
+// yayıncının ayrıntılı içindekiler listesinde yer almıyor (DOĞRULANAMADI).
+// Bu konu Rust Book'ta ayrıntılı ele alınmaz; Rustonomicon'da ele alınır — lifetime hatalarının
+// görünmez sebebi çoğu zaman budur.
 // Senin sorduğun `&'s mut &'a v` kalıbı tam buraya düşüyor.
 //
 // Doğrulanmış (rustc ile): MutStr iki lifetime ile DERLENİR, tek lifetime ile E0502; &mut
@@ -15,8 +15,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku; teknik kısım zor gelse de ana fikir orada.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/ownership` (ödünç alma, `&` ve `&mut`)
 // ve `learn/generics-traits-lifetimes` (lifetime, yani `'a` yazımı).
@@ -83,7 +82,6 @@ fn subtyping() {
     }
 
     let sabit: &'static str = "program boyu yaşarım"; // &'static str
-    // &'static str, &'a str beklenen yere GEÇER (alt-tip): daha uzun ömürlü, daha "işe yarar".
     println!(
         "subtyping: &'static → &'a kabul edildi, len = {}",
         kisa_bekler(sabit)
@@ -116,17 +114,14 @@ fn covariance() {
     }
 
     let depo: Vec<&'static str> = vec!["a", "b", "c"];
-    // &Vec<&'static str> --covariant--> &Vec<&'a str>: sorun yok.
     println!(
         "covariance: paylaşımlı & esnek, eleman sayısı = {}",
         oku(&depo)
     );
-    // Neden güvenli? Paylaşımlı & yalnız OKUR. Daha uzun ömürlü veriyi daha kısa süre okumak
-    // hiçbir şeyi bozmaz → derleyici uzun'u kısa'ya zahmetsiz "kısaltır" (covariance).
 }
 
 // ============================================================================
-// 2. INVARIANCE + senin örneğin:  &'a mut &'b str  (RfR Listing 2-11)
+// 2. INVARIANCE + senin örneğin:  &'a mut &'b str  (RfR Böl. 1, Lifetimes)
 // ============================================================================
 // &mut T, T'de INVARIANT'tır: ne alt-tipi ne üst-tipi kabul eder, TAM O TİP gerekir. Sebebi:
 // &mut hem okur HEM yazar. Uzun-ömürlüyü kısa yerine koymaya izin verilse, fonksiyon içeriye
@@ -187,8 +182,6 @@ fn invariance_mutstr() {
     //   - Tek lifetime varsa: dış ve iç AYNI 'a. İç konum invariant olduğundan 'a = 'static'e çivilenir
     //     (tek parametre hem invariant hem covariant konumda → invariant kazanır). Artık 'a kısalamaz;
     //     &mut borrow 'static yaşar → println'e taşar. Derleyici: "hâlâ mutably borrowed" (E0502).
-    // Ders: &mut ardındaki ömür invariant olduğu için, DIŞ borrow ömrünü İÇ veri ömründen AYIRMAK
-    // (ayrı lifetime) esnekliği geri kazandırır. "Gereksiz gibi duran ikinci lifetime"ın sebebi bu.
     println!("invariance: tek lifetime'da aynı kod E0502 verir (yorumda açıklandı)");
 }
 

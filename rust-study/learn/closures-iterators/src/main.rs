@@ -1,3 +1,4 @@
+// Açıklama: learn/closures-iterators/ACIKLAMA.md
 // Rust Book — Bölüm 13: Functional Language Features — Closures & Iterators
 // Çalıştır: cargo run -p closures-iterators
 //
@@ -12,8 +13,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümün başındaki "SADE ANLATIM" kutusunu önce oku, sonra teknik açıklamaya geç.
 // Bu dosyadaki benzetmelerin hepsi aynı yerde geçer: bir kargo şubesinde (görev notları ve
 // paketlerin aktığı taşıma bandı).
 //
@@ -123,19 +123,15 @@ fn closurelar() {
     //     teslim();                            // ✓ ilk çağrı: paket teslim edildi
     //     teslim();                            // ✗ derlenmez: verilecek paket kalmadı
     // Fn / FnMut / FnOnce: bir closure'ı GEÇERKEN hangi trait'i uyguladığı, ne yaptığına bağlı:
-    //   FnOnce  — en az bir kez çağrılabilir; yakalananı DIŞARI taşıyabilir (yalnız bir kez).
-    // ↳ DÜZELTME NOTU (son gözden geçirme): doğru ifade "EN FAZLA bir kez çağrılabilir"dir. "En az" olan şey
-    //   şudur: her closure en az FnOnce'ı UYGULAR (Fn ⊂ FnMut ⊂ FnOnce).
+    //   FnOnce  — en fazla bir kez çağrılabilir; yakalananı DIŞARI taşıyabilir (hiç çağrılmayabilir).
+    //   Her closure en az FnOnce'ı UYGULAR (Fn ⊂ FnMut ⊂ FnOnce).
     //   FnMut   — çağrılınca yakalananı DEĞİŞTİRİR (birden çok kez, ama &mut gerektirir).
     //   Fn      — yakalananı yalnız okur/ödünç alır (serbestçe, paylaşımlı).
-    // Hiyerarşi: her Fn aynı zamanda FnMut ve FnOnce'tur; her FnMut aynı zamanda FnOnce'tur.
     uygula_fn(|| println!("Fn: sadece okur"));
     let n = hesapla_sonra_calistir(|| 7 * 6);
     println!("FnOnce döndürdü: {n}");
-    // Neden üç ayrı trait? Sorun: closure'lar borrow kurallarını BOZMAMALI. Bir closure
-    // yakaladığını değiştiriyorsa &mut tutar; o yüzden onu Fn (paylaşımlı) kabul eden bir API'ye
-    // veremezsin — tür sistemi aliasing+mutation'ı derleme anında engeller. Trait seçimi,
-    // closure'ın ne kadar "yetki" aldığını imzaya taşır.
+    // Neden üç trait? Değiştiren closure &mut tutar; onu Fn bekleyen API'ye veremezsin. Seçim,
+    // closure'ın yetkisini imzaya taşır; aliasing+mutation tür düzeyinde yasaklı kalır.
 }
 
 // Fn alır: closure'ı çok kez, paylaşımlı çağırabilir.
@@ -143,9 +139,7 @@ fn uygula_fn<F: Fn()>(f: F) {
     f();
     f();
 }
-// FnOnce alır: en az bir kez çağırır (sonucu döndürebilir). En gevşek kısıt.
-// ↳ DÜZELTME NOTU (son gözden geçirme): `F: FnOnce` alan fonksiyon closure'ı en fazla bir kez çağırabilir; iki kez
-//   çağırmak E0382 verir, hiç çağırmamak ise derlenir (ikisi de rustc ile doğrulandı).
+// FnOnce alır: en fazla bir kez çağırır (hiç çağırmayabilir); sonucu döndürebilir. En gevşek kısıt.
 fn hesapla_sonra_calistir<F: FnOnce() -> i32>(f: F) -> i32 {
     f()
 }
@@ -180,8 +174,7 @@ fn iteratorlar() {
     //     let v = vec![1, 2, 3];
     //     v.iter().map(|x| println!("{x}"));    // ✗ hiçbir şey yazmaz: isteyen yok (uyarı verir)
     //     let iki_kat: Vec<i32> = v.iter().map(|x| x * 2).collect();   // ✓ [2, 4, 6]
-    // TEMBELLİK (lazy): adaptörler (map, filter) hiçbir şey YAPMAZ ta ki bir TÜKETİCİ gelene
-    // kadar. Aşağıdaki zincir, collect çağrılana dek çalışmaz.
+    // TEMBELLİK: adaptörler (map, filter) tüketici gelene kadar iş yapmaz; zincir collect'te çalışır.
     let sonuc: Vec<i32> = v
         .iter() // &i32 verir
         .map(|x| x * 2) // adaptör: her öğeyi dönüştür (tembel)
@@ -286,15 +279,14 @@ fn kendi_iteratorun() {
 //   döndürme, thread'e verme), derleyici move ister: E0373 "closure may outlive borrowed value".
 //   Sorun: aksi halde closure, düşmüş bir yereli ödünç tutan dangling bir yapı olurdu.
 //
-// • ITERATOR trait'inin TEK zorunlu metodu next (library/core/src/iter/traits/iterator.rs:78,
-//   `fn next(&mut self) -> Option<Self::Item>`). map, filter, sum, zip... hepsi bu next üstüne
-//   kurulu VARSAYILAN metotlardır. Bu yüzden kendi türüne next yazınca tüm zincir bedava gelir.
+// • ITERATOR'ın TEK zorunlu metodu next (library/core/src/iter/traits/iterator.rs:78,
+//   `fn next(&mut self) -> Option<Self::Item>`); map/filter/sum/zip bu next üstüne kurulu VARSAYILAN metotlar.
 //
 // • TEMBELLİK: adaptörler (map/filter) yeni bir iterator struct'ı döndürür, iş yapmaz. Zincir
 //   ancak bir TÜKETİCİ (collect/sum/for) next'i çağırmaya başlayınca akar. Tüketmezsen iş olmaz
 //   — derleyici "unused `Map` that must be used / iterators are lazy" uyarısı verir (DOĞRULANDI).
 //
-// • ZERO-COST: iterator zinciri runtime'da ek yük getirmez. Her adaptör generiktir →
-//   monomorphization her closure'ı somutlaştırır, sonra LLVM inline + optimizasyonla tüm zinciri
-//   elle yazılmış bir döngü kadar sıkı makine koduna indirger. Soyutlama derlemede eriyip gider;
-//   "yüksek seviye yazım, düşük seviye performans" bu yüzden çelişmez.
+// • ZERO-COST (çoğu zaman): adaptörler generiktir → monomorphization her closure'ı somutlaştırır;
+//   optimize derlemelerde (ör. `--release`) LLVM inline + optimizasyonla zincir çoğu zaman elle
+//   yazılmış döngüyle aynı koda iner. `opt-level = 0` derlemesinde dolaylama kalabilir; "aynı
+//   makine kodu" garanti değildir (Book ch13-04: "in many cases").

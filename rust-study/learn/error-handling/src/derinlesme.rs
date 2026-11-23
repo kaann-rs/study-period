@@ -1,3 +1,4 @@
+// Açıklama: learn/error-handling/ACIKLAMA.md
 // Derinleşme — Bölüm 9: Error Handling (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p error-handling   |   Test: cargo test -p error-handling
 //
@@ -62,16 +63,14 @@ pub fn calistir() {
 // ============================================================================
 // 1. KENDİ HATA TÜRÜN — enum + Display + Error (source zinciri) + From
 // ============================================================================
-// Bu konuyu neden öğreniyoruz? main.rs'teki `Result<i32, String>` küçük örnekte yeter ama gerçek
-// kodda yetmez: çağıran, String'in İÇİNE bakmadan "dosya mı yok, biçim mi bozuk?" ayrımını
-// yapamaz. Enum ise her başarısızlık biçimini AYRI bir varyant yapar; çağıran `match` ile karar
-// verir ve yeni varyant eklendiğinde derleyici eksik kolu hatırlatır (bütünlük denetimi — exhaustiveness, Böl. 6).
+// Bu konuyu neden öğreniyoruz? `Result<i32, String>` gerçek kodda yetmez: String'in içine bakmadan
+// "dosya mı yok, biçim mi bozuk?" ayırt edilemez. Enum her biçimi AYRI varyant yapar; yeni varyantta
+// derleyici eksik kolu hatırlatır (exhaustiveness, Böl. 6).
 // SADE ANLATIM: Tarif kartından kek yapacaktın ve olmadı. "Olmadı" demek yetmez; yardım edecek
 // kişi nedenini bilmek ister: kart mı kayıp, bir satır mı okunmuyor, "3 yumurta" yerine "üç
 // tane işte" mi yazıyor, yoksa şeker satırı hiç mi yok? Dört ayrı sorun, dört ayrı çözüm.
 // Rust'ta her sorun için enum'a ayrı bir varyant (çeşit) yazarsın; çağıran `match` ile hangisi
-// olduğuna bakar. Neden böyle? Hata düz bir yazı olsaydı, çağıranın o yazıyı okuyup tahmin
-// yürütmesi gerekirdi; yazıda bir harf değişince tahmin bozulurdu.
+// olduğuna bakar. Neden? Düz yazı olsaydı çağıran tahmin yürütürdü; bir harf değişince tahmin bozulurdu.
 //   Mini örnek:
 //     enum TarifHatasi { KartYok, SatirBozuk { satir: usize }, MalzemeEksik(&'static str) }
 //     match tarifi_oku() {
@@ -96,10 +95,9 @@ pub enum AyarHatasi {
     Eksik(&'static str),
 }
 
-// SADE ANLATIM: Aynı sorunu iki kişiye iki ayrı dille anlatırsın. Misafire "kek biraz gecikecek"
-// dersin (Display, `{}`); mutfaktaki yardımcına ise "fırın 180 dereceye çıkmıyor" dersin
-// (Debug, `{:?}`). Rust'ta bir hata türü ikisini de sunar. Neden böyle? Kullanıcı kısa ve
-// anlaşılır bir cümle ister, geliştirici ise bütün ayrıntıyı.
+// SADE ANLATIM: Aynı sorunu iki kişiye iki dille anlatırsın. Misafire "kek biraz gecikecek" (Display,
+// `{}`), yardımcına "fırın 180 dereceye çıkmıyor" (Debug, `{:?}`). Neden? Kullanıcı kısa cümle ister,
+// geliştirici bütün ayrıntıyı.
 //   Mini örnek (hata = bozuk bir satırdan çıkan AyarHatasi::Bicim):
 //     println!("{hata}");     // satır 2: `anahtar=değer` bekleniyordu, ...   → kullanıcıya
 //     println!("{hata:?}");   // Bicim { satir: 2, icerik: "..." }            → geliştiriciye
@@ -127,17 +125,15 @@ impl fmt::Display for AyarHatasi {
 // SADE ANLATIM: "Kek olmadı." Neden? "Çünkü fırın ısınmadı." Neden? "Çünkü fişi takılı değildi."
 // Her cevabın arkasında bir önceki neden durur; sordukça köke inersin. `source()` bu "neden?"
 // sorusudur: bir hata, kendisine yol açan alttaki hatayı gösterir; o da varsa kendininkini.
-// Neden böyle? Yalnız en üstteki cümleyi görürsen ("kek olmadı") neyi düzelteceğini bilemezsin;
-// yalnız en alttakini görürsen ("fiş") hangi işin bozulduğunu bilemezsin.
+// Neden? En üst cümle neyi düzelteceğini, en alt cümle hangi işin bozulduğunu söylemez.
 //   Mini örnek:
 //     let hata = ayarlari_coz("port = seksen\nazami_baglanti = 64").unwrap_err();
 //     println!("{hata}");                // `port` sayı olmalı, bulunan "seksen"
 //     println!("{:?}", hata.source());   // Some(..): alttaki asıl neden, sayıya çevirme hatası
 //     // AyarHatasi::Eksik(..) için source() None döner: altında başka bir hata yoktur.
-// Error trait'i `Debug + Display` ister (ikisi de yukarıda var); gövdesi boş bile olabilir. Tek
-// ilginç metodu source(): "bu hatanın ALTINDAKİ neden ne?" Böylece hatalar bağlı liste gibi
-// zincirlenir. Kural: bir hatayı source() ile veriyorsan Display'inde TEKRAR yazma; yoksa zinciri
-// yürüyen raporlayıcı aynı mesajı iki kez basar.
+// Error trait'i `Debug + Display` ister; gövdesi boş bile olabilir. source() hataları bağlı liste
+// gibi zincirler. Kural: source() ile verdiğin hatayı Display'de TEKRAR yazma; yoksa raporlayıcı
+// aynı mesajı iki kez basar.
 impl Error for AyarHatasi {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
         match self {
@@ -148,11 +144,9 @@ impl Error for AyarHatasi {
     }
 }
 
-// SADE ANLATIM: Marketten gelen "yok" notunu listeye olduğu gibi geçirmek kolaydır (From). Ama
-// "yok" tek başına işe yaramaz: NE yok? Notu taşıyan bunu bilmez; listeyi tutan sen bilirsin ve
-// "yumurta yok" diye tamamlarsın. Rust'ta bu tamamlamayı `map_err` yapar: hatayı alır, yanına
-// senin bildiğin bilgiyi (hangi satır, hangi anahtar) koyar. Neden böyle? From yalnız hatanın
-// kendisini görür; hatanın nerede çıktığını bilen tek yer, onu yakalayan koddur.
+// SADE ANLATIM: Marketten gelen "yok" notunu listeye geçirmek kolaydır (From), ama "NE yok?" sorusu
+// kalır; listeyi tutan sen "yumurta yok" diye tamamlarsın. Bunu `map_err` yapar: hataya senin bildiğin
+// bilgiyi (satır, anahtar) koyar. Neden? From yalnız hatanın kendisini görür; yeri yakalayan kod bilir.
 //   Mini örnek:
 //     let n: u16 = ham.parse()?;   // yalnız From ile (yazılmış olsaydı): "geçersiz rakam" der,
 //                                  // hangi anahtarda olduğunu söyleyemez
@@ -169,9 +163,7 @@ impl From<io::Error> for AyarHatasi {
     }
 }
 
-// (Sade: aşağıdaki fonksiyon "neden?" sorusunu cevap bitene kadar sorar ve aldığı cevapları
-// aralarına " <- " koyarak yan yana yazar.)
-// Zinciri yürüyen küçük raporlayıcı: en üstteki mesajdan kök nedene doğru iner.
+// Zinciri yürüyen raporlayıcı: "neden?" sorusunu kök nedene kadar sorar, cevapları " <- " ile yazar.
 // (`successors`: "bir öncekinden bir sonrakini üret" iterator'ı — Böl. 13 ile bağlantı.)
 fn zinciri_yaz(hata: &(dyn Error + 'static)) -> String {
     std::iter::successors(Some(hata), |&h| h.source())
@@ -196,11 +188,8 @@ pub struct Ayarlar {
 //     satir_ayristir(1, "")          // Ok(None): boş satır, hata değil
 //     satir_ayristir(2, "un = 2")    // Ok(Some(("un", "2"))): düzgün çift
 //     satir_ayristir(3, "un işte")   // Err(Bicim { satir: 3, .. }): `=` yok
-// Adım adım kod analizi — tek bir satır:
-//   Ok(None)        → boş satır/yorum: hata DEĞİL, sadece "veri yok"
-//   Ok(Some((k,v))) → geçerli çift
-//   Err(Bicim{..})  → `=` yok
-// Üç durumu tek dönüş türünde ayırmak için Result<Option<_>, _> kullanıyoruz.
+// Üç durum tek dönüş türünde: Result<Option<_>, _> — Ok(None)=boş/yorum (hata DEĞİL),
+// Ok(Some((k,v)))=geçerli çift, Err(Bicim{..})=`=` yok.
 fn satir_ayristir(no: usize, satir: &str) -> Result<Option<(String, String)>, AyarHatasi> {
     let satir = satir.trim();
     if satir.is_empty() || satir.starts_with('#') {
@@ -215,9 +204,8 @@ fn satir_ayristir(no: usize, satir: &str) -> Result<Option<(String, String)>, Ay
     Ok(Some((anahtar.trim().to_string(), deger.trim().to_string())))
 }
 
-// (Sade: aşağıdaki fonksiyon kartı satır satır okur, boş satırları atlar, düzgün satırları bir
-// tabloya koyar; bozuk bir satır görürse orada durur ve o hatayı döndürür. `transpose`, iç içe iki
-// kutunun sırasını değiştirir: "Result içinde Option" → "Option içinde Result".)
+// (Sade: kart satır satır okunur, boşlar atlanır, bozuk satırda durulur; `transpose` kutuların
+// sırasını "Result içinde Option" → "Option içinde Result" çevirir.)
 // İLK HATADA DUR: `collect`, Result'lardan oluşan bir akışı Result<Koleksiyon, E>'ye toplayabilir;
 // ilk Err'de akışı keser ve o Err'i döndürür. transpose: Result<Option<T>, E> → Option<Result<T, E>>;
 // böylece filter_map `Ok(None)`'ları (boş satırlar) atar ama Err'leri KAYBETMEZ.
@@ -266,8 +254,7 @@ pub fn ayarlari_coz(metin: &str) -> Result<Ayarlar, AyarHatasi> {
 //   Mini örnek:
 //     let metin = fs::read_to_string(yol)?;   // dosya yoksa: io::Error → AyarHatasi::Gc, dön
 //     ayarlari_coz(&metin)                    // dosya varsa: satırları anlamaya geç
-// Üst katman: io::Error burada `?` + From ile AyarHatasi::Gc olur; ayrıştırma hataları zaten bizim
-// türümüzde. İmzaya bakan, bu fonksiyonun nasıl başarısız olabileceğini eksiksiz görür.
+// Üst katmanda io::Error `?` + From ile Gc olur; ayrıştırma hataları zaten bizim türümüzde.
 pub fn dosyadan_yukle(yol: &Path) -> Result<Ayarlar, AyarHatasi> {
     let metin = fs::read_to_string(yol)?;
     ayarlari_coz(&metin)
@@ -449,9 +436,8 @@ fn dosya_senaryosu() {
 // SADE ANLATIM: Mutfakta iki çeşit kap vardır. Etiketli kavanozlar: üstünde "un", "şeker" yazar,
 // bakınca içindekini bilirsin. Bir de "karışık" yazan büyük kutu: içine her şeyi atabilirsin,
 // ama çıkarırken ne çıkacağını bilemezsin; ancak "bu şeker mi?" diye sorabilirsin. Özel hata
-// enum'u etiketli kavanozdur; `Box<dyn Error>` karışık kutudur. Neden ikisi de var? Hataya göre
-// farklı davranacaksan etiket gerekir; yalnız ekrana yazıp çıkacaksan karışık kutu yeter ve
-// daha az kod ister.
+// enum'u etiketli kavanozdur; `Box<dyn Error>` karışık kutudur. Hataya göre davranacaksan etiket,
+// yalnız raporlayacaksan karışık kutu yeter.
 //   Mini örnek:
 //     fn hizli() -> Result<usize, Box<dyn Error>> {
 //         let n = "12".parse::<usize>()?;         // ✓ sayı hatası çıkarsa kutuya girer
@@ -500,8 +486,7 @@ fn box_dyn_error_ne_zaman() {
 // SADE ANLATIM: Misafir "ben fıstık yiyemem" derse bu senin hatan değildir; beklenen bir
 // durumdur, menüyü değiştirirsin (Result). Ama tarifi sen yazdın ve "tuz" yerine "şeker"
 // yazdıysan yanlış sendedir; yemeği öyle servis etmek yerine durup tarifi düzeltmek gerekir
-// (panic). `unwrap`/`expect`, "burada hata çıkarsa yanlış benim kodumdadır" dediğin yerler
-// içindir. Neden bu ayrım? Dışarıdan gelen sorun ele alınır; koddaki yanlış saklanmaz, düzeltilir.
+// (panic). `unwrap`/`expect`, "burada hata çıkarsa yanlış benim kodumdadır" dediğin yerler içindir.
 //   Mini örnek:
 //     let yas: u8 = girdi.parse()?;            // ✓ kullanıcının ne yazacağı bilinmez: Result
 //     let ip: Ipv4Addr = "127.0.0.1".parse().expect("sabit doğru yazıldı");   // ✓ yazan sensin
@@ -518,11 +503,9 @@ fn unwrap_ne_zaman_mesru() {
     //   yerel = 127.0.0.1, en büyük = 3
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Buradan sonrası "en çok takılınan üç yer" listesidir.
-// Üçünün de özü aynıdır: `?` bir hatayı yukarı iletmek ister, ama fonksiyonun dönüş türü o
-// hatayı taşıyacak biçimde değildir. Çorbayı tabağa koymak gibi düşün: `?` kepçedir, dönüş türü
-// tabaktır; tabak yoksa ya da yanlış kap geldiyse derleyici dökmene izin vermez. Her maddede
-// önce bozuk (✗), sonra düzeltilmiş (✓) hâl var. Hata numaraları ilk okuyuşta önemli değildir.
+// SADE ANLATIM (aşağıdaki bölüm için): En çok takılınan üç yerin özü aynı: `?` hatayı yukarı
+// iletir ama dönüş türü onu taşıyamaz. `?` kepçe, dönüş türü tabaktır; kap yoksa derleyici dökmez.
+// Her maddede önce bozuk (✗), sonra düzeltilmiş (✓) hâl var; kodlar ilk okuyuşta önemli değil.
 // ============================================================================
 // 7. SIK YAPILAN HATALAR — yanlış kullanım / doğru kullanım (kodlar rustc ile doğrulandı)
 // ============================================================================
@@ -554,7 +537,6 @@ fn unwrap_ne_zaman_mesru() {
 // ÖNEMLİ NOKTALAR
 //   • Hata türü bir API sözleşmesidir: enum → çağıran ayırt edebilir; Box<dyn Error> → yalnız raporlar.
 //   • From = bağlamsız otomatik dönüşüm; map_err = bağlam ekleyerek dönüşüm.
-//   • source() ile sardığın hatayı Display'de tekrar yazma.
 //   • Hata, en çok bilgiye sahip katmanda ZENGİNLEŞTİRİLİR, karar verebilen katmanda ELE ALINIR.
 //
 // ============================================================================

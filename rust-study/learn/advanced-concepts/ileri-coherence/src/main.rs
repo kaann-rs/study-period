@@ -1,10 +1,10 @@
+// Açıklama: learn/advanced-concepts/ileri-coherence/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: COHERENCE ve ORPHAN RULE (tutarlılık ve yetim kuralı)
 // Çalıştır: cargo run -p ileri-coherence
 //
-// Kaynak: Rust for Rustaceans Böl. 3 ("Coherence and the Orphan Rule") + std.
-// ↳ DÜZELTME NOTU (son gözden geçirme): kitapta bu başlık Böl. 2'dedir (Types → Traits and
-//   Trait Bounds). Yayıncının ayrıntılı içindekiler listesiyle doğrulandı.
-// Böl. 10 (generics/traits) ve Böl. 20'de (newtype) değindiğimiz orphan rule'un TAM kuralı.
+// Kaynak: RfR Böl. 2 ("Coherence and the Orphan Rule") + std.
+// (Types → Traits and Trait Bounds; yayıncının ayrıntılı içindekiler listesiyle doğrulandı.)
+// Böl. 10'da (generics/traits) ve Böl. 20'de (newtype) değindiğimiz orphan rule'un TAM kuralı.
 //
 // Doğrulanmış (rustc ile): çakışan impl'ler → E0119 "conflicting implementations"; hem trait
 // hem tip yabancıysa → E0117. Ayrıntı: DERLEYİCİ PERSPEKTİFİ (altta).
@@ -12,8 +12,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku; teknik kısım zor gelse de ana fikir orada.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/generics-traits-lifetimes` (trait ve
 // `impl Trait for Tip` yazımı), `learn/modules` ile `learn/cargo-and-crates` (crate nedir) ve
@@ -83,7 +82,6 @@ impl<T: Display> Etiketle for T {
 }
 
 fn blanket_impl() {
-    // Blanket sayesinde Display olan HER tür Etiketle kazandı — ek impl yazmadan:
     println!(
         "blanket: {} {} {}",
         42.etiket(),
@@ -92,7 +90,6 @@ fn blanket_impl() {
     );
     // ✗ Bu blanket varken AYRICA `impl Etiketle for i32` YAZAMAZSIN (i32: Display → çakışır):
     //     E0119 "conflicting implementations of trait `Etiketle` for type `i32`" (DOĞRULANDI).
-    //   Coherence tam da bunu yasaklar: i32.etiket() için iki aday olamaz.
 }
 
 // ============================================================================
@@ -132,7 +129,6 @@ fn yerel_yabanci() {
 
     // ✗ YASAK: hem trait hem tip YABANCI → E0117 (DOĞRULANDI, Böl. 20):
     //     impl Display for Vec<i32> { ... }   // Display de Vec de std'den
-    //   Çözüm: NEWTYPE ile sar (Böl. 20) — Sarmal(Vec<...>) senin tipin olur, impl serbest kalır.
 }
 
 // ============================================================================

@@ -1,3 +1,4 @@
+// Açıklama: learn/advanced-concepts/ileri-lifetime-hrtb-gat/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: İLERİ LIFETIME'LAR, HIGHER-RANKED TRAIT BOUNDS (for<'a>) ve GAT
 // Çalıştır: cargo run -p ileri-lifetime-hrtb-gat   |   Test: cargo test -p ileri-lifetime-hrtb-gat
 //
@@ -23,8 +24,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku; teknik kısım zor gelse de ana fikir orada.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/ownership` (ödünç alma),
 // `learn/generics-traits-lifetimes` (lifetime ve associated type), `learn/closures-iterators`
@@ -74,7 +74,7 @@ fn main() {
     println!("== 1) Lifetime ilişkileri: iki ayrı süre, 'a: 'b, T: 'a ==");
     lifetime_iliskileri();
 
-    println!("\n== 2) HRTB: for<'a> — süreyi çağrılan seçer ==");
+    println!("\n== 2) HRTB: for<'a> — süreyi F'yi çağıran seçer, F her süreye razıdır ==");
     hrtb_closure();
     hrtb_trait();
 
@@ -100,7 +100,6 @@ fn main() {
 //     bulunan = Arayici { metin: &metin, kelime: &kelime }.ilk(); }
 //   println!("{bulunan:?}");      // ✗ E0597: `kelime` does not live long enough
 //
-// Sonuç yalnız `metin`in içine baktığı hâlde, tek 'a yüzünden `kelime`ye de bağlandı.
 // Çözüm: bağımsız yaşayan veriler için bağımsız parametreler.
 // SADE ANLATIM: Bir kitapta kurşun kalemle bazı cümlelerin altını çizdin. Çizgiler kitabın
 // içindedir; kalem bitse de kırılsa da çizgiler yerinde durur. `metin` kitaptır, `kelime`
@@ -258,16 +257,14 @@ fn lifetime_iliskileri() {
 //       f(&yerel).len()           // ✗ E0597: `yerel` does not live long enough
 //   }
 //
-// Neden? 'a'yı ÇAĞIRAN seçer ve fonksiyonun dışında başlayıp biten bir süredir; `yerel` ise
-// fonksiyonun içinde doğar. Çağıranın seçebileceği hiçbir 'a, henüz var olmayan bir yereli
-// kapsayamaz. İhtiyacımız olan: "F, benim ona vereceğim HER süre için çalışsın."
+// Neden? 'a'yı ÇAĞIRAN seçer; `yerel` ise fonksiyonun içinde doğar. Çağıranın seçebileceği
+// hiçbir 'a, henüz var olmayan bir yereli kapsayamaz. Gerekli söz: "F, vereceğim HER süreye razıdır."
 //
 // İşte bu `for<'a>`: bound'un içine gömülü, evrensel nicelenmiş ("her 'a için") bir süre.
 // İyi haber: Fn sözdiziminde referans yazınca derleyici bunu KENDİ ekler; aşağıdaki iki
 // imza birebir aynıdır:
 //     F: Fn(&str) -> &str
 //     F: for<'a> Fn(&'a str) -> &'a str
-// Yani HRTB'yi yıllardır kullanıyordun; burada yalnızca adını koyuyoruz.
 // SADE ANLATIM: İki terzi düşün. Biri "yalnız senin şimdi elinde tuttuğun kumaşı dikerim"
 // der; öteki "hangi kumaşı getirirsen getir dikerim" der. Bir fonksiyon closure'a KENDİ
 // içinde ürettiği veriyi verecekse ikinci terziye ihtiyacı vardır, çünkü o veri fonksiyon
@@ -496,8 +493,6 @@ fn gat_odunc_veren_iterator() {
     //   let a = pencereler.sonraki();
     //   let b = pencereler.sonraki();     // ✗ E0499: cannot borrow `pencereler` as mutable more than once
     //   kullan(a, b);
-    // İstediğimiz buydu: örtüşen iki &mut pencere aynı anda VAR OLAMAZ; sözleşmeyi artık tür
-    // sistemi taşıyor.
 
     let mut harfler = ['a', 'b', 'c', 'd'];
     println!(
@@ -673,8 +668,8 @@ fn gat_tur_ailesi() {
 // (Sade: "projeksiyon" = "I türünün bu trait'teki Oge'si hangi tür?" sorusunun yazılışı demek.)
 //
 // • Hepsi DERLEME ANINDA: lifetime'lar, for<'a> ve GAT'ın süre parametreleri kod üretiminden
-//   önce silinir (erasure). PencereMut::sonraki, elle yazılmış pointer aritmetiğiyle aynı
-//   makine koduna iner; kazandığımız şey hız değil, yanlış kullanımın derlenmemesidir.
+//   önce silinir (erasure). Lifetime denetimi derleme öncesinde kalkar; çalışma zamanında ek
+//   bir kontrol veya maliyet eklenmez. Kazandığımız şey hız değil, yanlış kullanımın derlenmemesidir.
 // (Sade: "erasure" = lifetime'lar yalnız denetim içindir; çalışan programda izleri kalmaz demek.)
 //
 // ============================================================================

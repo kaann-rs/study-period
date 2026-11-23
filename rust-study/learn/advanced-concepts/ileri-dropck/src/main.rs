@@ -1,11 +1,10 @@
+// Açıklama: learn/advanced-concepts/ileri-dropck/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: DROP CHECK (dropck), PhantomData, #[may_dangle]
 // Çalıştır: cargo run -p ileri-dropck
 //
-// Kaynak: Rust for Rustaceans Böl. 10 ("The Drop Check") + std. ileri-variance + Böl. 15 (Drop)
-// burada birleşir. Temel soru: "bir değer DÜŞERKEN, ödünç aldığı veriye hâlâ erişebilir mi?"
-// ↳ DÜZELTME NOTU (son gözden geçirme): kitapta "The Drop Check" Böl. 9'dadır
-//   (Unsafe Code); Böl. 10 Concurrency'dir. Yayıncının ayrıntılı içindekiler listesiyle doğrulandı.
-//   Dosyadaki "RfR Böl. 10" atıfları Böl. 9 olarak okunmalı.
+// Kaynak: Rust for Rustaceans Böl. 9 ("The Drop Check", Unsafe Code) + std. ileri-variance + Böl. 15
+// (Drop, kurs bölümü) burada birleşir. Yayıncının ayrıntılı içindekiler listesiyle doğrulandı.
+// Temel soru: "bir değer DÜŞERKEN, ödünç aldığı veriye hâlâ erişebilir mi?"
 //
 // Doğrulanmış (rustc ile): lifetime'lı bir tip Drop uygularsa, ödünç aldığı veri o tipi AŞMALIDIR
 // (yoksa E0597 "dropped here while still borrowed ... when `x` is dropped and runs Drop code");
@@ -14,8 +13,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümün üstündeki "SADE ANLATIM" kutusunu önce oku; teknik kısım zor gelirse sorun değil.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/ownership` (kapsam, drop, ödünç alma),
 // `learn/generics-traits-lifetimes` (lifetime), `learn/smart-pointers` (Drop trait'i) ve bu
@@ -97,11 +95,10 @@ fn dropck_temel() {
     //     borrow might be used here, when `denetci` is dropped and runs the Drop code".
     //   Çünkü gun önce düşer, ama denetci.drop() ondan SONRA çalışıp &gun'u okumaya kalkar → dangling.
     //
-    // KRİTİK FARK: Denetci'nin Drop impl'i OLMASAYDI, aynı ters-sıra kod DERLENİRDİ. Çünkü Drop yoksa
-    // derleyici "düşerken referansa dokunulmayacak" bilir → NLL borrow'u son kullanımda bitirir.
-    // Yani lifetime + Drop birleşimi şunu zorunlu kılar: ödünç ALINAN veri (gun), ödünç ALAN
-    // değerden (denetci) DAHA UZUN yaşamalı — çünkü denetci'nin &gun'a SON erişimi drop() içinde,
-    // yani denetci ölürken olur; borrow o ana kadar uzamak zorundadır, NLL onu erken bitiremez.
+    // KRİTİK FARK: Denetci'nin Drop impl'i OLMASAYDI, aynı ters-sıra kod DERLENİRDİ. Drop yoksa derleyici
+    // "düşerken referansa dokunulmayacak" bilir → NLL borrow'u son kullanımda bitirir. Drop varsa
+    // denetci'nin &gun'a SON erişimi drop() içinde olduğundan borrow o ana kadar uzamak zorundadır:
+    // ödünç ALINAN veri (gun), ödünç ALAN değerden (denetci) DAHA UZUN yaşamalı.
 }
 
 // ============================================================================
@@ -110,7 +107,6 @@ fn dropck_temel() {
 // PhantomData<T>: hiç yer kaplamayan (ZST) bir alan. Hiçbir veri TUTMAZ ama derleyiciye tipin
 // T açısından nasıl davranacağını söyler: VARIANCE (ileri-variance), DROP CHECK ve AUTO-TRAIT
 // (Send/Sync, ileri-send-sync) hesaplarında "sanki bir T varmış gibi" davranılır.
-// (Sade: "ZST" = bellekte sıfır bayt kaplayan tür demek; yalnız derleyicinin gözünde vardır.)
 // SADE ANLATIM: Boş bir odanın kapısına "Zeynep'in odası" yazan bir levha astığını düşün.
 // Odada kimse yok, levha da yer kaplamıyor; ama binadaki görevliler o odaya Zeynep'inmiş gibi
 // davranır. `PhantomData<T>` bu levhadır: bellekte T yoktur, ama derleyici türünü incelerken
@@ -128,6 +124,7 @@ struct Belirtec<T> {
     id: u32,
     _sahip: PhantomData<T>, // "mantıken bir T'ye sahibim" — ama bellekte T YOK
 }
+
 fn phantomdata_zst() {
     let b: Belirtec<String> = Belirtec {
         id: 7,
@@ -145,15 +142,14 @@ fn phantomdata_zst() {
     //   PhantomData<&'a T>      → "T'yi 'a boyunca ÖDÜNÇ aldım": 'a covariant, dropck T'yi okumaz.
     //   PhantomData<*const T>   → !Send + !Sync işaretçisi (ham pointer gibi davran).
     //   PhantomData<fn() -> T>  → T'de covariant AMA sahiplenmez (dropck tetiklenmez).
-    // (Sade: aşağıdaki iki satır eski kuralı anlatır. Güncel durum hemen altındaki düzeltme
-    //  notundadır: Drop yazılmış bir türde T zaten "silinirken kullanılabilir" sayılır.)
-    // Bir tip ham pointer (*mut T) tutup mantıken T'ye sahipse (kendi Box/Vec'ini yazıyorsan),
-    // *mut T dropck'e "T'm yok" dedirtir; PhantomData<T> eklemek bu yanlışı düzeltir (RfR Böl. 10).
-    // ↳ DÜZELTME NOTU (son gözden geçirme): güncel Rust'ta Drop impl'i olan bir tipin TÜM generic
-    //   parametreleri zaten canlı sayılır: `struct K<T>(*mut T)` + `impl Drop` PhantomData OLMADAN da
-    //   ters sırada ödünçte E0597 verir (rustc ile doğrulandı). PhantomData<T> dropck açısından yalnız
-    //   `#[may_dangle]` ile birlikte fark yaratır (std'nin Vec/Box'ı ikisini bu yüzden birlikte kullanır).
-    //   Variance ve auto-trait (Send/Sync) etkisi için yukarıda yazılanlar geçerlidir.
+    // Güncel kural: Drop impl'i olan bir tipin TÜM generic parametreleri zaten canlı sayılır
+    // (RFC 1238); bu yüzden *mut T tutan bir tipte PhantomData<T> eklemek dropck açısından gereksizdir.
+    // E0597 için T'nin gerçekten bir ödünç taşıması gerekir:
+    //     struct K<T>(T); impl<T> Drop for K<T> { fn drop(&mut self) {} }
+    //     let k; let x = 5u8; k = K(&x); // k, x'ten sonra düşer → E0597
+    // PhantomData<T>'nin bağımsız dropck etkisi yalnızca Drop impl'i olmayan (ama drop glue'ı olan)
+    // tiplerde ve `#[may_dangle]` ile görünür (std'nin Vec/Box'ı ikisini bu yüzden birlikte kullanır).
+    // Variance ve auto-trait (Send/Sync) etkisi için yukarıda yazılanlar geçerlidir.
 }
 
 // SADE ANLATIM (aşağıdaki bölüm için): Yukarıda iki şey gördün: Drop yazınca derleyici
@@ -174,20 +170,16 @@ fn phantomdata_zst() {
 //   kullanımdan sonra dokunulmaz → x değiştirilebilir (NLL). Drop varsa foo::drop &mut x'e
 //   erişebilir → x hâlâ ödünçte sayılır, mutasyon yasak. (Bizim Denetci örneği bunun paylaşımlı hâli.)
 //
-// • Neden Drop fark yaratır: Drop YOKSA, derleyici "düşerken bu referansa dokunulmaz" bilir ve
-//   borrow'u son kullanımda sonlandırır (NLL). Drop VARSA, drop() gövdesi referansı kullanabilir;
-//   bu yüzden borrow, değerin düşmesine (drop çağrısına) kadar UZATILIR. Sorun: izin verilse,
-//   drop() çoktan serbest bırakılmış/değişmiş veriyi okur/yazar → use-after-free.
+// • Neden Drop fark yaratır: Drop YOKSA borrow son kullanımda biter (NLL); Drop VARSA drop() gövdesi
+//   referansı kullanabilir → borrow, değerin düşmesine (drop çağrısına) kadar UZATILIR. İzin verilse
+//   drop() serbest bırakılmış/değişmiş veriyi okur/yazar → use-after-free.
 //
 // • PhantomData<T>: sıfır boyutlu işaret alanı. Bir tip, bir GENERIC parametreyi doğrudan ALAN
-//   olarak tutmuyorsa (ör. ham pointer *mut T ardında ya da hiç) ama variance/dropck/auto-trait
-//   açısından "sanki T içeriyormuş" gibi davranmalıysa PhantomData eklenir. En kritik kullanım
-//   (RfR): kendi Box<T>/Vec<T>'ini yazarken içeride *mut T tutarsın; dropck *mut T'yi görüp "T'ye
-//   sahip değil, T::drop'u çağırmaz" sanır. Bu YANLIŞ (sen T::drop'u elle çağırırsın). PhantomData<T>
-//   eklemek dropck'e gerçeği söyler: "T'ye sahibim, düşerken T::drop çalışır" → lifetime'lar doğru
-//   kısıtlanır.
-// ↳ DÜZELTME NOTU (son gözden geçirme): bu paragraf eski dropck kuralını anlatır; bugün belirleyici olan Drop impl'inin
-//   varlığıdır (yukarıdaki nota bak). PhantomData<T>'nin dropck rolü #[may_dangle] ile sınırlıdır.
+//   olarak tutmuyorsa (ör. ham pointer *mut T ardında ya da hiç) ama variance/auto-trait açısından
+//   "sanki T içeriyormuş" gibi davranmalıysa PhantomData eklenir. dropck açısından belirleyici olan
+//   Drop impl'inin varlığıdır: Drop yazılmış tipte T zaten canlı sayılır (RFC 1238). PhantomData<T>'nin
+//   bağımsız dropck etkisi yalnızca Drop impl'i olmayan (ama drop glue'ı olan) tiplerde ve
+//   `#[may_dangle]` ile görünür.
 //
 // • #[may_dangle] (unstable `dropck_eyepatch`): TERS yön. Kendi Box<&mut T> veya Box<T>'ini yazıyorsan
 //   ve Drop'un T'ye SADECE düşürmek dışında DOKUNMUYORSA, dropck'in aşırı-katı kısıtını gevşetmek

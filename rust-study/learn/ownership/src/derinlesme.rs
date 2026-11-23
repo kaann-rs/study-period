@@ -1,3 +1,4 @@
+// Açıklama: learn/ownership/ACIKLAMA.md
 // Derinleşme — Bölüm 4: Ownership ve Borrowing (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p ownership   |   Test: cargo test -p ownership
 //
@@ -12,8 +13,8 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Önce main.rs'i oku; bu dosya onun devamıdır. Buradaki her bölümün üstünde de bir "SADE ANLATIM"
-// kutusu var: önce onu oku, sonra teknik açıklamaya geç. Benzetmelerin hepsi bir KÜTÜPHANEDE geçer.
+// Önce main.rs'i oku; bu dosya onun devamıdır. Her bölümde önce SADE ANLATIM kutusu,
+// sonra teknik açıklama var. Benzetmelerin hepsi bir KÜTÜPHANEDE geçer.
 //
 // Bu dosyanın tek cümlelik özeti: main.rs'te öğrendiğin "ver, bak, değiştir" kurallarını gerçek
 // kod yazarken nerede, nasıl seçeceğini ve derleyici itiraz ettiğinde ne yapacağını gösterir.
@@ -59,9 +60,8 @@ pub fn calistir() {
 //   fn f(x: &str)         → "Yalnız BAKACAĞIM." Çağıranın değeri olduğu gibi kalır.
 //   fn f(x: &mut String)  → "Yerinde DEĞİŞTİRECEĞİM." Çağıran sonucu kendi değişkeninde görür.
 //
-// Benzetme: bir kitabı arkadaşına HEDİYE etmek (String), kütüphanede birlikte OKUMAK (&str),
-// üzerine not alsın diye ÖDÜNÇ vermek (&mut String). Üçü de meşrudur; yanlış olan, yalnız
-// bakacakken kitabı elinden almaktır.
+// Benzetme: kitabı HEDİYE etmek (String), kütüphanede OKUMAK (&str), not için ÖDÜNÇ vermek
+// (&mut String). Yanlış olan, yalnız bakacakken kitabı elinden almaktır.
 //
 // Karar kuralı (çoğu durumda yeter):
 //   1) Değeri saklayacak mısın (struct alanına koymak, başka thread'e göndermek)? → sahipliği al.
@@ -73,8 +73,7 @@ pub fn calistir() {
 // "ONARILACAK" sepetindeki kitabın yırtığını görevli yapıştırır, kitap onarılmış hâlde yine sende
 // kalır. Rust'ta fonksiyonun parametre türü, sepetin üstündeki bu yazıdır: `String` bağış, `&str`
 // bakış, `&mut String` onarımdır.
-// Neden böyle? Yazı olmasaydı kitabını bıraktıktan sonra geri alıp alamayacağını ancak görevlinin
-// bütün yaptıklarını izleyerek öğrenirdin. İmza bunu tek bakışta söyler.
+// Neden? İmza olmasaydı kitabın geri alınıp alınmayacağını görevlinin yaptıklarından çıkarırdın.
 //   Mini örnek:
 //     fn bagisla(kitap: String) {}             // alır; çağırana geri dönmez
 //     fn bak(kitap: &str) -> usize { kitap.len() }
@@ -120,7 +119,7 @@ fn imza_secimi() {
 // ============================================================================
 // Move yalnız değişkenin tamamına değil, ALANLARINA da uygulanır. Bir alanı taşırsan struct
 // "kısmen taşınmış" olur: kalan alanları tek tek kullanabilirsin ama struct'ı BÜTÜN olarak
-// artık kullanamazsın. Derleyici bunu alan alan izler (main.rs'teki "başlatılı mı" analizi,
+// artık kullanamazsın. Derleyici bunu alan alan izler (main.rs'teki "başlatılmış mı" analizi,
 // değişken düzeyinde değil yer/alan düzeyinde çalışır).
 // SADE ANLATIM: Üç ciltlik bir masal seti düşün. İkinci cildi kütüphaneye bağışlarsan birinci ve
 // üçüncü cildi okumaya devam edersin; ama elindekini artık "tam set" diye kimseye veremezsin,
@@ -215,10 +214,9 @@ impl KullaniciDeposu {
     }
 
     // (Sade: aşağıdaki liste adları kopyalamaz, raftaki adlara bakar. Liste elindeyken raf
-    //  değiştirilemez; yoksa liste, yerinden oynamış adları göstermeye devam ederdi.)
-    // Dönen dilimler deponun içindeki String'lere bakar; hiçbir ad kopyalanmaz. İmzadaki
-    // elision "dönen &str'ler &self kadar yaşar" der — depo değişirse bu liste geçersizleşeceği
-    // için derleyici, liste kullanılırken depoyu değiştirmeni engeller (aşağıda ✗).
+    //  değiştirilemez; yoksa yerinden oynamış adları göstermeye devam ederdi.)
+    // İmzadaki elision "dönen &str'ler &self kadar yaşar" der; depo değişirse liste
+    // geçersizleşeceği için derleyici, liste kullanılırken depoyu değiştirmeni engeller (aşağıda ✗).
     pub fn aktif_adlar(&self) -> Vec<&str> {
         self.kayitlar
             .iter()
@@ -349,8 +347,7 @@ fn sik_hatalar_ve_cozumleri() {
     //   ✗  let ilk = liste[0];            // E0507: cannot move out of index of `Vec<String>`
     //   ✗  fn ad_al(k: &Kullanici) -> String { k.ad }
     //                                     // E0507: cannot move out of `k.ad` which is behind a shared reference
-    // Mantık: & yalnız BAKMA hakkıdır; içindekini alıp götürürsen asıl sahip elinde "delik"
-    // kalan bir değerle baş başa kalır ve onu sonra düşürmeye çalışır (double free).
+    // Mantık: & yalnız BAKMA hakkıdır; içindekini alırsan asıl sahip "delik" değerle kalır (double free).
     // ✓ Üç seçenek, niyete göre:
     let mut liste = vec![String::from("bir"), String::from("iki"), String::from("üç")];
     let bakis: &String = &liste[0]; // (a) yalnız bak
@@ -372,8 +369,7 @@ fn sik_hatalar_ve_cozumleri() {
 // SADE ANLATIM: Raftan kitap alınca yerine "bu kitap alındı" yazan boş bir karton konur ki raf
 // hiçbir an boşluklu kalmasın. `std::mem::take` bunu yapar: değeri alır, yerine o türün boş
 // hâlini koyar. `Option`ın `take` metodu da aynısıdır: içindekini alır, yerine None bırakır.
-// Neden böyle? Yeri boş bırakmak yasaktır; rafa sonradan bakan biri orada geçerli bir şey bulmak
-// zorundadır. Yerine bir şey koyarak alırsan bu söz bozulmaz.
+// Neden? Rafa sonradan bakan biri orada geçerli bir şey bulmak zorundadır.
 //   Mini örnek:
 //     let mut raf = vec![String::from("masal")];
 //     let alinan = std::mem::take(&mut raf);   // kitaplar bizde, rafta boş bir liste kaldı
@@ -396,12 +392,10 @@ impl Sepet {
         self.kupon = Some(kod.to_string());
     }
 
-    // (Sade: aşağıdaki "üç kelime", Vec'in küçük künyesidir: elemanların yeri, sayısı ve ayrılan
-    //  yer. Elemanlar heap'te durur; el değiştiren yalnız bu künyedir, kitaplar yerinden oynamaz.)
+    // (Sade: "üç kelime" Vec'in küçük künyesidir: pointer, uzunluk, kapasite; elemanlar heap'te
+    //  durur, el değiştiren yalnız künyedir, tek bayt kopyalanmaz.)
     // ✗ `let hepsi = self.urunler;` → E0507: &mut self'in ardından alan taşınamaz.
-    // ✗ `self.urunler.clone()` + `self.urunler.clear()` çalışır ama tüm String'leri boşuna kopyalar.
-    // ✓ mem::take: Vec'in üç kelimesi (pointer, uzunluk, kapasite) el değiştirir, yerine boş Vec
-    //   gelir. Tek bir bayt bile kopyalanmaz.
+    // ✗ clone + clear boşuna kopyalar. ✓ mem::take yerine boş Vec koyar.
     pub fn siparise_cevir(&mut self) -> Vec<String> {
         std::mem::take(&mut self.urunler)
     }

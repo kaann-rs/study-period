@@ -1,14 +1,14 @@
+// Açıklama: learn/macros/ACIKLAMA.md
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosya çok kısadır; önce bu kutuyu, sonra altındaki açıklamaları oku.
-//
 // Bu dosyanın tek cümlelik özeti: Prosedürel makro, derleyicinin senin kodunu derlerken
 // çağırdığı küçük bir yardımcıdır: kod parçaları alır, yerine yeni kod parçaları verir.
 //
 // Benzetme: Bir lastik damga hazırlıyorsun. Damgayı hazırlayan atölye (bu crate) ile damgayı
-// kâğıda basan kişi (makroyu kullanan başka bir crate) ayrı yerlerdedir. Bu yüzden bu dosyada
-// `fn main` yoktur; damganın izini görmek için tests/kullanim.rs dosyasına bakarsın.
+// kâğıda basan kişi (makroyu kullanan başka bir crate) ayrı yerlerdedir: makro tanımlandığı
+// crate'te kullanılamaz. Bu dosyada `fn main` yoktur (tercih, zorunluluk değil); damganın izini
+// görmek için tests/kullanim.rs dosyasına bakarsın.
 //
 // MİNİ SÖZLÜK (bu dosyada geçen kelimeler):
 //   makro                    → kod yazan kod; çağrıldığı yere derlemeden önce kod yerleştirir.
@@ -22,16 +22,15 @@
 
 //! Prosedürel makro çalışması.
 //!
-//! Bu bir proc-macro kütüphanesidir: derleyici, kodu derlerken bu fonksiyonları
-//! çalıştırır ve dönen TokenStream'i kaynak koda ENJEKTE eder. Yani makro,
-//! derleme zamanında kod üretir. Böyle bir crate içinde normal kod çalıştırılamaz
-//! (fn main olmaz); makroyu ancak BAŞKA bir crate kullanabilir.
+//! Bu bir proc-macro kütüphanesidir: derleyici kodu derlerken bu fonksiyonları çalıştırır, dönen
+//! TokenStream'i kaynak koda ENJEKTE eder. Bu crate'in lib hedefi proc-makro tipindedir: proc-makro
+//! dışında öğe dışa aktaramaz, ama özel fonksiyonlar ve ayrı bir binary hedefi yazılabilir. Makroyu
+//! ancak BAŞKA bir crate kullanabilir.
 
 use proc_macro::TokenStream;
 
-// SADE ANLATIM: Aşağıdaki fonksiyon damganın kendisidir. Biri kodunda `cevap_uret!();` yazarsa
-// derleyici bu fonksiyonu çağırır ve o satırın yerine fonksiyonun döndürdüğü kodu koyar:
-// `fn cevap() -> u32 { 42 }`. Yani kullanıcı tek satır yazar, elinde hazır bir fonksiyon olur.
+// SADE ANLATIM: Aşağıdaki fonksiyon damganın kendisidir: `cevap_uret!();` yazan satırın yerine
+// derleyici onun döndürdüğü `fn cevap() -> u32 { 42 }` kodunu koyar.
 // Bu makro kendisine verilen girdiye hiç bakmaz (`_girdi`); gerçek makrolar girdiyi okuyup ona
 // göre kod üretir.
 // Neden böyle bir şey var? Aynı kalıptaki kodu elle tekrar tekrar yazmak yerine derleyiciye

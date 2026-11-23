@@ -1,3 +1,4 @@
+// Açıklama: learn/error-handling/ACIKLAMA.md
 // Rust Book — Bölüm 9: Error Handling (hata yönetimi)
 // Çalıştır: cargo run -p error-handling
 //
@@ -10,8 +11,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku, sonra teknik açıklamaya geç.
 // Bu dosyadaki benzetmelerin hepsi aynı yerde geçer: bir ev mutfağında.
 //
 // Bu bölümün tek cümlelik özeti: İşler ters gidebilir; Rust'ta bir fonksiyon "olmadı" diyecekse
@@ -64,9 +64,8 @@ fn main() {
 // 1. panic! — kurtarılamaz hata
 // SADE ANLATIM: Mutfakta kek yaparken ocak tutuşursa keke devam etmezsin; her şeyi bırakır, ocağı
 // kapatır ve mutfaktan çıkarsın. `panic!` budur: program "bu durumda devam etmek tehlikeli" der ve
-// o işi yarıda keser. Çıkarken ocağı kapatman gibi, Rust da varsayılan ayarda elindekileri
-// toplayıp (Drop) öyle çıkar. Neden böyle? Bozuk bir durumla devam eden program yanlış sonuç
-// üretir; durmak, yanlış sonucu doğruymuş gibi vermekten iyidir.
+// o işi yarıda keser. Rust da çıkarken elindekileri toplar (Drop). Neden? Bozuk durumla devam eden
+// program yanlış sonuç üretir; durmak daha iyidir.
 //   Mini örnek:
 //     let v = vec![1, 2, 3];
 //     println!("{}", v[1]);         // ✓ 2 — ikinci eleman var
@@ -105,16 +104,14 @@ fn ikiye_bol(a: i32, b: i32) -> Result<i32, String> {
     } else {
         Ok(a / b)
     }
-    // unwrap()/expect("...") Result'ı açar ama Err ise PANİK eder. expect mesaj verdirir,
-    // bu yüzden hata ayıklamada unwrap'tan iyidir. İkisi de "burada Err olamaz" dediğin
-    // yerler için; aksi halde match/`?` ile ele al.
+    // unwrap()/expect Result'ı açar ama Err ise PANİK eder; expect mesaj verdirir, hata ayıklamada iyidir.
+    // İkisi de "Err olamaz" dediklerin içindir; aksi halde match/`?` kullan.
     //
     // Not (doğrulanmış): Result #[must_use]'tır. `ikiye_bol(10, 2);` deyip sonucu yok sayarsan
     // "unused `Result` that must be used" UYARISI alırsın. Bilerek yok saymak için: `let _ = ...;`
 }
 
 // 3. ? operatörü — hata yayma (propagation)
-// x.parse()? : parse Ok ise içteki değeri verir; Err ise FONKSİYONDAN hemen o Err ile döner.
 // SADE ANLATIM: Annen sana "kek yap" dedi, sen de kardeşini süte yolladın. Kardeşin "süt
 // kalmamış" notuyla dönerse yapabileceğin en doğru şey, keki bırakıp aynı notu annene götürmektir.
 // Süt geldiyse hiçbir şey olmamış gibi devam edersin. `?` işareti bu iki cümlenin kısaltmasıdır:
@@ -194,30 +191,25 @@ fn from_donusumu() {
     if let Err(e) = hesapla("xx") {
         println!("Display: {e}");
     }
-    // Neden From? Sorun: alt fonksiyonlar FARKLI hata türleri döndürür (ParseIntError, IO hatası...).
-    // ? bunları, fonksiyonun ilan ettiği TEK hata türüne From ile köprüler; böylece her katmanda
-    // elle dönüştürme yazmazsın ama tür güvenliği korunur.
+    // Neden From? Alt fonksiyonlar farklı hata türleri döndürür (ParseIntError, IO hatası...); `?`
+    // bunları ilan edilen TEK türe From ile köprüler, elle dönüştürme gerekmez.
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Yukarıda `Result`ı bir poşet, `?`i de "not geldiyse hemen
-// ilet" kuralı diye anlattık. Aşağıdaki bölüm perdenin arkasını gösterir: derleyici `?` işaretini
-// görünce onu sıradan bir `match`e çevirir; içinde sihir yoktur. Ayrıca "sonucu kullanmadın"
-// uyarısının nereden geldiğini ve panikte ortalığın nasıl toplandığını anlatır. İlk okuyuşta
-// atlayabilirsin; yukarıdaki dört bölümü anlamış olman yeter.
+// SADE ANLATIM (aşağıdaki bölüm için): `?` sıradan bir `match`e çevrilir, içinde sihir yoktur;
+// ayrıca "sonucu kullanmadın" uyarısı ve panikte toplanan kaynaklar anlatılır. İlk okuyuşta atla,
+// dört bölüm yeter.
 // ============================================================================
 // DERLEYİCİ PERSPEKTİFİ — Result ve ? nasıl çalışıyor?
 // ============================================================================
 //
 // • Result<T, E> ve Option<T> SIRADAN enum'lardır; özel çalışma-anı mekanizması yoktur.
-//   Rust'ta exception YOK — "hata olabilir" bilgisi DÖNÜŞ TÜRÜNE kodlanır. Böylece çağıran,
-//   Err ihtimalini match/`?`/unwrap ile ele almak zorunda kalır (sessizce atlanamaz).
+//   Rust'ta exception YOK — "hata olabilir" DÖNÜŞ TÜRÜNE kodlanır; çağıran Err'i ele almak zorundadır.
 //
-// • #[must_use]: Result (ve Option gibi bazı türler) bu öznitelikle işaretlidir. Değerini
-//   kullanmadan bırakırsan derleyici uyarır ("unused `Result` that must be used"). Böylece
-//   "hatayı kontrol etmeyi unutma" derleyici tarafından hatırlatılır. (Bilerek yok say: `let _ =`.)
-// ↳ DÜZELTME NOTU (son gözden geçirme): TÜR olarak yalnız Result `#[must_use]`tur; Option türü değildir
-//   (`Some(3);` ya da Option dönen bir çağrıyı yok saymak uyarı vermez — rustc ile doğrulandı). Yalnız
-//   bazı Option METOTLARI tek tek #[must_use] taşır.
+// • #[must_use]: TÜR olarak yalnız Result bu öznitelikle işaretlidir; Option türü değildir
+//   (`Some(3);` ya da Option dönen bir çağrıyı yok saymak uyarı vermez). Yalnız bazı Option
+//   METOTLARI tek tek #[must_use] taşır. Result'ın değerini kullanmadan bırakırsan derleyici
+//   uyarır ("unused `Result` that must be used") — "hatayı kontrol etmeyi unutma" böylece
+//   hatırlatılır. (Bilerek yok say: `let _ =`.)
 //
 // (Sade: "indirgeme" (lowering/desugaring), derleyicinin kısa yazımı aynı işi yapan uzun ve yalın
 // koda çevirmesi demek. Aşağıdaki Continue = "devam et", Break = "dur ve dön" anlamına gelir.)

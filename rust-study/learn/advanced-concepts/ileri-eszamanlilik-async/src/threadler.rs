@@ -1,3 +1,4 @@
+// Açıklama: learn/advanced-concepts/ileri-eszamanlilik-async/ACIKLAMA.md
 // BÖLÜM A — İleri eşzamanlılık: RwLock, Condvar, kilit sıralaması, atomikler, Send/Sync
 //
 // Böl. 16 (concurrency) Mutex + kanal + scope ile "veri yarışı olmayan" kod yazmayı öğretti.
@@ -173,20 +174,15 @@ fn rwlock_ornegi() {
 //     notify_one()  → bekleyenlerden birini uyandırır.
 // "Bırak + uyu"nun atomik olması şarttır: arada boşluk olsaydı, bildirim tam o boşlukta gelip
 // kaybolabilirdi (lost wakeup) ve tüketici sonsuza dek uyurdu.
-// (Sade: "lost wakeup" = zil, sen tam uyumak üzereyken çalar; duymazsın ve bir daha çalan olmaz
-//  demek. "Atomik" burada "arada hiç boşluk bırakmadan, tek hamlede" anlamındadır.)
 //
 // İki kural:
 //  1) Koşulu HER ZAMAN döngüde denetle. wait sebepsiz yere de dönebilir (spurious wakeup) ve
 //     sen kilidi geri alana dek başka bir thread öğeyi kapmış olabilir. `wait_while` bu
 //     döngüyü senin yerine yazar.
-// (Sade: "spurious wakeup" = zil çalmadığı hâlde uyanmak demek. Bu yüzden uyanınca "gerçekten
-//  sıram geldi mi?" diye bir daha bakarsın.)
 //  2) Koşulu değiştiren taraf bunu KİLİT ALTINDA yapar, sonra bildirir.
 //
 // Senaryo: sınırlı (bounded) kuyruk. Kapasite dolunca ÜRETİCİ de bekler — buna geri basınç
 // (backpressure) denir: hızlı üretici, yavaş tüketicinin belleği şişirmesine izin vermez.
-// (Sade: "backpressure / geri basınç" = tepsi dolunca fırıncının da durup beklemesi demek.)
 // SADE ANLATIM: Pastanenin tezgâhında dört börek alan bir tepsi var. Tepsi boşsa müşteri
 // kapıda dikilip durmadan "geldi mi?" diye sormaz; oturur, börek gelince görevli "sıran geldi"
 // diye zili çalar. Tepsi doluysa bu kez fırıncı bekler; yer açılınca onun zili çalar.
@@ -436,8 +432,6 @@ fn kilit_siralamasi_ornegi() {
 //             ile okuyan thread'e görünür." Bayrak/işaretçi ile BAŞKA veriyi yayımlarken.
 //   SeqCst  → tüm SeqCst işlemler için tek bir global sıra. En güçlüsü ve en kolay akıl
 //             yürütüleni; emin değilsen bunu kullan, ölçmeden zayıflatma.
-// (Sade: "Ordering" = bu hamlenin öteki thread'lere ne kadar sıkı bir sırayla görüneceğini
-//  seçen ayar demek. Emin değilsen en sıkısı olan SeqCst'yi seç.)
 // SADE ANLATIM: Bayrak kapmaca oynuyorsunuz. Bayrağı kapmak tek hamledir: iki çocuk aynı
 // bayrağı yarı yarıya kapamaz, biri kapar, öteki boş yere uzanmış olur. Atomik değerler böyle
 // çalışır: okuma ve yazma yarıda kesilemeyen tek hamledir, bu yüzden kilit gerekmez.

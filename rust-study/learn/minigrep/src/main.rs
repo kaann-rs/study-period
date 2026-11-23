@@ -1,10 +1,9 @@
-// İnce ikili: tüm mantık lib.rs'te. main yalnız argüman toplar, hatayı stderr'e basar,
-// doğru çıkış koduyla biter.
-// SADE ANLATIM: Bu dosya danışma masasının önündeki kapıdır; asıl işi lib.rs'teki görevli yapar.
-// Burada yalnız üç şey olur: komut satırındaki argümanlar fişe yazılır (`Config::build`), fiş
-// görevliye verilir (`run`), bir sorun çıkarsa hata mesajı ekrana yazılıp programdan 1 koduyla
-// çıkılır. Neden bu kadar kısa? `main` test edilemez; içinde ne kadar az iş olursa, test edilmemiş
-// kod o kadar az olur. Terimler için lib.rs'in başındaki mini sözlüğe bak.
+// Açıklama: learn/minigrep/ACIKLAMA.md
+// İnce ikili: mantık lib.rs'te; main argümanları toplar, hatayı stderr'e basar, kod 1'le biter.
+// SADE ANLATIM: Bu dosya danışma masasının kapısıdır; asıl işi lib.rs'teki görevli yapar:
+// argümanlar fişe yazılır (`Config::build`), fiş görevliye verilir (`run`), sorun olursa hata
+// mesajı basılıp 1 koduyla çıkılır. `main` entegrasyon testine doğrudan import edilemez; test
+// edilebilir mantığı lib.rs'e taşıyıp main'i ince tutarız. Terimler için lib.rs'in mini sözlüğüne bak.
 //   Mini örnek (rust-study kökünden):
 //     cargo run -p minigrep -- hiç learn/minigrep/siir.txt   // ✓ uyan satırları yazar, kod 0
 //     cargo run -p minigrep -- hiç                           // ✗ "dosya yolu verilmedi", kod 1

@@ -1,3 +1,4 @@
+// Açıklama: learn/cargo-and-crates/ACIKLAMA.md
 //! # cargo-and-crates — Bölüm 14 örneği
 //!
 //! `//!` ile başlayan yorum, İÇİNDE bulunduğu öğeyi (burada: crate'in tamamını) belgeler.
@@ -15,9 +16,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Not: Bu dosyada `//!` ve `///` ile başlayan satırlar sıradan yorum değildir; kullanım kılavuzuna
-// dönüşen "doküman yorumları"dır. Sade anlatım kutuları ise düz `//` ile yazıldı ve kılavuza
-// girmez. Önce kutuyu oku, sonra altındaki koda geç.
+// Not: `//!` ve `///` kılavuza dönüşen "doküman yorumları", düz `//` ise kılavuza girmez.
 // Bu dosyadaki benzetmelerin hepsi aynı yerde geçer: kutusuyla satılan bir boya setinde.
 //
 // Bu bölümün tek cümlelik özeti: Yazdığın kodu başkalarının kullanabileceği bir pakete
@@ -40,7 +39,7 @@
 //   bağımlılık (dependency)  → senin crate'inin kullandığı başka bir crate.
 //   Cargo.toml / Cargo.lock  → paketin ayar dosyası / kullanılan sürümlerin kesin listesi.
 //   profil (dev, release)    → derleme ayar takımı: hızlı derleme / hızlı çalışan program.
-//   opt-level                → derleyicinin kodu ne kadar hızlandırmaya uğraşacağı (0–3).
+//   opt-level                → derleyicinin kodu ne kadar hızlandırmaya uğraşacağı (0–3; ayrıca boyut için "s" ve "z").
 //   workspace                → birlikte derlenen crate'lerin toplandığı çatı klasör.
 //   target/                  → derleme çıktılarının konduğu klasör.
 
@@ -117,15 +116,12 @@ pub mod islem {
 //     use cargo_and_crates::BirincilRenk;           // ✓ kısa yol: `pub use` sayesinde
 //     use cargo_and_crates::Mor;                    // ✗ derlenmez: kökte böyle bir öğe yok
 // ---- pub use: YENİDEN DIŞA AKTARMA ----
-// İç yapı: turler::BirincilRenk, islem::karistir. Ama kullanıcı derin yolları yazmak zorunda
-// kalmasın diye en çok kullanılanları KÖK seviyeye "yeniden dışa aktarıyoruz". Böylece hem
-// `cargo_and_crates::turler::BirincilRenk` hem de kısa `cargo_and_crates::BirincilRenk` çalışır.
+// İç yapı (turler::, islem::) olduğu gibi durur; pub use ile KÖK'ten de erişilir.
 pub use islem::karistir;
 pub use turler::{BirincilRenk, IkincilRenk};
 
 // (Sade: bu crate'te iki çeşit test birlikte çalışır: aşağıdaki sıradan testler ve yukarıda
 // kılavuzun içine yazılmış örnekler. `cargo test -p cargo-and-crates` ikisini de çalıştırır.)
-// Normal birim testi de doc-test'in yanında koşar.
 #[cfg(test)]
 mod testler {
     use super::*;
@@ -144,11 +140,8 @@ mod testler {
     }
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Aşağısı kod yazmayı değil, yazdığın kodu paketleyip
-// başkalarına ulaştırmayı anlatır: kılavuzdaki örnekler neden test edilir, iki çeşit doküman
-// yorumunun farkı nedir, "deneme için hızlı derleme" ile "kullanıcıya gidecek hızlı program"
-// ayarları nasıl ayrılır, birçok paket tek çatı altında nasıl toplanır. İlk okuyuşta
-// atlayabilirsin; yukarıdaki üç kutuyu anlamış olman yeter.
+// SADE ANLATIM (aşağıdaki bölüm için): doc-test, `//!`/`///` farkı, profil ayarları, workspace.
+// İlk okuyuşta atlayabilirsin.
 // ============================================================================
 // CARGO / EKOSİSTEM PERSPEKTİFİ — bu bölüm "neden" çok, "nasıl" az
 // ============================================================================
@@ -158,13 +151,11 @@ mod testler {
 //   derleyip çalıştırarak çözer. Örnek derlenmez veya assert düşerse `cargo test` başarısız olur
 //   → dokümanla kod senkron kalmaya ZORLANIR. (Örnekte main yazmadık; doc-test onu sarar.)
 //
-// • `//!` vs `///`: `//!` İÇİNDE bulunduğu öğeyi (crate/modül) belgeler, dosyanın en başına
-//   yazılır; `///` KENDİNDEN SONRAKİ öğeyi (fonksiyon, tür) belgeler. İkisi de Markdown'dır ve
-//   `cargo doc` ile HTML üretir (crates.io'ya yayımlanınca docs.rs otomatik yayımlar).
+// • `//!` vs `///`: `//!` İÇİNDE bulunduğu öğeyi (dosyanın başı), `///` KENDİNDEN SONRAKİ öğeyi
+//   belgeler. İkisi Markdown; `cargo doc` HTML üretir (crates.io'da docs.rs otomatik yayımlar).
 //
-// • `pub use` (re-export) neden? Sorun: iç modül hiyerarşin (turler/islem) senin DÜZENİN;
-//   kullanıcı onu ezberlemek zorunda kalmamalı. pub use ile "iç organizasyon" ile "public API"
-//   ayrışır: kodu istediğin gibi modüllere böl, sonra önemli öğeleri kök'e yeniden dışa aktar.
+// • `pub use` (re-export) neden? İç modül düzenin (turler/islem) senin işin; kullanıcı ezberlemesin.
+//   "İç organizasyon" ile "public API" ayrışır: önemli öğeleri kök'e yeniden dışa aktar.
 //
 // • RELEASE PROFİLLERİ: `cargo build` = dev profili (opt-level 0, hızlı derleme, yavaş kod);
 //   `cargo build --release` = release profili (opt-level 3, yavaş derleme, hızlı kod).

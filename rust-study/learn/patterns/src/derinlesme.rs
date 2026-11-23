@@ -1,3 +1,4 @@
+// Açıklama: learn/patterns/ACIKLAMA.md
 // Derinleşme — Bölüm 19: Patterns (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p patterns   |   Test: cargo test -p patterns
 //
@@ -11,8 +12,7 @@
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
 // Bu dosya main.rs'teki desen araçlarını gerçek bir işte birlikte kullanır: kullanıcının yazdığı
-// komutları anlayan küçük bir depo programı. Her bölümün başındaki "SADE ANLATIM" kutusunu önce
-// oku. Benzetmeler yine ŞEKİL EŞLEŞTİRME OYUNCAĞI ile sürer.
+// komutları anlayan küçük bir depo programı. Benzetmeler yine ŞEKİL EŞLEŞTİRME OYUNCAĞI ile sürer.
 //
 // Bu dosyanın tek cümlelik özeti: Desenler "kaç parça var, ilki ne, içinde ne var?" sorularını
 // tek ifadede sorar; unuttuğun bir durum olursa derleyici onu sana gösterir.
@@ -43,18 +43,15 @@ pub fn calistir() {
 }
 
 // 1. Gerçek hayattan örnek: komut ayrıştırıcı
-// Bu konuyu neden öğreniyoruz? Kullanıcıdan gelen bir satırı işlemek "kaç parça var, ilki ne,
-// gerisi ne?" sorularının toplamıdır. Desensiz yazınca bu `len()` kontrolleri ve `parcalar[1]`
-// indekslerine dağılır; kontrolle indeks birbirinden ayrı olduğu için biri güncellenip diğeri
-// unutulur ve program çalışma anında "index out of bounds" ile panikler. Dilim deseni
-// uzunluk testini ve parçalara erişimi TEK ifadede birleştirir: uymayan uzunluk o kola girmez.
+// Kullanıcı satırını işlemek "kaç parça, ilki ne, gerisi ne?" sorularıdır. Desensiz `len()` ve
+// `parcalar[1]` dağılır; biri güncellenip diğeri unutulunca "index out of bounds" paniği olur.
+// Dilim deseni uzunluk testiyle erişimi TEK ifadede birleştirir.
 // SADE ANLATIM: Kullanıcının yazdığı satırı kelimelere bölünce elinde bir sıra parça olur. Her
 // komut bu sıra için bir deliktir: "tam iki parça var ve ilki `sil` mi?" Dilim deseni iki soruyu
 // birden sorar: kaç parça olduğunu ve belli parçaların ne olduğunu. Uyarsa geri kalan parçalara
 // ad da verir.
-// Neden böyle? Aynı işi elle yaparsan önce uzunluğa bakar, sonra `parcalar[1]` diye alırsın. İki
-// ayrı satır olduğu için biri değişip öteki unutulur ve program olmayan bir parçaya uzanıp
-// panikler. Desende uzunluk uymuyorsa o kola hiç girilmez.
+// Elle yaparsan uzunluğa bakıp `parcalar[1]` alırsın; iki satır olduğu için biri unutulup panik olur.
+// Desende uzunluk uymuyorsa o kola hiç girilmez.
 //   Mini örnek:
 //     match ["sil", "vida"].as_slice() {
 //         [] => println!("boş"),                            // hiç parça yok
@@ -203,8 +200,7 @@ fn komut_ayristirici() {
 // BAKARSIN. Rust'ta kural basittir: paketin kendisi üzerinde eşleştirirsen parçalar dışarı
 // taşınır; pakete `&` ile bakarak eşleştirirsen parçalar da ödünç gelir, paket yerinde kalır.
 // `&mut` ile bakarsan parçaları yerinde değiştirebilirsin.
-// Neden böyle? Yalnız bakmak isterken parçayı taşırsan paketin o gözü boş kalır ve paketi bir
-// daha bütün olarak kullanamazsın.
+// Bakarken parçayı taşırsan paketin o gözü boş kalır, paketi bütün olarak kullanamazsın.
 //   Mini örnek:
 //     let k = Kayit { ad: String::from("vida"), adet: 10 };
 //     let Kayit { ad, adet } = &k;       // ✓ & üzerinden aç: ad ve adet ödünç, k yerinde
@@ -220,8 +216,6 @@ fn baglama_modlari() {
     // Match ergonomics: eşleştirilen şey bir REFERANS, desen ise referans deseni değilse
     // (`&..` ile başlamıyorsa) derleyici referansın içine kendisi iner ve alt bağlamaları
     // otomatik `ref` / `ref mut` yapar. Bu yüzden günlük kodda `ref` yazmak nadiren gerekir.
-    // (Sade: yukarıdaki "match ergonomics" şu demek: ödünç alınmış bir paketi açarsan içinden
-    // çıkanlar da kendiliğinden ödünç olur; `ref` yazmana çoğu zaman gerek kalmaz.)
     let mut kayit = Kayit {
         ad: String::from("vida"),
         adet: 10,
@@ -273,8 +267,7 @@ fn baglama_modlari() {
 // bebek Tikla olsun, içindeki Nokta'nın x'i 0 olsun, y'sine de ad ver". Aynı desende `@` ile
 // bütüne ad verip (`nokta @ ...`) parçalara da ayrı ad verebilir, sonuna bir ek soru (guard)
 // ekleyebilirsin. Kollar yukarıdan aşağı denenir; bu yüzden en özel durum en üstte durur.
-// Neden böyle? İç içe `if`lerle yazsaydın her katman için ayrı bir kontrol ve ayrı bir girinti
-// gerekir, hangi durumun unutulduğu görünmezdi.
+// İç içe `if`lerle her katman için ayrı kontrol/girinti gerekir, unutulan durum görünmezdi.
 //   Mini örnek:
 //     match &olay {
 //         Olay::Tikla { konum: Nokta { x: 0, y }, .. } => println!("sol kenar, satır {y}"),
@@ -409,8 +402,7 @@ fn ic_ice_at_ve_guard() {
 // vagon. `[ilk, .., son]` "baştakini ve sondakini ver, aradakilere bakmıyorum" demektir.
 // `[ilk, kalan @ ..]` ise "baştakini ayır, geri kalan vagonları da bana `kalan` adıyla ver"
 // demektir; geriye hiç vagon kalmamış da olabilir.
-// Neden boş dilim için ayrı kol gerekir? Hiç vagonu olmayan bir tren de trendir; onu unutursan
-// derleyici "boş dilim açıkta kaldı" diyerek kodu geri çevirir.
+// Boş dilim de dilimdir; onu unutursan derleyici "boş dilim açıkta kaldı" diyerek geri çevirir.
 //   Mini örnek:
 //     match [3, 1, 4].as_slice() {
 //         [] => println!("boş"),
@@ -430,8 +422,6 @@ fn ozetle(sayilar: &[i32]) -> String {
 }
 
 // Özyineleme + dilim deseni: "boş" ve "baş + kuyruk" iki durumu tüm dilimleri kapsar.
-// (Sade: özyineleme, işi küçültüp aynı fonksiyonu yeniden çağırmaktır. Burada "toplam = ilk
-// sayı + geri kalanların toplamı"; geri kalan boşalınca cevap 0 olur ve zincir durur.)
 fn topla(sayilar: &[i32]) -> i32 {
     match sayilar {
         [] => 0,
@@ -482,8 +472,7 @@ fn dilim_desenleri() {
 // gereken yerlerin listesidir. Kapakta "ne gelirse yutan" bir delik (`_`) varsa beşgen sessizce
 // oraya düşer ve kimse fark etmez. `matches!` ise yalnız bir soru sorar: "bu parça şu delikten
 // geçer mi?" Cevabı evet ya da hayırdır.
-// Neden önemli? Kendi enum'unda `_` yazmak bu korumadan vazgeçmektir; ancak "yeni gelen her şey
-// için de aynısını yapmak istiyorum" diyebiliyorsan yaz.
+// Kendi enum'unda `_` bu korumadan vazgeçmektir; "yeni gelen her şeye aynısını yaparım" dersen yaz.
 //   Mini örnek:
 //     let dolu = matches!(Some(3), Some(1..));         // ✓ true — "içi dolu ve en az 1 mi?"
 //     let bos = matches!(None::<i32>, Some(_));        // ✓ false
@@ -506,8 +495,7 @@ fn butunluk_ve_matches() {
         })
         .collect();
 
-    // matches!(değer, desen): desen tutuyor mu? → bool. Guard da alır. Karar verip dal
-    // seçmek için değil, filter/assert gibi bool beklenen yerlerde soru sormak içindir.
+    // matches!: desen tutuyor mu? → bool (guard da alır); filter/assert gibi bool beklenen yerlerde.
     let tukenen = envanter
         .iter()
         .filter(|k| matches!(k, Kayit { adet: 0, .. }))

@@ -1,3 +1,4 @@
+// Açıklama: learn/closures-iterators/ACIKLAMA.md
 // Derinleşme — Bölüm 13: Closures & Iterators (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p closures-iterators   |   Test: cargo test -p closures-iterators
 //
@@ -10,9 +11,8 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Önce main.rs'i oku; closure ve iterator'ın ne olduğu orada anlatıldı. Bu dosya ikisini gerçeğe
-// yakın bir işte birlikte kullanır: bir şubenin sipariş kayıtlarını okur, süzer, toplar, gruplar.
-// Benzetmelerde yine kargo şubesindeyiz: görev notları ve taşıma bandı.
+// Önce main.rs'i oku; burada ikisini gerçekçi bir işte birlikte kullanıyoruz: sipariş kayıtlarını
+// okur, süzer, toplar, gruplar. Benzetmeler yine kargo şubesinde.
 //
 // Bu dosyanın tek cümlelik özeti: Küçük notları (closure) bandın istasyonlarına (iterator
 // adaptörleri) takarak, uzun döngüler yazmadan veriyi adım adım işlersin.
@@ -62,12 +62,10 @@ pub fn calistir() {
 // ============================================================================
 // 1. HANGİ GÖVDE HANGİ TRAIT'İ DOĞURUR? — `move` trait'i DEĞİL, yakalama biçimini değiştirir
 // ============================================================================
-// Nasıl çalışır? İki AYRI soru vardır ve sık karıştırılır:
-//   (1) Değişken closure'a NASIL girer?  → &, &mut ya da değer olarak (move bunu "değer"e zorlar).
-//   (2) Gövde yakaladığıyla NE YAPAR?     → okur (Fn), değiştirir (FnMut), dışarı taşır (FnOnce).
-// Trait'i yalnız (2) belirler. Yani `move` ile içeri alınmış bir String'i sadece OKUYAN closure
-// hâlâ Fn'dir; defalarca çağrılabilir. Tersine, `move` yazmasan bile gövde değeri dışarı
-// taşıyorsa (drop, return, başka sahibe verme) closure yalnız FnOnce olur.
+// Nasıl çalışır? İki AYRI soru var ve sık karıştırılır: (1) Değişken closure'a NASIL girer? &, &mut
+// ya da değer (move bunu "değer"e zorlar). (2) Gövde yakaladığıyla NE YAPAR? okur (Fn), değiştirir
+// (FnMut), dışarı taşır (FnOnce: drop, return, başka sahibe verme). Trait'i yalnız (2) belirler:
+// move + okuma hâlâ Fn (defalarca çağrılır); move'suz taşıma da yalnız FnOnce olur.
 // SADE ANLATIM: Bir not hakkında iki ayrı soru sorulur ve ikisi sık karışır. Birincisi: not,
 // kullandığı şeyi yanında mı taşıyor, yoksa masada bırakıp oradan mı bakıyor? (`move` bunu
 // belirler.) İkincisi: not o şeyle ne YAPIYOR: okuyor mu, değiştiriyor mu, başkasına mı veriyor?
@@ -153,11 +151,9 @@ fn en_az(esik: u32) -> impl Fn(&Siparis) -> bool {
 // (Sade: her closure'ın türü kendine özgüdür; iki closure aynı görünse bile türleri ayrıdır.
 // Bir fonksiyon duruma göre farklı closure'lar döndürecekse, hepsini aynı boy bir zarfa koyar:
 // `Box<dyn Fn>`. Zarfın içi farklıdır, ama dışarıdan hepsi "çağrılabilen bir şey"dir.)
-// Kollar ortam YAKALAYAN farklı closure'lar döndürüyorsa `impl Fn` olmaz: her closure'ın türü
-// benzersizdir (E0308; not: "no two closures, even if identical, have the same type").
-// (Hiçbir şey yakalamayan closure'lar `fn` işaretçisine dönüşebildiği için o durumda derlenir;
-// burada kollar `oran`/`miktar` yakalıyor.) Çözüm tür silme:
-// Box<dyn Fn> — heap tahsisi + vtable üzerinden çağrı (Böl. 18'deki trait object'in aynısı).
+// Farklı closure döndüren kollar `impl Fn` olmaz: her tür benzersizdir (E0308; "no two closures,
+// even if identical, have the same type"). Yakalamayanlar `fn` işaretçisine döner; burada
+// `oran`/`miktar` yakalanıyor → çözüm tür silme: Box<dyn Fn> (heap + vtable, Böl. 18 trait object).
 fn indirim_sec(kod: &str) -> Box<dyn Fn(u32) -> u32> {
     match kod.split_once(':') {
         Some(("yuzde", n)) => {
@@ -369,9 +365,8 @@ fn veri_hatti() {
 //     [10, 20, 30].iter().zip(["a", "b"])    // (10, "a"), (20, "b"): kısa olan bitince durur
 //     [10, 20, 30].windows(2)                // [10, 20], [20, 30]: örtüşen komşu çiftler
 //     [10, 20, 30].chunks(2)                 // [10, 20], [30]: örtüşmeyen ikişerli parçalar
-// Ardışık aynı öğeleri (öğe, adet) çiftlerine sıkıştırır. peekable, bir sonraki öğeye TÜKETMEDEN
-// bakmayı sağlar; next_if_eq "sıradaki buna eşitse al" demektir. Sıradan iterator'da bakmak =
-// tüketmek olduğu için grup sınırındaki öğe kaybolurdu.
+// Ardışık aynı öğeleri (öğe, adet) çiftlerine sıkıştırır. peekable, sıradaki öğeyi TÜKETMEDEN
+// okur (next_if_eq: "eşitse al"); yoksa grup sınırındaki öğe kaybolur.
 fn ardisik_grupla<'a>(ogeler: &[&'a str]) -> Vec<(&'a str, usize)> {
     let mut akis = ogeler.iter().copied().peekable();
     let mut gruplar = Vec::new();
@@ -599,9 +594,8 @@ fn sik_hatalar_dogru_kullanim() {
     //   (e) en_az(100)(tutar=250) = true
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Aşağısı bu dosyanın dört maddelik özeti, kendi kendine
-// deneyeceğin alıştırmalar ve testlerdir. Bir madde yabancı gelirse ilgili bölümün sade kutusuna
-// dön. Alıştırmalar zor gelirse ilk okuyuşta atlayabilirsin.
+// SADE ANLATIM (aşağıdaki bölüm için): Dört maddelik özet, alıştırmalar ve testler. Bir madde
+// yabancı gelirse ilgili kutuya dön; alıştırmaları ilk okuyuşta atlayabilirsin.
 // ÖNEMLİ NOKTALAR
 //   • Trait'i GÖVDE belirler, `move` yalnız yakalama biçimini. `move` + okuma = hâlâ Fn.
 //   • Parametre alırken en gevşek trait'i iste; döndürürken tek tür → `impl Fn`, çok tür → Box<dyn Fn>.
@@ -624,8 +618,9 @@ fn sik_hatalar_dogru_kullanim() {
 //    ikinci sipariş" kuralı ekle (closure içinde görülen müşterileri bir HashSet'te biriktir).
 //    İpucu: `ihlaller` artık `&mut self` almak zorunda kalacak — nedenini §1 ile açıkla. Buna bağlı
 //    olarak `let mut kurallar` gerekir ve §2'deki döngü hem `filter` içinde hem gövdede `ihlaller`'i
-//    çağırdığı için derlenmez (E0501) ve durumlu kuralı iki kez tetiklerdi; döngüyü sipariş başına
-//    TEK çağrıya indir: `for s in &siparisler { let ihlal = kurallar.ihlaller(s); ... }`.
+//    çağırdığı için derlenmez (E0499: `kurallar` birden fazla kez mutable ödünç alınamaz) ve
+//    durumlu kuralı iki kez tetiklerdi; döngüyü sipariş başına TEK çağrıya indir:
+//    `for s in &siparisler { let ihlal = kurallar.ihlaller(s); ... }`.
 //    Beklenen: HAM_KAYITLAR için bu kural yalnız #3 ve #5'te ihlal verir.
 //
 // BİR SONRAKİ KONUYLA BAĞLANTISI

@@ -1,3 +1,4 @@
+// Açıklama: learn/concurrency/ACIKLAMA.md
 // Rust Book — Bölüm 16: Fearless Concurrency (korkusuz eşzamanlılık)
 // Çalıştır: cargo run -p concurrency
 //
@@ -11,9 +12,8 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
-// Bu crate'teki benzetmelerin hepsi bir lokanta MUTFAĞINDA geçer; derinlesme.rs de orada sürer.
+// Her bölümün "SADE ANLATIM" kutusunu önce oku; teknik kısım zorsa ana fikir orada.
+// Benzetmeler bir lokanta MUTFAĞINDA geçer; derinlesme.rs de orada sürer.
 //
 // Bu bölümün tek cümlelik özeti: Bir program işini birkaç kola (thread) bölebilir; Rust, iki
 // kolun aynı veriyi sırasız değiştirmesine yol açacak kodu daha derlerken geri çevirir.
@@ -62,8 +62,6 @@ fn main() {
 // (`thread::spawn`) o çorbayı karıştırırken sen salatayı hazırlarsın. Ona verdiğin malzeme artık
 // onundur (`move`): sen mutfaktan çıksan bile elindeki malzeme ortadan kalkmaz. `join()` ise
 // "işini bitirmeni bekliyorum, sonucu bana ver" demektir.
-// Neden böyle? Malzemeyi yalnız ödünç verseydin ve sen erken çıkıp onu çöpe atsaydın, aşçı
-// artık olmayan bir malzemeye uzanırdı.
 //   Mini örnek:
 //     let malzeme = vec![1, 2, 3];
 //     let asci = thread::spawn(move || malzeme.len());   // malzeme aşçıya geçti
@@ -71,8 +69,7 @@ fn main() {
 //     let sonuc = asci.join().unwrap();                  // ✓ aşçıyı bekle, sonucu al: 3
 fn threadler() {
     let veri = vec![1, 2, 3];
-    // `move`: `veri`nin SAHİPLİĞİ thread'e geçer. Neden şart? Thread, onu doğuran fonksiyondan
-    // UZUN yaşayabilir; ödünç alsaydı dangling olurdu — derleyici move ister.
+    // `move`: sahiplik thread'e geçer — thread bu fonksiyondan uzun yaşayabilir, ödünç olsa dangling olurdu.
     let tutamac = thread::spawn(move || {
         let toplam: i32 = veri.iter().sum();
         toplam // thread'in dönüş değeri
@@ -90,7 +87,6 @@ fn threadler() {
 // birçok aşçı tabak koyabilir (`tx.clone()`), alan ise tektir. Tabağı koyan aşçı ona bir daha
 // dokunamaz, çünkü `send` tabağın sahipliğini karşıya geçirir. Bütün aşçılar gidince (bütün
 // `tx`'ler silinince) garson "başka tabak gelmeyecek" diye anlar ve beklemeyi bırakır.
-// Neden böyle? Tabak aynı anda tek kişide olduğu için iki kişinin onu birlikte bozması olanaksız.
 //   Mini örnek:
 //     let (tx, rx) = mpsc::channel();
 //     let tabak = String::from("çorba");
@@ -106,8 +102,7 @@ fn kanallar() {
     for id in 0..3 {
         let tx = tx.clone();
         thread::spawn(move || {
-            // send, DEĞERİ TAŞIR: gönderdikten sonra o thread'de artık kullanılamaz (sahiplik
-            // alana geçti) → aynı veriye iki yerden erişim en baştan imkânsız.
+            // send sahipliği TAŞIR: gönderen artık o veriye erişemez — iki yerden erişim baştan imkânsız.
             tx.send(format!("thread {id} selam")).unwrap();
         });
     }
@@ -126,10 +121,7 @@ fn kanallar() {
 // anahtarı vardır (Mutex). Anahtarı alan (`lock()`) içeri girer, ötekiler kapıda bekler; çıkan
 // kişi anahtarı unutamaz, çünkü işi bitince anahtar kendiliğinden yerine asılır. Arc ise kilerin
 // yerini gösteren karttır: her aşçıya bir kart verilir, son kart da atılınca kiler kapatılır.
-// Kısaca Arc "birden çok sahip" sorununu, Mutex "sırayla girme" sorununu çözer.
-// Neden böyle? Anahtar olmasaydı iki aşçı aynı rafı aynı anda düzenler, sayım karışırdı.
-// Dikkat: kilit veri yarışını önler, ama iki aşçı birbirinin elindeki anahtarı beklerse sonsuza
-// dek bekleşirler (deadlock). Rust bunu senin yerine önlemez.
+// Dikkat: kilit veri yarışını önler, ama deadlock'u (iki aşçı birbirinin anahtarını bekler) Rust önlemez.
 //   Mini örnek:
 //     let kiler = Arc::new(Mutex::new(0));
 //     let kiler2 = Arc::clone(&kiler);            // ikinci aşçıya da bir kart verildi
@@ -150,9 +142,7 @@ fn paylasimli_durum() {
     for _ in 0..10 {
         let sayac = Arc::clone(&sayac); // her thread'e paylaşımlı bir sahip (sayaç +1)
         tutamaclar.push(thread::spawn(move || {
-            let mut n = sayac.lock().unwrap(); // kilidi al; .unwrap() çünkü poison olabilir
-            // (Sade: poison = kilidi tutan thread çökerse kilide konan "içerisi yarım kalmış
-            // olabilir" işareti; `unwrap()` o durumda bu thread'i de durdurur.)
+            let mut n = sayac.lock().unwrap(); // kilidi al; poison (thread çökerse "yarım kalmış" işareti) olabilir → unwrap durdurur
             *n += 1; // kilit bende → güvenle değiştir
         })); // n burada düşer → kilit bırakılır
     }
@@ -161,8 +151,7 @@ fn paylasimli_durum() {
     }
     // 10 thread, her biri +1 → tam 10. Veri yarışı OLMADAN deterministik sonuç.
     println!("Arc<Mutex> sayaç = {}", *sayac.lock().unwrap());
-    // Neden Arc + Mutex AYRI? Arc "çok sahip"liği, Mutex "güvenli değişim"i çözer. Rc burada
-    // DERLENMEZ (Send değil); Mutex'siz Arc salt-okunur olurdu (içindekini değiştiremezdin).
+    // Arc "çok sahip"liği, Mutex "güvenli değişim"i çözer; Mutex'siz Arc salt-okunur olurdu (Rc DERLENMEZ).
 }
 
 // SADE ANLATIM (aşağıdaki bölüm için): Derleyici her türün üstünde iki görünmez etiket arar:
@@ -187,9 +176,8 @@ fn paylasimli_durum() {
 //   aynı anda Rc::clone/düşürme yapsa sayaç bozulur (lost update) → ya erken serbest bırakma ya
 //   sızıntı → bellek güvensizliği. Bu yüzden Rc bilinçli olarak !Send'dir; thread'e taşımaya
 //   kalkınca E0277 "cannot be sent between threads safely" (DOĞRULANDI). Çok-thread için atomik
-//   sayaçlı Arc (library/alloc/src/sync.rs) kullanılır — aynı API, atomik sayaç (biraz daha pahalı).
-// ↳ DÜZELTME NOTU (son gözden geçirme): güncel kaynak ağacında Arc'ın tanımı library/alloc/src/rcs/arc.rs
-//   dosyasındadır; sync.rs yalnız yeniden dışa aktarır (re-export).
+//   sayaçlı Arc (library/alloc/src/rcs/arc.rs; sync.rs yeniden dışa aktarır) kullanılır — aynı API,
+//   atomik sayaç (biraz daha pahalı).
 //
 // • Mutex<T> (library/std/src/sync/poison/mutex.rs:227) kilit + veriyi BİRLİKTE tutar: veriye
 //   ancak lock() ile MutexGuard alarak erişirsin, guard düşünce kilit bırakılır (Drop). Böylece
@@ -197,8 +185,6 @@ fn paylasimli_durum() {
 //   kilidi tutan thread panik ederse Mutex zehirlenir; sonraki lock() Err döner (veri tutarsız
 //   olabilir diye uyarı) — bu yüzden .unwrap() görürsün.
 //
-// • SONUÇ: veri yarışının tanımı "paylaşımlı + değiştirilebilir + eşzamanlamasız erişim".
-//   Rust'ın tek-yazan-veya-çok-okuyan kuralı (Aliasing XOR Mutability) tek thread'de olduğu gibi
-//   thread'ler arası da geçerlidir; Send/Sync bu kuralı thread SINIRINA taşır. İhlal, çalışma
-//   anı kumarı değil, bir DERLEME hatasıdır — "fearless" tam da bu: derlenen eşzamanlı kod,
-//   veri yarışından (tanım gereği) azadedir. (Deadlock/mantık hatası ayrı mesele; onları önlemez.)
+// • SONUÇ: veri yarışı = "paylaşımlı + değiştirilebilir + eşzamanlamasız erişim". Rust'ın
+//   Aliasing XOR Mutability kuralı thread'ler arasında da geçerlidir; Send/Sync bunu thread SINIRINA
+//   taşır → ihlal DERLEME hatasıdır ("fearless"). Deadlock/mantık hatası ayrı mesele.

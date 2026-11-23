@@ -1,3 +1,4 @@
+// Açıklama: learn/oop/ACIKLAMA.md
 // Derinleşme — Bölüm 18: OOP / Trait Object'ler (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p oop   |   Test: cargo test -p oop
 //
@@ -56,9 +57,8 @@ pub fn calistir() {
 // ============================================================================
 // 1. GERÇEK HAYATTAN ÖRNEK — bildirim kanalları (şablon metot + kanca + supertrait)
 // ============================================================================
-// Bu konuyu neden öğreniyoruz? Bir sistemin "hangi türlerle çalışacağı" yazıldığı gün belli
-// değilse (eklentiler, sürücüler, bildirim kanalları, komutlar), çekirdek kodun o türleri
-// BİLMEDEN çalışması gerekir. Trait object bunun aracıdır: çekirdek yalnız sözleşmeyi (trait) bilir.
+// Türler yazıldığı gün belli değilse (eklentiler, sürücüler) çekirdek kod onları BİLMEDEN çalışmalı;
+// trait object bunun aracıdır: çekirdek yalnız sözleşmeyi (trait) bilir.
 //
 // Supertrait'ler (`Kanal: Debug + Any + KanalKlonla`) "Kanal olan her şey bunları da sağlar" der:
 //   • Debug       → `Box<dyn Kanal>` doğrudan {:?} ile basılabilir (derive(Debug) çalışır).
@@ -70,7 +70,6 @@ pub fn calistir() {
 // `azami_uzunluk` ise "istersen süsle" gibi isteğe bağlı bir adımdır (kanca): hazır cevabı
 // "sınır yok"tur, SMS onu değiştirir. Baştaki `Kanal: Debug + ...` da ön şarttır: "Kanal olmak
 // isteyen, önce bunları da yapabilmeli".
-// Neden böyle? Tarif tek yerde durmasaydı her kanal onu kopyalar, biri bir adımı unuturdu.
 //   Mini örnek:
 //     let e = Eposta { adres: String::from("a@b.c") };
 //     let s = Sms { numara: String::from("111") };
@@ -215,8 +214,7 @@ fn genisletilebilir_sistem() {
 // hepsi aynı türdendir, bu yüzden en hızlısıdır (generic). Üçüncünün bölmeleri sabittir ve
 // üstünde "düdük ya da davul" yazar: listeyi yalnız kutuyu yapan değiştirebilir, ama içinde ne
 // olabileceği baştan bellidir (enum).
-// Neden üç yol? Asıl soru "yeni türleri kim ekleyecek?" sorusudur. Başkaları ekleyecekse dyn,
-// yalnız sen ekleyeceksen ve türler azsa enum, tek tür varsa generic uygundur.
+// Seçim "yeni türleri kim ekleyecek?" sorusuna bağlı: başkalarıysa dyn, az ve sensen enum, tek türse generic.
 //   Mini örnek:
 //     let a: Vec<Box<dyn Kanal>> = vec![Box::new(eposta), Box::new(sms)];      // ✓ karışık, açık
 //     let b = [SabitKanal::Eposta(eposta2), SabitKanal::Sms(sms2)];            // ✓ karışık, kapalı
@@ -289,8 +287,7 @@ fn dyn_generic_enum() {
 // kez oynayıp geri vereceksen ödünç alırsın (`&dyn`). Oyuncak seninse kendi kutunda durur
 // (`Box<dyn>`). Birkaç çocuk aynı oyuncağın ortak sahibiyse sayaçlı kutu gerekir (`Rc<dyn>`);
 // çocuklar ayrı thread'lerdeyse onun thread'ler arası güvenli olanı (`Arc<dyn>`).
-// Neden böyle? `dyn` türünün boyu bilinmez, bu yüzden hep bir işaretçinin arkasında durur;
-// hangi işaretçiyi seçtiğin "sahibi kim?" sorusunun cevabıdır.
+// dyn'in boyu bilinmez, hep işaretçi arkasındadır; hangi işaretçi = "sahibi kim?" sorusunun cevabı.
 //   Mini örnek:
 //     let sms = Sms { numara: String::from("1") };
 //     bir_kez_bildir(&sms, "selam");                  // ✓ ödünç: yalnız kullan, geri ver
@@ -316,12 +313,10 @@ fn isaretci_secimi() {
         Rc::strong_count(&ortak)
     );
 
-    // (Sade: kutunun kapağı kapalı olduğu için derleyici içindekinin başka thread'e verilip
-    // verilemeyeceğini göremez. `+ Send + Sync` yazarak "bu kutuya yalnız thread'ler arası güvenli
-    // şeyler koyacağım" sözünü sen verirsin; derleyici de o sözü tutturur.)
-    // `dyn Kanal` tek başına Send/Sync DEĞİLDİR: tür silindiği için derleyici içindeki somut türün
-    // thread-güvenli olup olmadığını bilemez (auto trait'ler dyn'den "sızmaz"). Söz vermek SENİN
-    // işin: `dyn Kanal + Send + Sync`. Bu yazım, yalnız Send+Sync türlerin kutulanmasına izin verir.
+    // `dyn Kanal` tek başına Send/Sync DEĞİLDİR: tür silinince derleyici somut türün
+    // thread-güvenli olup olmadığını bilemez (auto trait'ler dyn'den "sızmaz"). `+ Send + Sync`
+    // yazan taraf sözü verir; bu yazım yalnız Send+Sync türlerin kutulanmasına izin verir.
+    // (Sade: kapalı kutunun içini derleyici göremez; sözü sen verirsin, o da tutturur.)
     //   ✗ let k: Box<dyn Kanal> = Box::new(..); thread::spawn(move || k.gonder(".."));
     //     E0277: `dyn Kanal` cannot be sent between threads safely
     let paylasilan: Arc<dyn Kanal + Send + Sync> = Arc::new(Webhook {
@@ -356,8 +351,7 @@ fn isaretci_secimi() {
 // "içinde ödünç şey yok" der (`'static`), ve böyle etiketli kutuya ödünç oyuncak koyamazsın.
 // Ödünç bir şey koyacaksan etikete "şu ödünç geçerli olduğu sürece kullanılabilir" yazarsın:
 // aşağıdaki `+ '_` budur.
-// Neden böyle? Etiket olmasaydı, ödünç alınan şey geri verildikten sonra kutu hâlâ onu
-// gösteriyor olabilirdi (sarkan referans).
+// Etiket olmasaydı kutu, ödünç geri verildikten sonra da onu gösterebilirdi (sarkan referans).
 //   Mini örnek:
 //     fn kutula(o: &str) -> Box<dyn Sablon + '_> { Box::new(Onek(o)) }   // ✓ etiket açıkça yazıldı
 //     fn kotu(o: &str) -> Box<dyn Sablon> { Box::new(Onek(o)) }          // ✗ derlenmez: etiket
@@ -406,7 +400,6 @@ fn gizli_static_siniri() {
 // Doğru soru "ötebilir misin?" sorusudur; yani soruyu türe değil trait'in bir metoduna sorarsın.
 // Upcasting ise bunun tersidir ve zararsızdır: "ses çıkaran oyuncak"a yalnızca "bir oyuncak"
 // gözüyle bakmak.
-// Neden böyle? Tür adına bakan kod, yarın eklenecek her yeni türü ve her sarmalayıcıyı kaçırır.
 //   Mini örnek:
 //     let sms = Sms { numara: String::from("1") };
 //     let sarili = sms.clone().etiketli("[ACİL]");
@@ -495,9 +488,8 @@ impl<K: Kanal + Clone> Kanal for Etiketli<K> {
 // Klonlama sorunu: Clone::clone `Self` döndürür → `trait Kanal: Clone` yazarsan trait dyn-uyumsuz
 // olur (§7-c). Çözüm: Self yerine KUTU döndüren, dyn-uyumlu bir yardımcı metot. Onu her türe elle
 // yazmamak için blanket impl (Böl. 10'daki Etiket kalıbı): "Kanal + Clone olan her T için hazır".
-// (Sade: `clone` "kendi türümden bir tane daha ver" der; kapalı kutuda tür bilinmediği için bu
-// söz tutulamaz. Çare, "aynımı yap ve KUTUYA koyup ver" diyen ayrı bir metottur. Altındaki
-// blanket impl onu "Kanal + Clone olan her tür için" bir kerede yazar.)
+// (Sade: `clone` "kendi türümden bir tane daha ver" der; kutuda tür bilinmediği için söz tutulamaz.
+// Çare: "aynımı yap, KUTUYA koyup ver" diyen metot; blanket impl onu her tür için bir kerede yazar.)
 pub trait KanalKlonla {
     fn kutu_klonu(&self) -> Box<dyn Kanal>;
 }
@@ -555,7 +547,8 @@ fn bilesim_ve_klonlama() {
 //       E0038: the trait `Kanal` is not dyn compatible
 //     ✓ O metodu `where Self: Sized` ile dyn'in dışında bırak (yukarıdaki `etiketli`). Bedeli:
 //       metot trait object üzerinde çağrılamaz — `kutu.etiketli("x")` →
-//       "error: the `etiketli` method cannot be invoked on a trait object" (E-kodu yok).
+//       rustc "cannot be invoked on a trait object" anlamında bir hata verir (E-kodu yok;
+//       mesajın birebir metni sürüye bağlı, ayrı repro ile doğrulanmadı).
 //
 // (b) Trait object'i işaretçisiz kullanmak
 //     ✗ let v: Vec<dyn Kanal> = Vec::new();

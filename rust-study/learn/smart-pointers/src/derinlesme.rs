@@ -1,3 +1,4 @@
+// Açıklama: learn/smart-pointers/ACIKLAMA.md
 // Derinleşme — Bölüm 15: Smart Pointers ve Interior Mutability (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p smart-pointers   |   Test: cargo test -p smart-pointers
 //
@@ -14,8 +15,8 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosya main.rs'teki araçları birlikte kullanır. Her bölümün üstündeki "SADE ANLATIM" kutusunu
-// önce oku; teknik kısım zor gelirse kutu ana fikri verir. Benzetmeler yine aynı OKULDA geçer.
+// Bu dosya main.rs'teki araçları birlikte kullanır. Her bölümün "SADE ANLATIM" kutusunu önce oku;
+// benzetmeler yine aynı OKULDA geçer.
 //
 // Bu dosyanın tek cümlelik özeti: Doğru kutuyu üç soruyla seçersin (kaç sahip, değişecek mi,
 // yalnız yerini bilmek yetiyor mu) ve birbirini tutan iki verinin sızmaması için bir yönü Weak
@@ -55,8 +56,7 @@ pub fn calistir() {
 // SADE ANLATIM: Okulda bir eşyanın nerede duracağına üç soruyla karar verirsin: Onu kaç kişi
 // kullanacak? Kullananlar onu değiştirecek mi? Biri yalnız "nerede durduğunu" mu bilmek istiyor?
 // Aşağıdaki tablo aynı üç soruyu Rust için sorar ve her cevabın karşısına bir kutu yazar.
-// Neden böyle? Her kutunun bir bedeli vardır (sayaç tutmak, çalışırken denetlemek); soruları
-// sırayla sormazsan gerekmeyen bir bedeli ödersin.
+// Neden sırayla? Her kutunun bedeli var (sayaç, çalışırken denetim); gereksiz bedeli ödeme.
 //   Mini örnek:
 //     let tek = Box::new(1);                     // tek sahip
 //     let ortak = Rc::new(1);                    // çok sahip, yalnız okunur
@@ -101,7 +101,6 @@ pub fn calistir() {
 // Aşağıdaki ağaçta da iki yön böyle ayrılır: yukarıdan aşağıya Rc ("sahibim"), aşağıdan yukarıya
 // Weak ("yerini biliyorum"). Weak'i kullanmadan önce `upgrade()` ile "hâlâ duruyor mu?" diye
 // sorarsın; cevap ya Some(...) ya None olur, yani boş bir yere bakman mümkün değildir.
-// Neden böyle? İki yön de Rc olsaydı sınıf ile öğrenci birbirini tutar, hiçbiri silinemezdi.
 // Alan türlerini içten dışa oku: `RefCell<Weak<Dizin>>` = "sonradan değiştirilebilen (RefCell),
 // sahip olmayan (Weak) bir Dizin işareti".
 //   Mini örnek:
@@ -187,8 +186,6 @@ fn dizin_agaci() {
 // diyor. Zil çalar, herkes gider; onlar öylece kalır. İki veri birbirini Rc ile tutarsa aynısı
 // olur: ikisinin de sayacı 1'de takılır, 0'a inemez ve kapladıkları yer geri verilmez. Çare,
 // yönlerden birini Weak yapmaktır; Weak sayaca yazılmadığı için düğüm çözülür.
-// Neden derleyici bunu yakalamaz? Sızıntıda bellek bozulmaz, yalnız geri verilmez; Rust bunu
-// "güvenli ama israf" sayar ve sorumluluğu sana bırakır.
 //   Mini örnek (kısaltılmış; gerçek kod alanlara borrow_mut() ile yazıyor):
 //     a.komsu = Some(Rc::clone(&b));      // a, b'yi tutuyor
 //     b.komsu = Some(Rc::clone(&a));      // ✗ b de a'yı tutuyor: döngü, ikisi de sızar
@@ -243,8 +240,7 @@ fn dongu_ve_sizinti() {
     // (✓ sürüm): `a` adı düşer → a'nın güçlü sayacı 1'den 0'a → a düşer → elindeki b Rc'sini
     // bırakır; `b` adı da düşmüştü → b'nin sayacı 0 → b düşer. Zincir çözülür.
     //
-    // Kural: bir veri yapısında işaret yönleri bir DÖNGÜ kurabiliyorsa, döngüdeki en az bir
-    // kenar Weak olmalı. Hangisi? "Sahiplik" anlamı taşımayan (geri/yan/gözlemci) kenar.
+    // Kural: döngü kurabilen işaretlerden en az biri Weak olmalı — sahiplik taşımayan (geri/yan/gözlemci) kenar.
 }
 
 // ============================================================================
@@ -266,8 +262,6 @@ fn dongu_ve_sizinti() {
 // değişmemiştir, ama içindeki küçük bir kayıt güncellenmiştir. Rust'ta da metot `&self` ("yalnız
 // bakacağım") alır, değişen küçük kayıt ise bir hücrenin içinde durur. Cell küçük değerler
 // içindir: al, değiştir, geri koy; panikleyemez. RefCell içine referans verir, nöbetçi denetler.
-// Neden böyle? Kayıt tutmak için metodu `&mut self` yapsaydık bu iç ayrıntı herkese yansır,
-// yalnız okumak isteyen iki kişi bile aynı anda çağıramazdı.
 //   Mini örnek:
 //     let sayac = Cell::new(0);            // `mut` yok
 //     sayac.set(sayac.get() + 1);          // ✓ al, bir artır, geri koy
@@ -355,9 +349,8 @@ fn ic_degiskenlik_senaryosu() {
 // ============================================================================
 // SADE ANLATIM: Nöbetçiden "bakma izni" alıp kâğıdı cebinde unutursan, yazmak isteyen hiç kimse
 // içeri giremez. RefCell'de `borrow()` böyle bir izin kâğıdı (guard) verir; kâğıt yaşadıkça
-// `borrow_mut()` geri çevrilir ve program panikler. Çare: izni kısa tut. Önce bak, gerekeni
-// kopyala, kâğıdı bırak, sonra yaz. Emin değilsen `try_borrow_mut()` ile sor: panik yerine "olur"
-// ya da "olmaz" cevabı alırsın.
+// `borrow_mut()` geri çevrilir ve program panikler. Çare: izni kısa tut — bak, kopyala, bırak,
+// sonra yaz. Emin değilsen `try_borrow_mut()` ile sor: panik yerine "olur"/"olmaz" cevabı alırsın.
 // Neden böyle? Biri bakarken başkası yazsaydı, bakan kişi yarım değişmiş veri görürdü.
 //   Mini örnek:
 //     let d = RefCell::new(vec![1]);
@@ -431,8 +424,6 @@ fn refcell_tuzaklari() {
 // bir not eklemek istiyorsun. Panodakini karalarsan herkes etkilenir; bunun yerine fotokopisini
 // çeker, notu kendi kopyana yazarsın. Panoya senden başka bakan yoksa fotokopiye gerek kalmaz,
 // doğrudan yazarsın. `Rc::make_mut` tam bunu yapar: başka sahip varsa önce kopyalar.
-// Neden böyle? RefCell kullansaydık değişikliği herkes görürdü; burada istenen, ötekilerin
-// etkilenmemesi.
 //   Mini örnek:
 //     let mut benim = Rc::new(vec![1]);
 //     let pano = Rc::clone(&benim);           // ikimiz aynı listeye bakıyoruz
@@ -458,9 +449,8 @@ fn paylasiliyorsa_kopyala() {
     println!("kullanıcı  = {} ayar", kullanici_ayari.len()); // 3
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Aşağıda bu dosyanın kısa özeti ve üç alıştırma var.
-// Özetin ana fikri: bedelsiz olan araç (Box, düz referans) yetiyorsa bedelli olana (Rc, RefCell)
-// geçme. Alıştırmaları ilk okuyuşta atlayabilirsin; yukarıdaki altı bölümü anlaman yeter.
+// SADE ANLATIM (aşağıdaki bölüm için): Kısa özet ve üç alıştırma var; ana fikir, bedelsiz araç
+// (Box, düz referans) yetiyorsa bedelli olana (Rc, RefCell) geçmemek. Alıştırmaları atlayabilirsin.
 // ============================================================================
 // ÖNEMLİ NOKTALAR
 // ============================================================================

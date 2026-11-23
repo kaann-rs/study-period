@@ -1,3 +1,4 @@
+// Açıklama: learn/ownership/ACIKLAMA.md
 // Rust Book — Bölüm 4: Ownership (Sahiplik), Borrowing (Ödünç alma), Slices (Dilimler)
 // Çalıştır: cargo run -p ownership
 //
@@ -6,14 +7,12 @@
 // E0515) rustc ile DERLENEREK doğrulandı; uydurma değil.
 //
 // Stil: terim (İngilizce) + Türkçe açıklama + örnek + Neden? + Sorun (olmasaydı ne
-// bozulurdu) + rustc: (derleyici hangi aşamada/dosyada zorluyor). Derleyici
-// perspektifi dosyanın sonunda.
+// bozulurdu) + rustc: (hangi aşamada/dosyada zorluyor). Derleyici perspektifi sonda.
 
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce SADE ANLATIM kutusu, sonra teknik ayrıntı var.
 //
 // Bu bölümün tek cümlelik özeti: Rust'ta her verinin TEK bir sahibi vardır; sahibi gidince
 // veri de silinir. Başkaları o veriyi ancak "ödünç" alabilir.
@@ -21,7 +20,7 @@
 // MİNİ SÖZLÜK (bu dosyada geçen kelimeler):
 //   sahip (owner)        → veriyi elinde tutan değişken. Oyuncağın sahibi gibi: tek kişidir.
 //   taşıma (move)        → veriyi başka bir değişkene VERMEK. Verdikten sonra sende kalmaz.
-//   kopya (copy)         → sayılar gibi küçük şeylerin fotokopisini çekmek. İkisi de kalır.
+//   kopya (copy)         → Copy trait'i olan türlerin fotokopisini çekmek. İkisi de kalır.
 //   klon (clone)         → büyük bir şeyin bire bir aynısını YENİDEN yapmak (emek ister).
 //   drop                 → verinin silinmesi, kapladığı yerin geri verilmesi.
 //   ödünç alma (borrow)  → sahibi değiştirmeden veriye bakmak ya da onu kullanmak.
@@ -64,24 +63,23 @@ fn sahiplik_ve_move() {
 
     // Neden kopyalayıp ikisini de geçerli bırakmıyor? Sorun: String heap'te veri tutar.
     // s1 ve s2 aynı heap bloğunu işaret edip İKİSİ DE geçerli olsaydı, ikisi de scope
-    // sonunda o bloğu serbest bırakmaya çalışır → DOUBLE FREE (aynı belleği iki kez
-    // free etmek → bellek bozulması / güvenlik açığı). Çözüm: atama bir MOVE'dur;
-    // s1 geçersizleşir, bloğu yalnızca s2 serbest bırakır. Tek sahip = tek free.
+    // sonunda o bloğu serbest bırakmaya çalışır → DOUBLE FREE (bellek bozulması /
+    // güvenlik açığı). Çözüm: atama bir MOVE'dur; s1 geçersizleşir, bloğu yalnızca s2 serbest bırakır.
     // rustc: move, MIR'de `Operand::Move(place)` olarak modellenir; taşınan yer artık
-    //        "uninitialized" sayılır. Hangi yerlerin başlatılı olduğunu dataflow analizi
+    //        "uninitialized" sayılır. Hangi yerlerin başlatılmış olduğunu dataflow analizi
     //        (rustc_mir_dataflow: MaybeInitializedPlaces + MoveData) izler; taşınmış bir
     //        değeri kullanınca borrowck E0382 üretir
-    //        (rustc_borrowck/src/diagnostics/mod.rs, "use of moved value").
+    //        (rustc_borrowck/src/borrowck_errors.rs, "use of moved value — cannot_act_on_moved_value").
 }
 
 // 2. Copy vs move
-// Yalnızca STACK'te duran sabit boyutlu türler (i32, bool, char, f64, ve tamamı Copy
-// olan tuple'lar) `Copy` trait'ini uygular: atama bit kopyası yapar, orijinal GEÇERLİ kalır.
-// SADE ANLATIM: Bazı şeyler o kadar küçüktür ki vermek yerine fotokopisini çekmek daha kolaydır.
+// Ölçüt boyut ya da stack/heap değil, `Copy` trait'idir: sayılar, bool, char, &T, fn
+// işaretçileri ve tamamı Copy olan struct/tuple/dizi/Option atamada bit kopyası yapar.
+// String/Vec gibi heap SAHİBİ olan türler Drop gerektirdiğinden Copy olamaz, TAŞINIR.
+// SADE ANLATIM: Bazı şeylerin fotokopisini çekmek güvenlidir; vermek yerine kopyasını alabilirsin.
 // "5" sayısını bir kâğıda yazıp arkadaşına verirsen, aynı sayıyı kendi kâğıdına da yazabilirsin;
 // kimse bir şey kaybetmez. Sayılar, doğru/yanlış değerleri ve tek harfler böyledir: kopyalanır.
-// Uzun bir yazı (String) ise büyük bir kutudur; her atamada fotokopisini çekmek pahalı olurdu,
-// o yüzden kopyalanmaz, TAŞINIR.
+// String ise kutusunun SAHİBİNİ tutar; fotokopisi iki sahip yaratacağından kopyalanmaz, TAŞINIR.
 //   Mini örnek:
 //     let x = 5;
 //     let y = x;            // fotokopi: ikisi de 5
@@ -112,10 +110,9 @@ fn klonlama() {
     let s2 = s1.clone(); // heap verisi DERİN kopyalanır (ayrı blok); s1 hâlâ geçerli
     println!("s1 = {s1}, s2 = {s2}");
 
-    // Neden clone AÇIKÇA çağrılır (otomatik değil)? Sorun: heap'i derin kopyalamak
-    // pahalıdır (tahsis + byte kopyalama). Diller bunu sessizce/otomatik yapsaydı,
-    // farkında olmadan ağır kopyalar maliyet çıkarırdı. Rust move'u varsayılan (ucuz:
-    // sadece pointer taşınır), derin kopyayı `.clone()` ile görünür/istemli yapar.
+    // Neden clone AÇIKÇA çağrılır? Sorun: heap'i derin kopyalamak pahalıdır (tahsis + byte
+    // kopyalama); otomatik olsaydı farkında olmadan maliyet çıkarırdı. Move ucuz varsayılandır
+    // (sadece pointer taşınır); derin kopya `.clone()` ile görünür/istemli yapılır.
 }
 
 // 4. Scope ve Drop (RAII — kaynak yönetiminin kalbi)
@@ -138,10 +135,12 @@ fn kapsam_ve_drop() {
     // Neden ne GC ne de elle free()? Sorun: elle free (C) → unutursan sızıntı, iki kez
     // çağırırsan double free, erken çağırırsan use-after-free. GC (Java/Go) → çalışma
     // anında duraklamalar ve ek yük. Rust'ın yolu RAII: değer, sahibinin scope'u bitince
-    // DETERMİNİSTİK biçimde ve SIFIR çalışma-anı maliyetiyle düşürülür.
+    // derleyicinin eklediği kodla, GC duraklaması/ek yükü olmadan deterministik biçimde
+    // düşürülür (heap serbest bırakma çalışma anında olur; "sıfır maliyet" yalnız
+    // borrow/ownership KONTROLLERİ için geçerlidir).
     // rustc: drop çağrılarını SEN yazmazsın; "drop elaboration" geçişi MIR'e ekler
     //        (rustc_mir_transform/src/elaborate_drops.rs). Bir değer koşullu taşınmış
-    //        olabileceği için "drop flag"ler kullanılır: yalnız hâlâ başlatılı değerler düşürülür.
+    //        olabileceği için "drop flag"ler kullanılır: yalnız hâlâ başlatılmış değerler düşürülür.
     //        (Değişkenler scope sonunda ters tanım sırasında düşürülür.)
 }
 
@@ -184,7 +183,6 @@ fn borrow_mut() {
     ekle_dunya(&mut s); // &mut: değiştirmek için ödünç; s mut olmalı
     println!("{s}");
 
-    // Kural: aynı anda ya N tane &T (okuma) YA DA tam 1 tane &mut T (yazma). İkisi birden OLMAZ.
     let r1 = &s;
     let r2 = &s; // birden çok paylaşımlı borrow aynı anda SERBEST (hepsi yalnız okur)
     println!("{r1} {r2}");
@@ -200,10 +198,8 @@ fn borrow_mut() {
     // Neden? Sorun: a ile okurken b ile yazarsan, a ayağının altından değişen veriyi
     // görür (tutarsız okuma); veri heap'te yeniden tahsis edilirse a geçersiz belleği
     // gösterir. Bu kural tam da bunu imkânsızlaştırır.
-    // rustc: borrow checker MIR üzerinde çalışır; borç kümelerini (rustc_borrowck/
-    //        borrow_set.rs) ve çakışmayı (places_conflict.rs) hesaplar, ömürleri NLL ile
-    //        çıkarır (nll.rs, region_infer/). "Last use"tan sonra borç biter — r1/r2 sonrası
-    //        r3'ün serbest olmasının nedeni budur (NLL = non-lexical lifetimes).
+    // rustc: borrow checker MIR'de borç kümelerini (borrow_set.rs) ve çakışmayı
+    //        (places_conflict.rs) hesaplar; NLL ile ömürleri çıkarır (nll.rs, region_infer/).
 }
 fn ekle_dunya(x: &mut String) {
     x.push_str(" dünya");
@@ -270,7 +266,7 @@ fn dilimler() {
     // değişkenlerde taşımak, asıl veri değişince (ör. String temizlenince) o indeksleri
     // geçersiz kılar — senkronizasyon derdi ve hata kaynağı. Dilim, parçayı asıl veriye
     // BAĞLI bir referans olarak tutar; borrow checker dilimin ömrünü sahibe bağladığı için
-    // sahibi, dilim dururken değiştiremezsin:
+    // dilim dururken sahibini değiştiremezsin:
     //   let w = ilk_kelime(&s);
     //   s.clear();            // ✗ E0502 (DOĞRULANDI): w hâlâ &s borç'u tutuyor
     //   println!("{w}");
@@ -298,9 +294,8 @@ fn ilk_kelime(s: &str) -> &str {
 // programda referans sadece bir pointer, drop sadece bir free çağrısıdır — GC yoktur,
 // ek yük yoktur. Aşamalar:
 //
-//   • Move takibi: HIR → MIR indirgemesinde (rustc_mir_build) kullanımlar move/copy diye
-//     ayrışır. Move edilen yer "uninitialized" olur. Başlatılı/taşınmış durumunu dataflow
-//     (rustc_mir_dataflow: MoveData, MaybeInitializedPlaces) izler.
+//   • Move takibi: HIR → MIR'de (rustc_mir_build) kullanımlar move/copy ayrışır; taşınan yer
+//     "uninitialized" olur. Durumu rustc_mir_dataflow (MoveData, MaybeInitializedPlaces) izler.
 //
 //   • Borrow checker (rustc_borrowck): MIR üzerinde çalışır. Borçları toplar (borrow_set.rs),
 //     çakışmaları bulur (places_conflict.rs), ömürleri/bölgeleri NLL ile çıkarır

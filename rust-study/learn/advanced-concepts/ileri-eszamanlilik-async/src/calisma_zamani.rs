@@ -1,3 +1,4 @@
+// Açıklama: learn/advanced-concepts/ileri-eszamanlilik-async/ACIKLAMA.md
 // BÖLÜM B — Mini async çalışma zamanı (runtime): görev kuyruğu, spawn, zamanlayıcı, zaman aşımı
 //
 // Böl. 17'nin executor'u tek bir kök future'ı döngüde poll ediyordu; "çok görev"i de her turda
@@ -225,8 +226,6 @@ where
 // ============================================================================
 // B3) Tutamac — başlatılan görevin sonucunu beklemek (JoinHandle)
 // ============================================================================
-// (Sade: "lost wakeup / kayıp uyandırma" = sen numaranı bırakmadan hemen önce iş biter; arayan
-//  kişi numara bulamaz ve bir daha kimse aramaz demek.)
 // SADE ANLATIM: Kuru temizlemeciye gömlek bırakınca sana bir fiş verirler. Gömleği almaya
 // gittiğinde hazırsa alırsın; hazır değilse telefon numaranı bırakırsın, hazır olunca seni
 // ararlar. `Tutamac` bu fiştir: görevin sonucu bir kutuda birikir, sen `.await` deyince ya
@@ -278,9 +277,8 @@ impl<T> Future for Tutamac<T> {
 // ============================================================================
 // Böl. 17'deki sahte future'lar Pending dönerken kendilerini HEMEN uyandırıyordu. Gerçek bir
 // yaprak (leaf) future şunu yapar: waker'ı, olayı bilecek tarafa teslim eder ve Pending döner.
-// Burada o taraf, süre kadar uyuyan bir yardımcı thread. (Üretim runtime'ları her zamanlayıcı
-// için thread açmaz; tek bir zamanlayıcı yapısı + işletim sisteminin olay bildirimi kullanır.
-// İlke aynıdır: olay olunca waker.wake().)
+// Burada o taraf, süre kadar uyuyan bir yardımcı thread. Üretim runtime'ları tek zamanlayıcı + OS
+// olay bildirimi kullanır; ilke aynıdır: olay olunca waker.wake().
 // SADE ANLATIM: Sabah kalkmak için saatin başında oturup akrebi izlemezsin; çalar saati
 // kurar ve uyursun. `Uyku` böyle çalışır: ilk poll'da saati kurar (süre kadar uyuyan yardımcı
 // bir thread), zili (waker) saate teslim eder ve "daha olmadı" der. Süre dolunca saat zili
@@ -375,9 +373,6 @@ pub struct ZamanAsimiHatasi;
 //   ✗ Kısayol yok: `Pin::new(&mut self.ic)` yalnız `F: Unpin` ise derlenir ve async blokların
 //     ürettiği future'lar Unpin DEĞİLDİR:
 //         E0277: `F` cannot be unpinned  (… note: consider using the `pin!` macro)
-// (Sade: "birleştirici / combinator" = başka bir future'ı sarıp ona yeni bir kural ekleyen
-//  future demek. "Pin projeksiyonu" = sabitlenmiş bir kutunun içindeki parçaya, o parçayı da
-//  yerinden oynatmadan ulaşmak demek.)
 // SADE ANLATIM: Masaya bir kum saati koyup işe başlıyorsun. İş kum bitmeden biterse sonucu
 // alırsın. Kum önce biterse işi olduğu yerde bırakırsın. `ZamanAsimi` iki future'ı yarıştırır:
 // asıl iş ve bir `Uyku`. Async'te "işi bırakmak" için ayrı bir düğme yoktur: future'ı poll

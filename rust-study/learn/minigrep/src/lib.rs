@@ -1,22 +1,20 @@
+// Açıklama: learn/minigrep/ACIKLAMA.md
 // Rust Book — Bölüm 12: An I/O Project — `minigrep` (küçük bir grep)
-// Çalıştır:  cargo run -p minigrep -- hiç siir.txt
-//            IGNORE_CASE=1 cargo run -p minigrep -- NE siir.txt
-// ↳ DÜZELTME NOTU (son gözden geçirme): workspace kökünden (rust-study/) çalıştırırken dosya yolu
-//   `learn/minigrep/siir.txt` olmalıdır; `siir.txt` yalnız learn/minigrep dizininden çalışır.
+// Çalıştır (rust-study kökünden):  cargo run -p minigrep -- hiç learn/minigrep/siir.txt
+//                                  IGNORE_CASE=1 cargo run -p minigrep -- NE learn/minigrep/siir.txt
+//   (`siir.txt` yalnız learn/minigrep dizininden çalıştırılırsa çıplak yazılabilir.)
 // Test et:   cargo test -p minigrep
 //
 // Bu bölüm YENİ kavram öğretmez; önceki bölümleri (Result/?, lifetime, trait, closure/iterator,
-// test) GERÇEK bir komut satırı aracında birleştirir. Ders: mantığı lib.rs'e koy (test
-// edilebilir), main.rs'i ince tut (argüman + hata gösterimi + çıkış kodu).
+// test) GERÇEK bir komut satırı aracında birleştirir.
 //
 // Doğrulama ve "neden böyle": DERLEYİCİ/TASARIM PERSPEKTİFİ (en altta).
 
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her önemli parçanın üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
-// Bu dosyadaki benzetmelerin hepsi aynı yerde geçer: bir kütüphanenin danışma masasında.
+// Her önemli parçanın üstünde "SADE ANLATIM" kutusu var: önce onu oku; teknik kısım zor gelse de
+// olur. Benzetmeler bir kütüphanenin danışma masasında geçer.
 //
 // Bu bölümün tek cümlelik özeti: Programa bir kelime ve bir dosya adı verirsin; o da dosyada o
 // kelimenin geçtiği satırları bulup ekrana yazar.
@@ -55,7 +53,6 @@ use std::fs;
 //         dosya_yolu: String::from("siir.txt"),   // hangi dosyada
 //         harf_duyarsiz: false,                   // "Hiç" ile "hiç" ayrı sayılsın
 //     };
-// Ayarları tek yerde topla: ayrıştırma mantığı main'den çıkıp test edilebilir hale gelir.
 pub struct Config {
     pub sorgu: String,
     pub dosya_yolu: String,
@@ -73,8 +70,7 @@ impl Config {
     //     args.next()                     // Some("hiç")      → sorgu
     //     args.next()                     // Some("siir.txt") → dosya yolu
     //     // `minigrep hiç` yazılsaydı üçüncü next() None verirdi → Err("dosya yolu verilmedi")
-    // Argüman ITERATOR'ı alır (Bölüm 13 kalıbı): sahipliği devralır, klonlamaya gerek kalmaz.
-    // Hata olursa panic ETMEZ; Result döner → main düzgün bir mesajla çıkabilir.
+    // Argüman ITERATOR'ı (Bölüm 13): sahiplik devri, klon yok; hata olursa panic etmez, Result döner.
     pub fn build(mut args: impl Iterator<Item = String>) -> Result<Config, &'static str> {
         args.next(); // ilk argüman programın kendi adı; atla
 
@@ -107,8 +103,7 @@ impl Config {
 //     for satir in ara("hiç", &icerik) {              // dosya varsa: uyan satırları gez
 //         println!("{satir}");                        // her birini ekrana yaz
 //     }
-// Asıl iş. Box<dyn Error> = "Error uygulayan HERHANGİ bir hata" (trait object, Bölüm 10).
-// Böylece fs okuma hatası da başka hata da tek dönüş türünde ? ile yukarı taşınır.
+// Asıl iş. Box<dyn Error> = herhangi bir Error (trait object, Bölüm 10); farklı hatalar ? ile taşınır.
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let icerik = fs::read_to_string(&config.dosya_yolu)?; // dosya yoksa Err → ? ile geri döner
 
@@ -135,8 +130,6 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 //     ara("hiç", icerik)                  // ["Ben bir hiçim"] — "Hiç" büyük harfli, uymaz
 //     ara_harf_duyarsiz("hiç", icerik)    // ["Ben bir hiçim", "Hiç misin"]
 //     ara("yok", icerik)                  // [] — hiçbir satır uymadı; bu bir hata değildir
-// Lifetime 'a (Bölüm 10): dönen diliml(er) `icerik`ten gelir, o yüzden çıktı icerik kadar yaşar.
-// `sorgu`nun süresiyle ilişkisi yok — bu yüzden yalnız icerik'e 'a bağlanır.
 pub fn ara<'a>(sorgu: &str, icerik: &'a str) -> Vec<&'a str> {
     icerik
         .lines()
@@ -152,11 +145,9 @@ pub fn ara_harf_duyarsiz<'a>(sorgu: &str, icerik: &'a str) -> Vec<&'a str> {
         .collect()
 }
 
-// SADE ANLATIM: Yeni görevli işe başlamadan önce ona küçük bir deneme yaptırılır: "şu üç
-// satırlık kâğıtta 'hiç' kelimesini bul." Doğru cevap önceden bellidir; görevli aynı cevabı
-// verirse deneme geçer. Aşağıdaki testler bu denemelerdir. TDD ise sırayı ters çevirir: önce
-// denemeyi yazarsın (henüz düşer), sonra onu geçirecek kodu yazarsın. Neden? Önce beklentiyi
-// yazınca "kod ne yapmalı" sorusu netleşir.
+// SADE ANLATIM: Görevliye küçük bir deneme yaptırılır: "şu üç satırlık kâğıtta 'hiç' kelimesini bul."
+// Doğru cevap bellidir; aynı cevabı verirse deneme geçer. TDD sırayı ters çevirir: önce testi
+// yazarsın (henüz düşer), sonra onu geçirecek kodu. Beklentiyi yazınca "kod ne yapmalı" netleşir.
 //   Mini örnek:
 //     cargo test -p minigrep            // üç testi çalıştırır
 //     cargo test -p minigrep duyarsiz   // yalnız adında "duyarsiz" geçen testi çalıştırır
@@ -191,11 +182,8 @@ mod testler {
     }
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): Aşağısı "bu küçük program neden böyle düzenlendi?"
-// sorusunu cevaplar. Ana fikirler: görevli (lib.rs) işi yapar, kapıdaki kişi (main.rs) yalnız
-// fişi alır ve sonucu bildirir; bulunan satırlar ile hata mesajları iki ayrı kanaldan verilir ki
-// birbirine karışmasın; program biterken "oldu" ya da "olmadı" anlamına gelen bir sayı bırakır.
-// İlk okuyuşta atlayabilirsin; yukarıdaki dört parçayı anlamış olman yeter.
+// SADE ANLATIM (aşağıdaki bölüm için): "Neden böyle düzenlendi?"nin cevabı: iş lib.rs'te, sonuç
+// ve hata iki ayrı kanaldan, çıkışta bir durum kodu. İlk okuyuşta atlayabilirsin.
 // ============================================================================
 // DERLEYİCİ / TASARIM PERSPEKTİFİ — küçük bir CLI'ın doğru iskeleti
 // ============================================================================

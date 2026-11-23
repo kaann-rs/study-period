@@ -1,3 +1,4 @@
+// Açıklama: learn/concurrency/ACIKLAMA.md
 // Derinleşme — Bölüm 16: Concurrency ve Thread Safety (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p concurrency   |   Test: cargo test -p concurrency
 //
@@ -63,8 +64,7 @@ pub fn calistir() {
 // SADE ANLATIM: İki aşçı bir işi iki yolla paylaşır. Ya tabağı elden ele geçirirler (kanal):
 // tabak kimdeyse yalnız o dokunur. Ya da ikisi de yerinde duran aynı tencereye sırayla uzanır
 // (paylaşımlı durum): tencere tektir, kaşık sırayla alınır.
-// Neden iki yol? Akan işler (hazırla → pişir → servis et) elden ele geçirmeye, herkesin baktığı
-// ortak kayıtlar (stok listesi) yerinde paylaşmaya daha uygundur.
+// Akan işler elden ele geçirmeye, ortak kayıtlar (stok listesi) yerinde paylaşmaya uygundur.
 //   Mini örnek:
 //     tx.send(tabak).unwrap();           // kanal: tabak öteki aşçıya GEÇTİ, artık yalnız onda
 //     *tencere.lock().unwrap() += 1;     // paylaşım: tencere yerinde durur, sırayla uzanılır
@@ -77,9 +77,7 @@ pub fn calistir() {
 //   PAYLAŞIMLI DURUM (Arc<Mutex<T>>) → veri YERİNDE durur, thread'ler sırayla erişir.
 //       Uygun: herkesin okuyup güncellediği ortak tablo (önbellek, sayaçlar, bağlantı havuzu).
 //
-// Benzetme: kanal, masadan masaya dosya gezdirmektir (dosya kimdeyse o çalışır); Mutex, ortak
-// bir beyaz tahtadır (kalemi alan yazar, ötekiler bekler). İlki akış için, ikincisi ortak
-// kayıt için doğaldır. Emin değilsen kanalla başla: hataları derleyici daha fazla yakalar.
+// Emin değilsen kanalla başla: hataları derleyici daha fazla yakalar.
 
 // ============================================================================
 // 2. thread::scope — yerel veriyi ÖDÜNÇ vererek paralel işlem
@@ -89,9 +87,8 @@ pub fn calistir() {
 //   ✗  let veri = vec![1, 2, 3];
 //      thread::spawn(|| println!("{veri:?}"));
 //         // E0373: closure may outlive the current function, but it borrows `veri`
-// İki klasik çözüm var: `move` ile sahipliği vermek (veri artık bizde değil) ya da Arc ile
-// paylaşmak (sayaç + heap tahsisi). Oysa çoğu zaman istediğimiz daha basit: "şu dilimi dört
-// parçaya böl, paralel işle, SONRA devam et" — thread'ler zaten fonksiyon bitmeden bitecek.
+// İki klasik çözüm: `move` ile sahipliği vermek ya da Arc ile paylaşmak (sayaç + heap). Oysa
+// çoğu zaman istenen daha basit: "dilimi paralel işle, SONRA devam et" — thread'ler zaten biter.
 //
 // thread::scope tam bunu ifade eder: kapsamın içinde doğan her thread, kapsam kapanmadan
 // OTOMATİK join edilir. Derleyici bu garantiye dayanarak 'static şartını kaldırır; closure'lar
@@ -100,8 +97,7 @@ pub fn calistir() {
 // çağırırsın. Senden önce bitirecekleri kesin olduğu için malzemeyi onlara VERMEN gerekmez;
 // malzeme senin tezgâhında dururken kullanırlar (ödünç alırlar). `thread::scope` bu sözü verir:
 // blok kapanırken içeride başlayan bütün thread'ler kendiliğinden beklenir.
-// Neden böyle? Sıradan `thread::spawn` ile başlayan aşçı senden uzun çalışabilir; bu yüzden ona
-// ödünç malzeme vermek yasaktır. Scope'ta "önce onlar biter" güvencesi yasağı gereksiz kılar.
+// Sıradan spawn uzun yaşayabilir → ödünç yasaktır; scope'ta "önce onlar biter" güvencesi yasağı kaldırır.
 //   Mini örnek:
 //     let sayilar = vec![1, 2, 3, 4];
 //     thread::scope(|k| {
@@ -118,22 +114,17 @@ pub fn paralel_topla(veri: &[u64], parca_sayisi: usize) -> u64 {
             .chunks(parca_boyu)
             .map(|parca| kapsam.spawn(move || parca.iter().sum::<u64>()))
             .collect();
-        // (Sade: "tembel" = sonucu isteyen olmadıkça çalışmayan demek; `collect()` zincire
-        // "hepsini şimdi yap" der, böylece bütün yardımcılar beklemeye geçmeden önce işe başlar.)
-        // collect() burada ŞART: iterator'lar tembeldir. Tutamaçları toplamadan doğrudan
-        // `.map(spawn).map(join)` zincirleseydik her thread doğar doğmaz join edilir, bir
-        // sonraki ancak o bitince başlardı — kod "paralel" görünür ama SERİ çalışırdı.
-        // Önce hepsini başlat (collect), sonra hepsini bekle.
+        // (Sade: "tembel" = sonucu isteyen olmadıkça çalışmayan; `collect()` der "hepsini şimdi yap".)
+        // collect() ŞART: yoksa `.map(spawn).map(join)` her thread'i doğar doğmaz join eder, kod
+        // "paralel" görünür ama SERİ çalışır. Önce hepsini başlat, sonra hepsini bekle.
         // join(): her parçanın sonucunu al. unwrap: işçi panik ettiyse biz de durduralım.
         tutamaclar.into_iter().map(|t| t.join().unwrap()).sum()
     }) // ← kapsam burada kapanır; içeride doğan tüm thread'lerin bittiği GARANTİ
 }
 
-// Ayrık parçalara YAZMAK da aynı kalıpla güvenlidir: chunks_mut her thread'e çakışmayan bir
-// &mut dilim verir. "Aynı anda iki &mut yok" kuralı bozulmaz çünkü dilimler örtüşmez — ve
-// bunu derleyici chunks_mut'un imzasından bilir, bizim dikkatimizden değil.
-// (Sade: tezgâhı çizgilerle bölüp her yardımcıya kendi bölümünü verirsen kimse kimsenin
-// bölümüne uzanamaz; `chunks_mut` bu çizgileri çeker, bu yüzden aynı anda YAZMAK da güvenlidir.)
+// Ayrık parçalara YAZMAK da güvenlidir: chunks_mut her thread'e çakışmayan &mut dilim verir.
+// "Aynı anda iki &mut yok" kuralı bozulmaz, çünkü derleyici bunu imzadan bilir. (Sade: tezgâhı
+// bölüp her yardımcıya kendi bölümünü verirsen kimse kimsenin bölümüne uzanamaz.)
 pub fn paralel_karesini_al(veri: &mut [u64], parca_sayisi: usize) {
     let parca_boyu = veri.len().div_ceil(parca_sayisi.max(1)).max(1);
     thread::scope(|kapsam| {
@@ -156,7 +147,6 @@ fn kapsamli_threadler() {
         &sayilar[..3],
         sayilar[999]
     ); // [1, 4, 9], 1000000
-    // `sayilar` hâlâ bizim: ne move ettik ne Arc'a sardık.
 }
 
 // ============================================================================
@@ -177,7 +167,7 @@ fn kapsamli_threadler() {
 // penceresine koyar. Aşağıdaki kodda ray "iş kanalı", pencere "sonuç kanalı"dır. Rayın alan ucu
 // tek olduğu için bir Mutex'in içinde durur: fişi çekerken raya tek aşçı uzanır ve fişi alır
 // almaz rayı bırakır. Ray boşalıp kapanınca (`drop(is_tx)`) aşçılar "mesai bitti" diye anlar.
-// Neden böyle? Her işe yeni thread açmak pahalıdır; yoğun saatte mutfak aşçıyla dolar taşardı.
+// Her işe yeni thread açmak pahalı olduğu için havuz kullanılır.
 //   Mini örnek:
 //     let ray = Arc::new(Mutex::new(is_rx));         // fiş rayı: sırayla uzanılır
 //     let fis = ray.lock().unwrap().recv();          // ✓ fişi çek; satır bitince ray serbest
@@ -205,11 +195,9 @@ pub fn havuzda_isle(isler: Vec<Is>, isci_sayisi: usize) -> Vec<Sonuc> {
         let sonuc_tx = sonuc_tx.clone(); // her işçiye kendi göndereni
         isciler.push(thread::spawn(move || {
             loop {
-                // ÖNEMLİ SATIR: lock() geçici bir MutexGuard üretir ve bu `let` deyimi
-                // bitince düşer → kilit, iş ALINIR ALINMAZ bırakılır; işi kilitsiz işleriz.
-                // Bunu `while let Ok(is) = is_rx.lock().unwrap().recv() { ... }` diye yazsaydık
-                // guard döngü GÖVDESİ boyunca yaşardı: bir işçi çalışırken ötekiler kuyruğa
-                // erişemez, havuz sessizce tek thread'e inerdi (derlenir, yanlış çalışır).
+                // ÖNEMLİ: lock() geçici guard üretir, deyim bitince düşer → kilit iş alınır alınmaz
+                // bırakılır. `while let Ok(is) = is_rx.lock().unwrap().recv()` yazsaydık guard
+                // döngü boyunca yaşar, havuz tek thread'e inerdi (derlenir, yanlış çalışır).
                 let alinan = is_rx.lock().unwrap().recv();
                 match alinan {
                     Ok(is) => {
@@ -230,8 +218,7 @@ pub fn havuzda_isle(isler: Vec<Is>, isci_sayisi: usize) -> Vec<Sonuc> {
             }
         }));
     }
-    // Ana thread'deki orijinal sonuç gönderenini kapat. Kapatmazsak aşağıdaki sonuç döngüsü
-    // "hâlâ bir gönderen var" diye sonsuza dek bekler (main.rs'teki drop(tx) ile aynı sebep).
+    // drop(sonuc_tx): kapatmazsak sonuç döngüsü sonsuza dek bekler (main.rs'teki drop(tx) ile aynı sebep).
     drop(sonuc_tx);
 
     for is in isler {
@@ -289,8 +276,7 @@ fn isci_havuzu_senaryosu() {
 // için kilere gidip deftere bir çizgi atarsan bütün aşçılar gününü kiler kapısında geçirir. Bunun
 // yerine herkes kendi kâğıdına sayar, işi bitince kilere BİR kez girip toplamını deftere yazar.
 // Aşağıdaki kod da böyle yapar: önce kilitsiz yerel tablo, sonra tek ve kısa bir `lock()`.
-// Neden böyle? Kilit sonucun doğru çıkmasını sağlar, hızlı çıkmasını değil; kilit altında geçen
-// süre uzadıkça dört aşçı tek aşçı gibi çalışır.
+// Kilit doğruluğu sağlar, hızı değil: kilit altında geçen süre uzadıkça dört aşçı tek gibi çalışır.
 //   Mini örnek:
 //     let mut yerel = 0;
 //     for _ in 0..1000 { yerel += 1; }                      // ✓ kilitsiz, kendi kâğıdında say
@@ -341,9 +327,6 @@ fn paylasimli_durum_senaryosu() {
 // SADE ANLATIM: Mutfak kapısında, basınca bir artan mekanik bir sayaç var. Basmak tek hamledir:
 // iki kişi aynı anda bassa da sayı iki artar, hiçbir basış kaybolmaz. Bunun için kapıyı
 // kilitlemeye gerek yoktur. Atomik türler bu sayaçtır; `fetch_add(1, ...)` düğmeye basmaktır.
-// Neden böyle? Sıradan bir sayıda "oku, artır, yaz" üç ayrı adımdır; iki thread araya girerse bir
-// artış kaybolur. Atomik işlem bu üç adımı bölünmez tek adım yapar.
-// (Sade: `Ordering::Relaxed` = "yalnız bu sayının doğru sayılması yeter, başka şart yok" demek.)
 //   Mini örnek:
 //     let sayac = AtomicU64::new(0);
 //     thread::scope(|k| {
@@ -439,12 +422,11 @@ fn derleyicinin_yakalayamadiklari() {
     // ile geri çekilme → ileri-eszamanlilik-async.
 
     // --- (c) Zehirlenmiş kilit (poison) -------------------------------------------------------
-    // (Sade: aşçı elinde kiler anahtarıyla bayılırsa raflar yarım düzenlenmiş kalabilir; kapıya
-    // "dikkat" levhası asılır. Sonraki `lock()` bu levhayı Err olarak gösterir, karar senindir.)
-    // Kilidi tutan thread panik ederse veri yarıda kalmış olabilir; std Mutex'i "zehirli"
-    // işaretler ve sonraki lock() çağrıları Err döndürür. .unwrap() bu yüzden yaygındır:
-    // "öteki thread çöktüyse ben de durayım". Veri yine de kullanılabilir durumdaysa
-    // `lock().unwrap_or_else(|zehir| zehir.into_inner())` ile guard'ı kurtarabilirsin.
+    // (Sade: aşçı anahtarıyla bayılırsa raflar yarım kalır; kapıya "dikkat" levhası asılır,
+    // sonraki lock() bunu Err olarak gösterir.)
+    // Kilidi tutan thread panik ederse veri yarıda kalabilir; std Mutex'i "zehirli" işaretler ve
+    // sonraki lock() Err döner. `.unwrap()` "öteki çöktüyse ben de durayım" demektir; veri
+    // kullanılabilir durumdaysa `lock().unwrap_or_else(|z| z.into_inner())` ile kurtarılabilir.
     // Çalışan örneği testlerde: `zehirli_kilit_kurtarilabilir`.
 }
 
@@ -485,10 +467,8 @@ fn derleyicinin_yakalayamadiklari() {
 //    İpucu: mpsc::channel::<BTreeMap<String, u32>>(); kapsam içinde tx.clone(), kapsamdan
 //    önce/sonra orijinal tx'i düşürmeyi unutma.
 //
-// Bir sonraki konuyla bağlantısı: thread'ler işi GERÇEKTEN aynı anda koşturur (paralellik);
-// çok sayıda BEKLEYEN işi az thread'le yürütmek ise async'in alanıdır → async-await. Send ve
-// Sync'in neden böyle çalıştığı → ileri-send-sync. RwLock, Condvar, deadlock önleme ve async
-// çalışma zamanı → ileri-eszamanlilik-async.
+// Sıradaki konu: thread'ler paralellik; BEKLEYEN çok işi az thread'le yürütmek async'in alanı
+// (async-await). Send/Sync'in nedeni → ileri-send-sync.
 
 #[cfg(test)]
 mod testler {

@@ -1,3 +1,4 @@
+// Açıklama: learn/writing-tests/ACIKLAMA.md
 // Rust Book — Bölüm 11: Writing Automated Tests
 // Test et: cargo test -p writing-tests
 // Çalıştır (demo): cargo run -p writing-tests
@@ -11,9 +12,8 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki önemli yerlerin üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
-// Bu dosyadaki benzetmelerin hepsi aynı yerde geçer: bir oyuncak atölyesinde.
+// Önemli yerlerin üstünde "SADE ANLATIM" kutusu var: önce onu oku; teknik kısım zor gelse de olur.
+// Benzetmeler bir oyuncak atölyesinde geçer.
 //
 // Bu bölümün tek cümlelik özeti: Test, "bu fonksiyona şunu verirsem şunu almalıyım" diyen küçük
 // bir denemedir; bir kez yazarsın, bilgisayar her seferinde senin yerine dener.
@@ -44,8 +44,7 @@
 
 // ---- Test edilecek gerçek kod ----
 
-// (Sade: buradan testlere kadar olan dört fonksiyon, atölyenin ürettiği "oyuncaklar"dır. Kendileri
-// çok basittir; asıl konu, aşağıda onları nasıl denediğimizdir.)
+// (Sade: aşağıdaki dört fonksiyon atölyenin oyuncakları; asıl konu onları nasıl denediğimizdir.)
 pub fn topla(a: i32, b: i32) -> i32 {
     a + b
 }
@@ -65,7 +64,8 @@ pub fn kelime_say(s: &str) -> usize {
 
 // (Sade: "private", atölyenin içindeki bir alet gibidir: müşteri göremez, ama atölyenin içinde
 // çalışan kalite kontrolcü (birim testi) onu eline alıp deneyebilir.)
-// PRIVATE fonksiyon: dışarıdan erişilemez ama birim testleri (aynı crate içinde) test EDEBİLİR.
+// PRIVATE fonksiyon: dışarıdan erişilemez ama birim testleri (aynı modül ağacında, alt modülden
+// `use super::*` ile) erişebilir; aynı crate'deki her modül erişemez.
 fn kirp(s: &str) -> &str {
     s.trim()
 }
@@ -75,12 +75,10 @@ fn kirp(s: &str) -> &str {
 // ============================================================================
 // #[cfg(test)]: bu modül YALNIZCA `cargo test`'te derlenir; `cargo build`/`run`'da hiç yoktur
 // (ikiliye test kodu sızmaz). `use super::*;` ile üstteki (private dahil) öğeleri içeri alır.
-// SADE ANLATIM: Oyuncak atölyesinde her araba kutuya girmeden önce denenir: "itince gidiyor mu,
-// tekerleği dönüyor mu?" Deneme tezgâhı atölyenin içindedir, ama müşteriye giden kutuya
-// konmaz. Rust'ta testler bu tezgâhtır: asıl kodla aynı dosyada durur, `#[cfg(test)]` sayesinde
-// yalnız `cargo test` dediğinde derlenir; çalışan programa girmez. Neden böyle? Kodu elle
-// denemek unutulur ve yorar; yazılı test, kodu her değiştirdiğinde eskiden çalışan şeyi bozup
-// bozmadığını birkaç saniyede söyler.
+// SADE ANLATIM: Oyuncak atölyesinde her araba kutuya girmeden önce denenir. Deneme tezgâhı
+// atölyenin içindedir, müşteriye giden kutuya konmaz; Rust'ta testler bu tezgâhtır, asıl kodla
+// aynı dosyada durur. Elle denemek unutulur; yazılı test her değişiklikte eskiden çalışan şeyi
+// bozup bozmadığını saniyeler içinde söyler.
 //   Mini örnek:
 //     fn ikiye_katla(x: i32) -> i32 { x * 2 }
 //     #[test]
@@ -92,11 +90,10 @@ fn kirp(s: &str) -> &str {
 mod testler {
     use super::*;
 
-    // SADE ANLATIM: Kalite kontrolcünün elinde bir liste vardır: "itince gitmeli", "kırmızı
-    // olmalı", "ağırlığı 100 gram olmalı". Her satır bir beklentidir; biri bile tutmazsa oyuncak
-    // geri döner. `assert!` ailesi bu satırlardır: `assert!(koşul)` "bu doğru olmalı",
-    // `assert_eq!(a, b)` "ikisi eşit olmalı", `assert_ne!(a, b)` "eşit olmamalı" der. Neden üç
-    // ayrı biçim? `assert_eq!` tutmayınca iki değeri de yazar; neyin yanlış çıktığını aramazsın.
+    // SADE ANLATIM: Kalite kontrolcünün bir beklentiler listesi vardır; biri tutmazsa oyuncak geri
+    // döner. `assert!` ailesi bu satırlardır: `assert!(koşul)` "doğru olmalı", `assert_eq!(a, b)`
+    // "eşit olmalı", `assert_ne!(a, b)` "eşit OLMAMALI" der. `assert_eq!` tutmayınca iki değeri de
+    // yazar; neyin yanlış çıktığını aramazsın.
     //   Mini örnek:
     //     assert!(topla(2, 3) > 0);         // ✓ 5 > 0 doğru
     //     assert_eq!(topla(2, 3), 5);       // ✓ eşit
@@ -143,9 +140,8 @@ mod testler {
         yas_dogrula(-1);
     }
 
-    // (Sade: bir test sonucunu paniklemek yerine dönüş değeriyle de bildirebilir: `Ok(())` "geçti",
-    // `Err(..)` "düştü" demektir. Faydası: testin içinde `?` kullanabilirsin.)
-    // Test Result<(), E> da döndürebilir: Err dönerse test düşer. ? operatörünü teste taşır.
+    // (Sade: test `Result<(), E>` de döndürebilir: `Ok(())` geçti, `Err(..)` düştü; faydası, testin
+    // içinde `?` kullanabilmek.)
     #[test]
     fn result_donen_test() -> Result<(), String> {
         if topla(2, 2) == 4 {
@@ -156,21 +152,17 @@ mod testler {
     }
 
     // (Sade: `#[ignore]`, uzun süren bir denemeyi "bugün yapma" diye kenara ayırmaktır. Test
-    // silinmez; `cargo test -- --ignored` dediğinde yine çalışır.)
+    // silinmez; `cargo test -- --ignored` ya da `--include-ignored` dediğinde yine çalışır.)
     #[test]
-    #[ignore] // normalde atlanır; sadece `cargo test -- --ignored` ile koşar (yavaş/isteğe bağlı)
+    #[ignore] // normalde atlanır; `--ignored` veya `--include-ignored` ile koşar (yavaş/isteğe bağlı)
     fn pahali_test() {
         assert_eq!(topla(1000, 1000), 2000);
     }
 }
 
-// SADE ANLATIM (aşağıdaki bölüm için): `cargo test` yazınca perde arkasında bir "deneme
-// sorumlusu" işe başlar: `#[test]` etiketli fonksiyonları tek tek bulur, hepsini çalıştırır,
-// kaçının geçip kaçının düştüğünü sayar. Aşağıdaki bölüm bu sorumlunun nasıl çalıştığını anlatır:
-// testleri neden aynı anda çalıştırdığını, bir testin neye göre "düşmüş" sayıldığını ve
-// atölyenin içinden yapılan deneme (birim testi) ile müşteri gibi dışarıdan yapılan denemenin
-// (entegrasyon testi) farkını. İlk okuyuşta atlayabilirsin; yukarıdaki testleri okuyup
-// `cargo test -p writing-tests` çalıştırman yeter.
+// SADE ANLATIM (aşağıdaki bölüm için): `cargo test` yazınca bir "deneme sorumlusu" #[test]
+// fonksiyonları bulup koşturur, kaçının geçtiğini sayar; paralellik, düşme koşulu ve birim/
+// entegrasyon farkını aşağıda okursun. İlk okuyuşta atlayabilirsin; yukarıdaki testler yeter.
 // ============================================================================
 // DERLEYİCİ / HARNESS PERSPEKTİFİ — `cargo test` ne yapıyor?
 // ============================================================================
@@ -192,7 +184,7 @@ mod testler {
 //   Her test kendi mantığında izole panik yakalanır, biri düşünce ötekiler koşmaya devam eder.
 //
 // • Filtreleme: `cargo test topla` → adında "topla" geçen testleri koşar (substring).
-//   `cargo test -- --ignored` → yalnız #[ignore]'luları. Ad çözümü libtest'te, derleyicide değil.
+//   `cargo test -- --ignored` → yalnız #[ignore]'luları (`--include-ignored` tümünü koşar).
 //
 // • BİRİM vs ENTEGRASYON:
 //     - Birim testleri: src içinde #[cfg(test)] modül; private'a erişir, iç mantığı sınar.

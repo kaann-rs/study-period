@@ -1,13 +1,10 @@
+// Açıklama: learn/advanced-concepts/ileri-send-sync/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: UnsafeCell ve Send/Sync'in İÇ YÜZÜ
 // Çalıştır: cargo run -p ileri-send-sync
 //
-// Kaynak: Rust for Rustaceans Böl. 4 (Auto-Traits) & Böl. 10 (UnsafeCell) + std (core::cell).
-// ↳ DÜZELTME NOTU (son gözden geçirme): bölüm numaraları bir fazla yazılmış.
-//   Auto-trait'ler Böl. 3'te (Designing Interfaces), UnsafeCell Böl. 9'da (Unsafe Code) ele
-//   alınır; Böl. 4 Error Handling, Böl. 10 Concurrency'dir. Bölüm listesi yayıncının içindekiler
-//   sayfasıyla doğrulandı. Aşağıdaki "Listing 4-8" atfı da Böl. 3'e aittir; listenin tam
-//   numarası doğrulanmadı.
-// Böl. 15 (RefCell) + Böl. 16 (Send/Sync) + ileri-future burada tek kökte birleşir:
+// Kaynak: Rust for Rustaceans Böl. 3 (Auto-Traits, Designing Interfaces) & Böl. 9 (UnsafeCell,
+//   Unsafe Code) + std (core::cell). Bölüm listesi yayıncının içindekiler sayfasıyla doğrulandı.
+// Müfredat Böl. 15 (RefCell) + Böl. 16 (Send/Sync) + ileri-future burada tek kökte birleşir:
 //   - İÇ DEĞİŞKENLİĞİN tek gerçek temeli UnsafeCell'dir (Cell/RefCell/Mutex/atomik hepsi onun üstünde).
 //   - Send/Sync birer AUTO-TRAIT'tir: derleyici tipin İÇERİĞİNE bakıp otomatik ekler/eklemez.
 //
@@ -17,8 +14,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümün üstündeki "SADE ANLATIM" kutusunu önce oku; teknik kısım zor gelirse sorun değil.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/ownership` (`&` ile bakılır, `&mut` ile
 // değiştirilir), `learn/smart-pointers` (Rc, RefCell) ve `learn/concurrency` (thread, Arc, Mutex).
@@ -29,7 +25,7 @@
 //
 // MİNİ SÖZLÜK (bu dosyada geçen kelimeler):
 //   thread (iş parçacığı) → programın içinde aynı anda çalışan ayrı bir işçi.
-//   veri yarışı (data race)→ iki thread'in aynı veriye aynı anda dokunması ve en az birinin
+//   veri yarışı (data race) → iki thread'in aynı veriye aynı anda dokunması ve en az birinin
 //                          yazması. Sonuç belirsizdir; Rust bunu derlemede engeller.
 //   iç değişkenlik       → interior mutability: `&` üzerinden bile içeriği değiştirebilmek.
 //   UnsafeCell           → iç değişkenliğin temel taşı; "bakarken değişebilir" etiketi.
@@ -60,15 +56,12 @@ fn main() {
 // ============================================================================
 // 1. UnsafeCell — iç değişkenliğin TEK yasal temeli
 // ============================================================================
-// Normalde `&T` ÜZERİNDEN veriyi değiştiremezsin; dahası derleyici "& ardındaki veri değişmez"
-// varsayımıyla OPTİMİZASYON yapar (no-alias). UnsafeCell, derleyicinin TANIDIĞI tek istisnadır:
-// içindeki veriyi bu garantiden muaf tutar. get(&self) -> *mut T verir; yani PAYLAŞIMLI bir
-// referanstan yazılabilir ham pointer. Cell, RefCell, Mutex, atomikler... hepsi bunun üstüne kurulu.
+// Normalde `&T` ÜZERİNDEN veri değiştirilemez; derleyici "& ardındaki veri değişmez" varsayımıyla
+// OPTİMİZASYON yapar (no-alias). UnsafeCell bu garantiden muaf tutulan TEK istisnadır:
+// get(&self) -> *mut T verir; yani paylaşımlı referanstan yazılabilir ham pointer.
 //
 // Aşağıda Cell'in minik bir kopyasını UnsafeCell ile kuruyoruz: &self ile (paylaşımlı referansla)
 // değer değiştirmek. Tek-thread'de güvenli — çünkü UnsafeCell !Sync, paylaşımı en baştan engeller.
-// (Sade: "no-alias optimizasyonu" = derleyici "& ile bakılan şey değişmez" deyip değeri bir
-//  kez okur ve ezberinden kullanır demek.)
 // SADE ANLATIM: Müzedeki eşyaların önünde "dokunmayın, yalnız bakın" yazar; `&` referansı
 // böyledir. Derleyici de buna güvenir: "kimse dokunamadığına göre bir kez bakıp aklımda
 // tutabilirim" der. `UnsafeCell` ise üstünde "DİKKAT: sen bakarken bu değişebilir" yazan özel
@@ -112,7 +105,7 @@ fn unsafecell_temel() {
 }
 
 // ============================================================================
-// 2. Send / Sync AUTO-TRAIT olarak — derleme-zamanı üyelik testi (RfR Listing 4-8)
+// 2. Send / Sync AUTO-TRAIT olarak — derleme-zamanı üyelik testi
 // ============================================================================
 // Send: değer başka bir thread'e GÜVENLE TAŞINABİLİR mi.
 // Sync: &T başka thread'lerce GÜVENLE PAYLAŞILABİLİR mi — tanımı gereği:  T: Sync  ⇔  &T: Send.
@@ -121,7 +114,6 @@ fn unsafecell_temel() {
 
 // Bu fonksiyonlar KOD ÇALIŞTIRMAZ; yalnız T'nin ilgili trait'i uygulamasını DERLEME ANINDA sınar.
 // Çağrı derleniyorsa üyelik vardır (RfR'nin is_normal hilesi).
-// (Sade: "auto-trait" = sen yazmazsın; derleyici türün parçalarına bakıp kendisi verir demek.)
 // SADE ANLATIM: Evde iki oda, her odada bir çocuk var; odalar thread'lerdir. `Send`, "bu
 // oyuncağı öteki odaya götürebilirsin" demektir. `Sync`, "bu oyuncağa iki odadan aynı anda
 // bakılabilir" demektir. İkisi birbirine bağlıdır: bir şeye iki odadan bakılabiliyorsa, onu
@@ -150,19 +142,15 @@ fn auto_trait_testi() {
     // sync_ister::<MiniCell<i32>>();  // ✗ DERLENMEZ: UnsafeCell !Sync → MiniCell !Sync
     //   "the trait `Sync` is not implemented for `UnsafeCell<i32>`"
 
-    // Neden !Sync iyi? Tek-thread iç değişkenliği güvenli; ama iki thread aynı anda yaz()'sa VERİ
-    // YARIŞI olurdu. UnsafeCell'in !Sync olması (std'de açık negatif impl), MiniCell'i/RefCell'i
-    // thread'ler ARASINDA paylaşmayı DERLEME ANINDA yasaklar → yarış en baştan imkânsız.
+    // Neden !Sync iyi? Tek-thread iç değişkenliği güvenli, ama iki thread yaz()'sa VERİ YARIŞI olurdu;
+    // UnsafeCell'in !Sync olması (std'de açık negatif impl) paylaşımı DERLEME ANINDA yasaklar.
     //
-    // (Sade: "açık negatif impl" = std'nin "bu tür Sync DEĞİLDİR" diye elle yazdığı satır demek.)
     // KARŞI ÖRNEKLER (hepsi rustc ile doğrulandı, kod derlenmez diye yorumda):
     //   - RefCell<T>: !Sync → Arc<RefCell<T>> thread'e geçmez (E0277 "cannot be shared / Sync yok").
     //   - *const T / *mut T: hem !Send hem !Sync → bu alanı taşıyan struct da !Send olur.
     //   - Rc<T>: !Send + !Sync (sayacı atomik değil) → thread'e taşınamaz (Böl. 16).
     //   - Mutex<T>: İÇİNDE UnsafeCell olduğu hâlde Sync'TİR, çünkü std `unsafe impl Sync for Mutex`
     //     ile "erişimi kilit serileştirir, yarış olmaz" sözünü verir. Arc<Mutex<T>> bu yüzden çalışır.
-    // (Sade: "kilit erişimi serileştirir" = kilit, içeri girmek isteyenleri tek tek sıraya
-    //  sokar demek. Aynı anda yalnız bir thread içeride olduğu için T'nin Send olması yeter.)
 }
 
 // SADE ANLATIM (aşağıdaki bölüm için): Yukarıda iki şey gördün: "bakarken değişebilir"
@@ -189,11 +177,11 @@ fn auto_trait_testi() {
 //   gibi tür-silinmiş türlere bile PROPAGE olur.
 //
 // • UnsafeCell'in std'de AÇIK NEGATİF impl'i var: `impl<T: ?Sized> !Sync for UnsafeCell<T> {}`
-//   (cell.rs ~2315). Auto-trait "her şey Sync olurdu" diyecekken bu negatif impl araya girer:
+//   (cell.rs:2318). Auto-trait "her şey Sync olurdu" diyecekken bu negatif impl araya girer:
 //   işte Cell/RefCell'in !Sync olmasının KÖK sebebi. Böylece iç-değişken bir değer, ek bir
 //   eşzamanlama (Mutex gibi) olmadan thread'ler arası PAYLAŞILAMAZ — veri yarışı derleme hatası olur.
 //
-// • AUTO-TRAIT ve API (RfR Böl. 4): Send/Sync "gizli bir söz"dür; neredeyse her tipin parçasıdır.
+// • AUTO-TRAIT ve API (RfR Böl. 3): Send/Sync "gizli bir söz"dür; neredeyse her tipin parçasıdır.
 //   Public tipin private bir alanı !Send olursa, tipin KENDİSİ sessizce !Send olur — bu bir KIRICI
 //   değişikliktir (semver). Yakalamak için RfR'nin hilesi: `fn is_normal<T: Send + Sync + Unpin>(){}`
 //   + bir #[test] içinde `is_normal::<Tipim>();`. Test kod çalıştırmaz; yalnız DERLENİR — üyelik

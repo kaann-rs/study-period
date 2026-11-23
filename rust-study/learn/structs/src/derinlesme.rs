@@ -1,3 +1,4 @@
+// Açıklama: learn/structs/ACIKLAMA.md
 // Derinleşme — Bölüm 5: Structs (pekiştirme: gerçekçi senaryo, sık hatalar, alıştırmalar)
 // Çalıştır: cargo run -p structs   |   Test: cargo test -p structs
 //
@@ -11,9 +12,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Önce main.rs'i oku; bu dosya onun devamıdır. Buradaki her bölümün üstünde de bir "SADE ANLATIM"
-// kutusu var. main.rs'teki öğrenci kartı benzetmesi sürer; bu kez kartları basan KAYIT BÜROSUNA
-// bakıyoruz.
+// Önce main.rs'i oku; öğrenci kartı benzetmesi sürer, bu kez kartları basan KAYIT BÜROSUNA bakıyoruz.
 //
 // Bu dosyanın tek cümlelik özeti: Bir kartı yalnız büronun basmasına izin verirsen, eline geçen
 // her kartın denetimden geçtiğine güvenebilirsin.
@@ -45,18 +44,15 @@ pub fn calistir() {
 }
 
 // Bu konuyu neden öğreniyoruz?
-// main.rs'teki Kullanici'nın alanlarına aynı dosyadaki her kod serbestçe yazabiliyordu;
-// `eposta: "asdf".into()` derlenirdi. Gerçek projede asıl soru şudur: bu struct'ın bir değeri
-// elimdeyse NEYE güvenebilirim? Gizlilik (privacy) varsayılanı bunun aracıdır: bir alan `pub`
-// değilse yalnızca tanımlandığı modül (ve alt modülleri) ona dokunabilir. Kuralı modülün
-// içinde bir kez yazarsın; modülün dışındaki hiçbir kod onu çiğneyen bir değer üretemez.
+// main.rs'te Kullanici alanlarına her kod yazabiliyordu; `eposta: "asdf".into()` derlenirdi.
+// Gizlilik (privacy) varsayılanı: `pub` olmayan alana yalnız tanımlandığı modül (ve altları)
+// dokunur. Kural modülde bir kez yazılır; dışarıdan onu çiğneyen değer üretilemez.
 // SADE ANLATIM: Öğrenci kartını kendin yazamazsın; yalnız kayıt bürosu basar. Büro önce bilgini
 // denetler, uygunsa kartı verir. Bu yüzden elinde kart olan herkesin bilgisi denetlenmiştir;
 // kartı gören kimsenin yeniden denetlemesi gerekmez. Rust'ta büro bir modüldür (`mod hesap`),
 // kartın gözleri `pub` yazılmadığı için dışarıya kapalıdır ve kart yalnız büronun verdiği
 // fonksiyonla (`ayristir`) üretilir.
-// Neden böyle? Gözler herkese açık olsaydı, programın herhangi bir satırı karta geçersiz bir
-// e-posta yazabilirdi; karta güvenen bütün kod sessizce yanlış çalışırdı.
+// Neden? Gözler açık olsaydı her satır geçersiz e-posta yazabilir, karta güvenen kod yanlış çalışırdı.
 //   Mini örnek:
 //     mod buro {
 //         pub struct Numara(u32);                  // içindeki sayı dışarıya kapalı
@@ -69,17 +65,14 @@ pub fn calistir() {
 //     let n = buro::Numara::yeni(7);    // ✓ Some(..) → büro denetledi ve bastı
 //     let k = buro::Numara(0);          // ✗ derlenmez: kartı yalnız büro basar
 mod hesap {
-    // (Sade: aşağıdaki Eposta, içinde tek bir yazı bulunan karttır. Sıradan bir String'den farkı:
-    //  ancak denetimden geçen yazı Eposta olabilir.)
-    // Newtype: tek alanlı tuple struct. İçindeki String private → dışarıdan ne kurulabilir
-    // ne değiştirilebilir. Değişmez: "boşluksuz, küçük harfli, tek '@' içeren, '@' öncesi boş olmayan ve
+    // Newtype: tek alanlı tuple struct; String private → ancak denetimden geçen yazı Eposta olur.
+    // Değişmez: "boşluksuz, küçük harfli, tek '@' içeren, '@' öncesi boş olmayan ve
     // alan adında nokta bulunan adres". (Gerçek e-posta doğrulaması daha katıdır; amaç kalıbı göstermek.)
     #[derive(Debug, Clone, PartialEq)]
     pub struct Eposta(String);
 
     impl Eposta {
-        // Bir Eposta üretmenin TEK yolu. Denetim burada geçilmeden değer oluşmadığı için
-        // `Eposta` alan her fonksiyon doğrulamayı tekrarlamak zorunda kalmaz.
+        // Eposta üretmenin TEK yolu: denetim geçilmeden değer oluşmaz, alan kod tekrar denetlemez.
         // (Result'ı enums ve error-handling crate'lerinde ayrıntılı göreceğiz.)
         pub fn ayristir(ham: &str) -> Result<Eposta, String> {
             let ham = ham.trim();
@@ -116,9 +109,8 @@ mod hesap {
         giris_sayisi: u32,
     }
 
-    // (Sade: KullaniciKurucu, kart basılmadan önce doldurulan başvuru formudur. Henüz doldurulmamış
-    //  göz None'dır; form teslim edilince (`olustur`) eksik göz var mı diye bakılır.)
-    // Builder: zorunlu alanlar Option ile "henüz verilmedi" olarak başlar, olustur() denetler.
+    // (Sade: KullaniciKurucu, kart basılmadan önce doldurulan başvuru formudur; boş göz None,
+    //  `olustur` eksik gözü denetler.) Builder: zorunlu alanlar Option ile "verilmedi" başlar.
     #[derive(Debug, Default)]
     pub struct KullaniciKurucu {
         ad: Option<String>,
@@ -141,8 +133,7 @@ mod hesap {
             self.yonetici = yonetici;
             self
         }
-        // (Sade: aşağıdaki satır sonlarındaki `?` şunu der: "hata çıktıysa onu hemen geri döndür,
-        //  çıkmadıysa içindeki değeri ver ve devam et".)
+        // (Sade: `?` = hata varsa hemen döndür, yoksa içindeki değeri ver ve devam et.)
         // `self` tüketilir: kurucunun içindeki String'ler Kullanici'ya TAŞINIR (clone yok).
         pub fn olustur(self) -> Result<Kullanici, String> {
             let ad = self
@@ -190,8 +181,7 @@ mod hesap {
         }
         // (Sade: pasifleştirmek, öğrenci kartını geri verip yerine başka CİNS bir kart almaktır.
         //  Yeni kartın üstünde "giriş kaydet" diye bir iş yazmadığı için onu isteyemezsin.)
-        // self: aktif kullanıcıyı TÜKETİP başka bir tür döndürür. `aktif: bool` bayrağı yerine
-        // ayrı tür: pasif kullanıcıda giris_kaydet diye bir metot YOK, yanlışlıkla çağrılamaz.
+        // self: aktif kullanıcı TÜKETİLİP başka tür döner; pasifte `giris_kaydet` YOK, çağrılamaz.
         pub fn pasiflestir(self) -> PasifKullanici {
             PasifKullanici {
                 ad: self.ad,
@@ -231,10 +221,8 @@ mod hesap {
 use hesap::{Eposta, Kullanici};
 
 // 1. Alan gizliliği ile değişmez (invariant) koruma
-// SADE ANLATIM: Burada büroyu sınıyoruz: üç başvuru veriyoruz. Birincisi kurallara uyar ve kart
-// basılır; büro bu arada yazıyı düzeltir (boşlukları atar, harfleri küçültür). Öteki ikisi
-// reddedilir ve büro sebebini söyler. Kabul `Ok(...)`, ret `Err(...)` olarak döner; `match` ikisine
-// ayrı ayrı bakar.
+// SADE ANLATIM: Üç başvuru: ilki düzeltilip (boşluk atılır, küçük harf) basılır, ikisi reddedilir.
+// Kabul `Ok`, ret `Err` döner; `match` ikisine ayrı ayrı bakar.
 //   Mini örnek:
 //     match Eposta::ayristir("ada@ornek.com") {
 //         Ok(e) => println!("kart basıldı: {}", e.as_str()),   // ✓ bu dal çalışır
@@ -264,7 +252,6 @@ fn degismez_koruma() {
     //                                                // ✗ E0451: fields .. of struct `Kullanici` are private
     // Olmasaydı ne bozulurdu? Tek bir `k.eposta = "asdf".into()` satırı, e-postayı geçerli
     // sayan bütün kodu (posta gönderimi, alan adına göre gruplama...) sessizce yanlışa düşürürdü.
-    // ✓ Doğrusu yukarıdaki gibi: değer yalnız ayristir()'dan doğar, as_str() ile okunur.
 }
 
 // 2. Gerçek hayattan örnek: builder kalıbı
@@ -280,9 +267,7 @@ fn degismez_koruma() {
 //     println!("{}", eksik.is_ok());     // false → e-posta gözü boş kaldı, kart basılmadı
 fn builder_kalibi() {
     println!("-- 2. Builder kalıbı");
-    // Neden builder? Rust'ta varsayılan/isimli argüman yok. Dört beş parametreli bir
-    // `yeni("Kaan", "k@x.com", true, false)` çağrısında hangi bool'un ne olduğu okunmaz;
-    // sırayı karıştırmak da tür aynı olduğu için derlenir. Builder her değere bir ad verir.
+    // Neden builder? Rust'ta isimli argüman yok; builder her değere bir ad verir (yukarıdaki kutu).
     let kaan = Kullanici::kurucu()
         .ad("Kaan")
         .eposta("Kaan@Ornek.com")
@@ -354,8 +339,7 @@ fn alici_secimi() {
     let pasif = ada.pasiflestir(); // `ada` burada tüketildi
     println!("{}", pasif.ozet()); // [pasif] Ada <ada@ornek.com>, son giriş sayısı 2
     //   ada.giris_kaydet(); // ✗ E0382: borrow of moved value: `ada`
-    // Bu hata burada bir ÖZELLİKTİR: pasifleştirilmiş hesaba giriş yazmak mantık hatasıdır ve
-    // derleyici onu yakalar. `aktif: bool` bayrağıyla aynı hata ancak çalışma anında görülürdü.
+    // Bu hata ÖZELLİKTİR: mantık hatası derlenirken yakalanır; `aktif: bool` ile çalışma anında görülürdü.
 
     let geri = pasif.yeniden_etkinlestir();
     println!("{}", geri.ozet()); // Ada <ada@ornek.com> [üye], 0 giriş
@@ -406,9 +390,8 @@ impl Default for Ayarlar {
 
 fn guncelleme_tuzagi() {
     println!("-- 4. Struct update: kısmi move");
-    // Nasıl çalışır? `..taban` "kalanları kopyala" DEĞİL, "açıkça yazmadığım alanları taban'dan
-    // AL" demektir. main.rs taşınan alanın (eposta) öldüğünü gösterdi; buradaki ek bilgi:
-    // taşıma ALAN ALAN olur — yalnız `..`'nın gerçekten aldığı non-Copy alanlar gider.
+    // `..taban` "kalanları kopyala" DEĞİL, "yazmadığım alanları taban'dan AL" demektir. main.rs'te
+    // eposta ölmüştü; ek bilgi: taşıma ALAN ALAN olur, yalnız alınan non-Copy alan gider.
     let taban = Ayarlar::default();
     let koyu = Ayarlar {
         tema: String::from("koyu"),
@@ -489,9 +472,8 @@ fn guncelleme_tuzagi() {
 // tam bunu çözer. KullaniciKurucu'daki Option ve olustur()'un döndürdüğü Result da birer
 // enum; `learn/enums` onların içini açıyor.
 
-// SADE ANLATIM: Aşağıdaki `testler` bölümü programla birlikte çalışmaz; kodun doğru davrandığını
-// denetleyen küçük sınavlardır. `cargo test -p structs` yazınca her biri çalışır.
-// `assert_eq!(a, b)` "a ile b eşit olmalı" der; eşit değilse o sınav kalır ve sana haber verilir.
+// SADE ANLATIM: `testler` programla çalışmaz; `cargo test -p structs` ile sınavlar çalışır.
+// `assert_eq!(a, b)` eşitlik ister; eşit değilse sınav kalır ve haber verilir.
 #[cfg(test)]
 mod testler {
     use super::Ayarlar;

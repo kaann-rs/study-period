@@ -1,3 +1,4 @@
+// Açıklama: learn/patterns/ACIKLAMA.md
 // Rust Book — Bölüm 19: Patterns and Matching (desenler ve eşleştirme)
 // Çalıştır: cargo run -p patterns
 //
@@ -10,8 +11,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümün "SADE ANLATIM" kutusunu önce oku; teknik kısım zorsa ana fikir orada.
 // Bu crate'teki benzetmeler ŞEKİL EŞLEŞTİRME OYUNCAĞI çevresinde geçer: kapağında yıldız, kare,
 // daire biçiminde delikler olan kutu. derinlesme.rs de aynı oyuncakla sürer.
 //
@@ -56,15 +56,13 @@ fn main() {
 // desen o deliktir, değer de parçadır. Üstelik parça geçerken açılır ve içindekilere ad
 // verirsin: `let (a, b) = (1, 2);` ikiliyi açıp a ile b'yi doldurur. Bu oyun yalnız `match`te
 // oynanmaz; `let`, `if let`, `while let`, `for` ve fonksiyon parametreleri de birer deliktir.
-// Neden böyle? Desen olmasaydı her parçayı tek tek "0. eleman, 1. eleman" diye elle çıkarır,
-// şeklin uyup uymadığını da ayrıca sorardın; ikisini ayrı yazınca biri kolayca unutulur.
+// Desen olmasaydı "0. eleman, 1. eleman" diye elle çıkarır, şekli ayrıca sorardın; biri unutulurdu.
 //   Mini örnek:
 //     let (a, b) = (1, 2);                   // ✓ ikiliyi aç: a = 1, b = 2
 //     if let Some(r) = Some("mavi") {        // ✓ "içi dolu mu?" Doluysa içindekine r de
 //         println!("{r}");
 //     }
 //     // let (c, d) = (1, 2, 3);             // ✗ derlenmez: iki gözlü desen, üç parçalı değer
-// (e) Fonksiyon PARAMETRESİ de bir desendir: tuple'ı doğrudan parçala.
 fn konum(&(x, y): &(i32, i32)) -> String {
     format!("({x}, {y})")
 }
@@ -117,8 +115,7 @@ fn desen_yerleri() {
 // desenlerdir. Düz `let`, parçanın KESİN geçeceği delik ister, çünkü "geçmezse ne olacak?"
 // sorusuna verecek cevabı yoktur. `if let` ve `let ... else` ise bu cevabı taşır: uymazsa bloğu
 // atla ya da buradan çık.
-// Neden böyle? `let Some(x) = None` derlenseydi, program çalışırken x'in içine konacak bir değer
-// bulunamazdı.
+// `let Some(x) = None` derlenseydi, çalışırken x'e konacak değer bulunamazdı.
 //   Mini örnek:
 //     let veri: Option<i32> = Some(5);
 //     let kopya = veri;                               // ✓ her değere uyar (reddedilemez)
@@ -126,12 +123,8 @@ fn desen_yerleri() {
 //     let Some(n) = veri else { return };             // ✓ "uymazsa çık" yolu var; n = 5
 //     if let Some(m) = kopya { println!("{m} {n}"); } // ✓ uymazsa blok atlanır
 fn reddedilebilirlik() {
-    // İrrefutable = HER değere uyar (ör. `let x`, `let (a,b)`). Eşleşmeme ihtimali yok.
-    // Refutable  = bazı değerlere uymayabilir (ör. `Some(x)` → None'a uymaz).
-    //
-    // `let`, `for`, fn parametreleri yalnız İRREFUTABLE desen kabul eder (eşleşmeme olasılığı
-    // olamaz). if let / while let REFUTABLE kabul eder (eşleşmezse dalı atlar).
-    //
+    // İrrefutable = HER değere uyar (`let x`, `let (a,b)`); refutable = bazılarına uymaz (`Some(x)`).
+    // `let`, `for`, fn parametreleri yalnız irrefutable kabul eder; if let / while let refutable alır.
     //   let Some(x) = bir_option;   // ✗ E0005: refutable pattern in local binding
     //
     // Doğru yol 1 — let...else: eşleşmezse `else` KONTROLÜ DEVRALIR (return/break/panic ile çıkar),
@@ -152,8 +145,7 @@ fn reddedilebilirlik() {
 // bir sorum daha var" (guard: `if ...`) ve "geçen parçaya ad da ver" (`@`). Parça delikleri
 // yukarıdan aşağı sırayla dener ve ilk uyduğundan geçer; bu yüzden dar delikler üstte, geniş
 // delikler altta durur.
-// Neden böyle? Derleyici bir de bütünlük denetimi yapar: hiçbir deliğe uymayan bir parça
-// kalıyorsa kodu derlemez. Böylece "bu durumu unutmuşum" hatası program çalışmadan yakalanır.
+// Derleyici bütünlük denetimi yapar: uymayan parça kalırsa derlemez, "unutmuşum" hatası çalışmadan yakalanır.
 //   Mini örnek:
 //     let n = 42;
 //     let etiket = match n {
@@ -216,8 +208,6 @@ fn desen_sozdizimi() {
     }
 
     // (f) match GUARD: desenin yanında ek bir koşul (if ...)
-    // (Sade: guard, şekli uyan parçaya sorulan ek sorudur: "ikili olduğun tamam, peki toplamın
-    // sıfır mı?" Cevap hayırsa parça bu delikten geçmez, sıradaki deliği dener.)
     let cift = (2, -2);
     match cift {
         (x, y) if x + y == 0 => println!("guard: toplamı sıfır"),
@@ -260,9 +250,7 @@ fn desen_sozdizimi() {
 //   mu? Uyuyorsa irrefutable (let kabul eder), uymayan hâl varsa refutable. `let` bir dal
 //   atlayamaz (else yoktur), bu yüzden refutable deseni reddeder → E0005 "refutable pattern in
 //   local binding", derleyici let-else önerir. Kontrol rustc_mir_build/src/thir/pattern/
-//   check_match.rs (check_binding_is_irrefutable, ~60). Sorun: izin verilseydi, `let Some(x) =
-//   None` çalışma anında "x neye bağlanacak?" belirsizliği/çökmesi olurdu — tür sistemi bunu
-//   baştan eler.
+//   check_match.rs (check_binding_is_irrefutable, ~657).
 //
 // • EXHAUSTIVENESS (match tüm halleri kapsıyor mu, Böl. 6) ve USEFULNESS (bir kol asla erişilmez
 //   mi) aynı analiz ailesindendir (rustc_pattern_analysis). Erişilemez kol → "unreachable

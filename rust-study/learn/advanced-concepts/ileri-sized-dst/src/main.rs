@@ -1,10 +1,9 @@
+// Açıklama: learn/advanced-concepts/ileri-sized-dst/ACIKLAMA.md
 // Sağlamlaştırma — İleri konu: SIZED, DST ve FAT POINTER
 // Çalıştır: cargo run -p ileri-sized-dst
 //
-// Kaynak: Rust for Rustaceans Böl. 3 "Dynamically Sized Types and Fat Pointers" + std.
-// ↳ DÜZELTME NOTU (son gözden geçirme): kitapta bu başlık Böl. 2'dedir (Types) ve adı
-//   "Dynamically Sized Types and Wide Pointers"tır; "fat pointer" ile "wide pointer" aynı
-//   şeyin iki adıdır. Yayıncının ayrıntılı içindekiler listesiyle doğrulandı.
+// Kaynak: RfR Böl. 2 "Dynamically Sized Types and Wide Pointers" + std. ("fat pointer" ile
+// "wide pointer" aynı şeyin iki adıdır; yayıncının ayrıntılı içindekiler listesiyle doğrulandı.)
 // Bu, daha önceki birçok parçayı tek köke bağlar: `str`/`[T]` neden hep & ya da Box ardında,
 // `dyn Trait` nasıl çalışır (ileri-future'daki vtable buraya bağlanır), `?Sized` ne demek.
 //
@@ -14,8 +13,7 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
+// Her bölümde önce "SADE ANLATIM" kutusunu oku; teknik kısım zor gelse de ana fikir orada.
 //
 // Bu dosyayı okumadan önce bilmen gerekenler: `learn/ownership` (referans ve dilim),
 // `learn/generics-traits-lifetimes` (generic ve trait), `learn/smart-pointers` (Box) ve
@@ -98,9 +96,6 @@ fn boyutlar() {
     println!("  &dyn Ciz   = {}", size_of::<&dyn Ciz>()); // 16: ptr + vtable
     println!("  Box<str>   = {}", size_of::<Box<str>>()); // 16
     println!("  Box<dyn Ciz> = {}", size_of::<Box<dyn Ciz>>()); // 16
-    // Neden ikisi? Bir word veriye işaret eder; ikinci word "tipi tamamlar": slice/str için
-    // UZUNLUK, trait object için VTABLE adresi. İşte fat pointer budur (RfR: "twice the size of
-    // a usize").
 }
 
 // ============================================================================
@@ -172,7 +167,8 @@ fn fat_pointer_anlami() {
     println!("slice fat pointer: d1.len()={} d2.len()={} (ikinci word = uzunluk)", d1.len(), d2.len());
 
     // TRAIT OBJECT: ikinci word = VTABLE adresi. vtable, somut türün metot adreslerini + layout/
-    // align + drop'unu tutar (ileri-future'daki RawWakerVTable da bunun elle yazılmış hâliydi).
+    // align + drop'unu tutar (ileri-future'daki RawWakerVTable benzer bir fikir olarak verilebilir;
+    // birebir karşılık DOĞRULANAMADI).
     let nesneler: Vec<Box<dyn Ciz>> = vec![
         Box::new(Dugme { ad: String::from("Tamam") }),
         Box::new(Dugme { ad: String::from("İptal") }),
@@ -210,9 +206,10 @@ fn fat_pointer_anlami() {
 //
 // • VTABLE (dyn Trait'in ikinci word'ü): somut tür için trait metotlarının adresleri + tipin
 //   layout/alignment bilgisi + drop metodu. Metot çağrısı bu tablodan adresi okuyup atlar
-//   (dinamik dispatch, küçük bir dolaylama). ileri-future'daki RawWakerVTable, bunun elle yazılmış
-//   özel bir hâliydi — aynı fikir. (std ayrıca std::ptr::Pointee/metadata ile bu metadata'yı
-//   programatik erişilebilir yapar.)
+//   (dinamik dispatch, küçük bir dolaylama). ileri-future'daki RawWakerVTable benzer bir fikir
+//   olarak verilebilir (birebir karşılık DOĞRULANAMADI). std ayrıca std::ptr::Pointee/metadata
+//   ile bu metadata'ya erişimi nightly'de `ptr_metadata` özellik bayrağı altında (issue #81513)
+//   sunar; kararlı Rust'ta değil.
 //
 // • GENERIC vs dyn (RfR tekrarı): generic<T> → monomorphization, her somut T için kod kopyası
 //   (yalnız KULLANILAN parçalar kopyalanır); dyn → tek kod + vtable. Biri kod boyutu+hız, öteki

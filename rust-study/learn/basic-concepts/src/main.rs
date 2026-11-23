@@ -1,6 +1,6 @@
-// Küçük örneklerle Rust temelleri. Önce main'deki binding'ler ve raw pointer ile
-// başla, sonra closure'lar ile trait'lerin nasıl oturduğunu görmek için test'i
-// takip et. (Terimler aşağıda ilk geçtikleri yerde açıklanıyor.)
+// Açıklama: learn/basic-concepts/ACIKLAMA.md
+// Küçük örneklerle Rust temelleri: binding'ler, raw pointer, closure'lar ve trait'ler.
+// Terimler ilk geçtikleri yerde açıklanır; akışı görmek için test'i takip et.
 
 use std::ptr;
 
@@ -34,10 +34,9 @@ fn main() {
 
         let s1: *const i32 = &s as *const i32;
 
-        // ptr::read, belleği değiştirmeden bit'lerin bir kopyasını döndürür.
-        // Burada i32 Copy olduğundan, orijinal değeri tekrar okumak sorun değil.
-        // Aşağıdaki dereference (içeriğe erişme = işaretçinin gösterdiği değere *s1
-        // ile ulaşmak) s'yi tekrar okur.
+        // ptr::read, belleği değiştirmeden bit'lerin bir kopyasını döndürür; i32 Copy
+        // olduğundan orijinal değeri tekrar okumak sorun değil. Aşağıdaki dereference
+        // (işaretçinin gösterdiği değere *s1 ile ulaşmak) s'yi yine okur.
         ptr::read(s1);
 
         println!("{:?}", *s1);
@@ -85,7 +84,8 @@ const N: usize = 0;
 //   • yakaladığını TÜKETİYORSA    → yalnızca BİR KEZ çağrılabilir        (FnOnce)
 // Bu ayrım olmasaydı: bir kez tüketen closure'ı iki kez çağırmak, taşınmış/serbest
 // bırakılmış değeri tekrar kullanırdı (use-after-move / double-free); değiştiren bir
-// closure'a aynı anda iki yerden erişmek veri yarışı (data race) olurdu. Üçlü ayrım
+// closure'a aynı anda iki yerden erişmek &mut tekliğini (aliasing kuralını) ihlal eder;
+// bu erişim thread'ler arasında olursa sonucu veri yarışıdır (data race). Üçlü ayrım
 // bu tehlikeli çağrıları derleyicinin DERLEME ZAMANINDA reddetmesini sağlar:
 //   let s = String::from("x");
 //   let tuket = move || drop(s);  // s'yi sahiplenir → FnOnce
@@ -116,9 +116,7 @@ where
 trait Animal<T> {
     type Your;
 
-    // self parametresi olmadığından voice bir associated function'dır: tür
-    // üzerinden, instance (örnek = bir türden üretilmiş somut değer) oluşturmadan
-    // çağrılır.
+    // voice, self almadığı için tür üzerinden çağrılan bir associated function'dır.
     fn voice() -> T;
 }
 
@@ -201,8 +199,7 @@ unsafe extern "C" fn noise() -> i8 {
 //   hex_v2: for<'a> "her ömre uyarım" dediğinden derleyici 'a = İÇ bölge seçer
 //           → &n uyar → derlenir.
 //
-// Sezgi: for'suzken ömür DIŞTAN sabitlenir; for<'a> ile o sabitlemeyi bırakıp
-// f'in HER ömre uymasını şart koşarız ("dıştan beklemeyi kapatmak").
+// Sezgi: for<'a> "dıştan beklemeyi kapatıp" f'in HER ömre uymasını şart koşar.
 //
 // Tuzak: aşağıdaki gövdeler `f(&1)` kullanıyor ve İKİSİ DE derlenir! Çünkü `&1`
 // literali 'static'e TERFİ eder (constant promotion = derleyicinin sabit bir
@@ -223,8 +220,7 @@ where
     f(&1)
 }
 
-// ÖRNEK — farkı yerel bir değişkenle canlı gör. Gövdeler `f(&1)` yerine
-// `let n = 1; f(&n)` kullanıyor; `&n` static'e terfi etmez, iç bölgede ölür.
+// ÖRNEK — farkı yerel değişkenle gör: gövdeler `let n = 1; f(&n)` kullanır; `&n` iç bölgede ölür.
 // Yorumdan çıkarıp `cargo check -p basic-concepts` ile deneyebilirsin:
 //
 //   // ✓ DERLENİR — for<'a> her ömre uyar, derleyici 'a = n'nin iç bölgesini seçer.
@@ -251,9 +247,8 @@ fn test() {
     // olduğu bölge) hiçbir şey capture etmez (yakalamaz).
     let x = |y: i8| -> i8 { y };
 
-    // İlk x kendi closure türünü korur ve F'yi belirler. İkinci x hiçbir şey
-    // capture etmediği için function pointer'a coerce olur (örtük dönüşüm =
-    // derleyicinin sen yazmadan yaptığı otomatik tür dönüşümü).
+    // İlk x kendi closure türünü korur ve F'yi belirler. İkinci x function pointer'a
+    // coerce olur (örtük dönüşüm = derleyicinin sen yazmadan yaptığı otomatik tür dönüşümü).
     let a: i8 = Color::hex(x, x);
 
     // Derleyici, i8'i hex'in dönüş türünden de infer eder (çıkarsama = türü sen
@@ -310,11 +305,9 @@ fn test() {
 // çakışma matematiksel olarak imkânsızlaşır. Dahası, şu an ortada hiç impl olmasa
 // bile yasaktır: std ileride ekleyebilir ya da başka bir crate ekleyebilir;
 // derleyici öbür crate'leri göremediği için "yabancı + yabancı" kategorisini
-// tedbiren komple kapatır. (Bu mekanizma olmasaydı A ve B crate'leri ayrı ayrı aynı
-// impl'i yazar, bir program ikisini birden kullanınca çakışırdı — ve aynı-crate
-// çakışma denetimi E0119 bunu yakalayamazdı, çünkü impl'ler ayrı derlenmiş
-// crate'lerde.) Adı "yetim (orphan)": ne trait'in ne de türün sahibi sen olduğunda
-// o impl ortada "sahipsiz" kalır — yasak olan bu.
+// tedbiren komple kapatır (aynı-crate denetimi E0119 ayrı crate'lerdeki çakışmayı
+// yakalayamazdı). Adı "yetim (orphan)": ne trait'in ne de türün sahibi sen
+// olduğunda o impl ortada "sahipsiz" kalır — yasak olan bu.
 //
 // Örnek (Display std'nin trait'i, Vec de std'nin türü; ikisi de sana yabancı):
 //   impl std::fmt::Display for Vec<i32> {}   // ✗ YASAK — ikisi de yabancı (yetim)

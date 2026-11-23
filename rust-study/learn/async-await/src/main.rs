@@ -1,4 +1,5 @@
-// Rust Book — Bölüm 17: Async/Await (2024 edition'da kitaba eklendi)
+// Açıklama: learn/async-await/ACIKLAMA.md
+// Rust Book — Bölüm 17: Async/Await (bkz. ch17-00)
 // Çalıştır: cargo run -p async-await
 //
 // Async, EŞZAMANLILIK (concurrency) içindir: tek thread'de, BEKLEME anlarında (I/O, zamanlayıcı)
@@ -13,11 +14,9 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
-// Bu crate'teki benzetmelerin hepsi EVDE, ev işi yapan TEK bir kişiyle geçer; derinlesme.rs de
-// orada sürer. Bu dosya konunun en zor yerinden (mekanizmadan) başlar; takılırsan önce
-// "async ve await KEYWORD'LERİ" bölümünün kutusunu oku, sonra başa dön.
+// Her bölümün "SADE ANLATIM" kutusunu önce oku; teknik kısım zorsa ana fikir orada.
+// Benzetmeler EVDE, ev işi yapan TEK kişiyle geçer; derinlesme.rs de orada sürer. En zor yer
+// (mekanizma) başta; takılırsan "async ve await KEYWORD'LERİ" kutusuna bak.
 //
 // Bu bölümün tek cümlelik özeti: async, tek kişinin beklerken boş durmamasıdır: çamaşır makinesi
 // dönerken bulaşığı yıkarsın; işler aynı anda değil, İÇ İÇE ilerler.
@@ -79,10 +78,8 @@ fn main() {
 // bitince zil çalar, sen de o zaman gidersin. Waker o zildir. Bir iş "daha hazır değilim" derken
 // zili yanına alır; hazır olunca `wake()` ile çalar. Bu dosyada zilin çalması, koltukta uyuyan
 // kişiyi (thread'i) dürtmek demektir: `unpark()`.
-// Neden böyle? Zil olmasaydı ya durmadan gidip bakman (işlemciyi boşa yormak) ya da işin bittiğini
-// hiç öğrenememen gerekirdi.
-// (Sade: vtable = "zil çalınca hangi fonksiyon çalışacak" listesi; Wake trait'i onu bizim
-// yerimize hazırlar, elle yazmayız.)
+// Zil olmasaydı durmadan bakmak (CPU'yu boşa yormak) ya da hiç öğrenememek gerekirdi.
+// (Sade: vtable = zil çalınca hangi fonksiyonun çalışacağı listesi; Wake onu bizim yerimize hazırlar.)
 //   Mini örnek:
 //     let zil = Waker::from(Arc::new(ThreadWaker(thread::current())));
 //     zil.wake_by_ref();     // ✓ zil çaldı: "kalk, işin hazır"
@@ -102,7 +99,6 @@ impl Wake for ThreadWaker {
 // SADE ANLATIM: Executor evdeki kişidir. `block_on` tek bir işi sonuna kadar takip eder: gider,
 // bakar (poll). Cevap "bitti" (Ready) ise sonucu alır. Cevap "daha değil" (Pending) ise koltuğa
 // oturup uyuklar (`park`); zil çalınca kalkar, yeniden bakar.
-// Neden böyle? Bir Future kendi kendine ilerlemez; biri gidip bakmadıkça hiçbir satırı çalışmaz.
 // Rust'ın standart kütüphanesi bu "bakan kişiyi" vermez; gerçek projelerde tokio gibi bir
 // kütüphane verir. Burada nasıl çalıştığını görmek için kendimiz yazıyoruz.
 //   Mini örnek:
@@ -127,8 +123,7 @@ fn block_on<F: Future>(fut: F) -> F::Output {
 // beklerken dönüp çamaşıra bakarsın. Tek kişisin, yine de iki iş iç içe ilerler. `cok_gorev` de
 // listedeki her işe sırayla bir kez bakar; biten işi listeden çıkarır, kalanlara sonraki turda
 // yeniden bakar.
-// Neden önemli? Burada tek thread var. Kazanç iki kişinin çalışmasından (paralellik) değil,
-// bekleme sürelerinin boşa gitmemesinden (eşzamanlılık) gelir.
+// Tek thread var; kazanç paralellikten değil, bekleme sürelerinin boşa gitmemesinden (eşzamanlılık).
 //   Mini örnek:
 //     cok_gorev(vec![Box::pin(gorev(1)), Box::pin(gorev(2))]);
 //     // ✓ ekrana yazılan sıra: 1 başladı, 2 başladı, 1 bitti, 2 bitti (işler iç içe ilerledi)
@@ -203,8 +198,6 @@ impl Future for Teslim {
 // kartı şimdi takip et" demektir: iş beklemeye girerse sıra başka işe geçer, hazır olunca tam
 // kaldığın satırdan devam edersin. Kaldığın yeri hatırlamak için derleyici fonksiyonu ayraçlı
 // bir deftere çevirir; buna state machine (durum makinesi) denir.
-// Neden `.await` yalnız async içinde yazılır? Sıradan bir fonksiyon yarıda bırakılıp sonra
-// kaldığı yerden sürdürülemez; ayraç yalnız async fonksiyonlarda vardır.
 //   Mini örnek:
 //     async fn cay() -> u32 { 1 }
 //     async fn mutfak() {
@@ -219,7 +212,6 @@ impl Future for Teslim {
 //   değerine çevirir (derleyici arka planda bir state machine üretir). `async fn f() -> T`'nin
 //   gerçek dönüş tipi `impl Future<Output = T>`'dir. Yani `f()` çağırmak SIFIR iş yapar — sadece
 //   "henüz başlamamış hesap"ı (future'ı) üretir; iş, biri onu poll edene dek BAŞLAMAZ (tembel).
-//   Fark: normal fonksiyon çağrılınca HEMEN koşar; async fonksiyon çağrılınca koşmaz, Future verir.
 //
 // • `.await` (bir future üzerinde): o future'ı, içinde bulunduğun async gövdeden SÜRER (poll eder).
 //   Anlamı kabaca şu desugaring'tir (gerçekte state machine'in bir DURUMU):
@@ -233,26 +225,21 @@ impl Future for Teslim {
 //                     // (loop en baştan değil — makine hangi durumda kaldığını hatırlar).
 //             }
 //         }
-//   Yani `.await` bir BUSY-LOOP DEĞİL: Pending'de geri döner (yield), executor başka iş yapar,
-//   future hazır olunca (waker.wake()) yeniden poll edilir ve makine bu noktadan devam eder.
-//   `.await`'in değeri = future'ın Output'u (Ready'den çıkan değer).
+//   `.await` busy-loop DEĞİL: Pending'de döner, waker.wake() ile yeniden poll edilir; değeri Output'tur.
 //
-// • Neden `.await` yalnız `async` içinde kullanılabilir? Çünkü "Pending'de durumu saklayıp ÜST'e
-//   dön, sonra buradan devam et" davranışı ancak bir state machine'de mümkün. Normal fonksiyonda
-//   "geri dönüp sonra kaldığın yerden devam etme" diye bir şey yok → `.await` orada derleme hatası.
-//   (Bu yüzden düz `main` async olamaz; bir runtime'a ihtiyaç duyar — biz block_on ile köprü kurduk.)
+// • Neden yalnız `async` içinde? "Pending'de durumu sakla, sonra buradan devam et" ancak state
+//   machine'de mümkün; normal fonksiyonda yok → derleme hatası. Düz `main` de async olamaz; runtime
+//   gerekir (biz block_on ile köprü kurduk).
 //
-// Aşağıdaki `akis`, tam da böyle bir state machine'e derlenir: iki await noktası (BirKezBekle ve
-// selam) = makinenin iki duraklama DURUMU. Yukarıda ELLE yazdığımız BirKezBekle Future'ı ise,
-// derleyicinin bu makineyi (poll → Pending/Ready → wake) NASIL kurduğunun küçük, elle yapılmış hâli.
+// `akis` iki await noktasıyla (BirKezBekle, selam) iki DURUMLU bir makineye derlenir. ELLE yazdığımız
+// BirKezBekle, derleyicinin o makineyi (poll → Pending/Ready → wake) nasıl kurduğunun küçük hâli.
 // ============================================================================
 // async fn'ler — derleyici bunları birer state machine'e çevirir
 // ============================================================================
 
 // SADE ANLATIM: Aşağıdaki `akis` iki yerde bekler; yani defterinde iki ayraç yeri vardır. Onu
 // `block_on(akis())` ile çalıştırınca olanlar sırasıyla şöyledir.
-// Neden bilmek işe yarar? `.await` gördüğün her yer, işin yarıda kalıp sıranın başkasına
-// geçebileceği bir duraktır; iki `.await` arasındaki kod ise hiç bölünmeden çalışır.
+// Her `.await` bir duraktır; iki `.await` arasındaki kod hiç bölünmeden çalışır.
 //   Mini örnek (olay sırası):
 //     1. poll → BirKezBekle "daha değil" der; akis kaldığı yeri saklar ve Pending döner
 //     2. poll → BirKezBekle 42 verir; selam hemen biter; akis 43 ile Ready döner  ✓
@@ -261,8 +248,7 @@ async fn selam(ad: &str) -> String {
 }
 
 async fn akis() -> i32 {
-    // .await: future'ı buraya "yerleştir"; hazır olana dek bu async fonksiyon ASILI kalır,
-    // kontrol executor'a döner. Hazır olunca kaldığı yerden devam eder.
+    // .await: future buraya yerleşir; Pending'de kontrol executor'a döner, hazır olunca buradan sürer.
     let n = BirKezBekle { hazir: false }.await; // 42 (bir tur Pending'den sonra)
     let s = selam("Kaan").await; // iç içe await
     println!("  akis içinden: {s}");
@@ -306,13 +292,11 @@ async fn gorev(id: u32) {
 //   "bu değer artık yerinden oynatılamaz" garantisi verir; poll bu yüzden Pin alır. Future'ı poll
 //   etmeden önce pin!/Box::pin ile sabitlememizin sebebi bu. (Unpin olan türler bu kısıttan muaf.)
 //
-// • Neden RUNTIME gerekir? std, Future'ı ve async/await'i TANIMLAR ama onu KOŞTURAN döngüyü
-//   (poll et, Pending'de uyu, wake'te devam et, çok görevi zamanla) vermez. Sorun: bu döngü
-//   I/O entegrasyonu, zamanlayıcı, görev kuyruğu ister — tek bir "doğru" seçim yok, bu yüzden
-//   std dışına (tokio/async-std) bırakılmış. Biz burada o döngünün ÇEKİRDEĞİNİ (block_on +
-//   cok_gorev) yazdık: gerçek bir runtime aynı prensibi binlerce görev + epoll/iocp ile ölçekler.
+// • Neden RUNTIME? std Future'ı ve async/await'i TANIMLAR ama koşturan döngüyü vermez; o döngü
+//   I/O, zamanlayıcı, görev kuyruğu ister — tek "doğru" seçim yok, bu yüzden std dışına
+//   (tokio/async-std) bırakılmış. Biz ÇEKİRDEĞİ (block_on + cok_gorev) yazdık; gerçek runtime aynı
+//   prensibi binlerce görev + epoll/iocp ile ölçekler.
 //
-// • EŞZAMANLILIK vs PARALELLİK: cok_gorev tek thread'de iki görevi İÇ İÇE yürüttü (biri await'te
-//   beklerken öteki ilerledi) — bu concurrency. Çıktıda iki "başladı" iki "bitti"den ÖNCE gelir.
-//   Paralellik (Böl. 16) ise işi gerçekten aynı anda çok çekirdekte koşturmaktır; async runtime'lar
-//   ikisini birleştirir (çok thread'li executor + her thread'de çok async görev).
+// • EŞZAMANLILIK vs PARALELLİK: cok_gorev tek thread'de İÇ İÇE yürüttü (çıktıda iki "başladı",
+//   iki "bitti"den önce gelir) — bu concurrency. Paralellik (Böl. 16) çok çekirdekte koşturur;
+//   async runtime'lar ikisini birleştirir (çok thread + her thread'de çok görev).

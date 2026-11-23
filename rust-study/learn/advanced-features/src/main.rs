@@ -1,3 +1,4 @@
+// Açıklama: learn/advanced-features/ACIKLAMA.md
 // Rust Book — Bölüm 20: Advanced Features (kitabın son kavramsal bölümü)
 // Çalıştır: cargo run -p advanced-features
 //
@@ -10,9 +11,8 @@
 // ============================================================================
 // SADE ANLATIM — önce buradan başla (hiç bilmeyen biri için)
 // ============================================================================
-// Bu dosyadaki her bölümün üstünde "SADE ANLATIM" diye bir kutu var. Önce onu oku, sonra
-// altındaki teknik açıklamaya geç. Teknik kısım zor gelirse sorun değil: sade kutu ana fikri verir.
-// Bu dosyadaki benzetmeler bir ATÖLYE ve içindeki aletler çevresinde geçer.
+// Her bölümün "SADE ANLATIM" kutusunu önce oku; teknik kısım zorsa ana fikir orada.
+// Benzetmeler bir ATÖLYE ve içindeki aletler çevresinde geçer.
 //
 // Bu bölümün tek cümlelik özeti: Rust'ın seyrek kullanılan güçlü aletleri vardır; doğru
 // kullanımı, tehlikeli kısmı küçük tutup dışarıya güvenli bir sap bırakmaktır.
@@ -50,9 +50,7 @@ use std::fmt;
 use std::ops::Add;
 use std::slice;
 
-// (Sade: aşağıdaki `benim_vec!` bir makrodur; ne yaptığı 5. bölümün kutusunda anlatılıyor.
-// `$( $x:expr ),*` kısmı "virgülle ayrılmış, istediğin kadar ifade" demektir.)
-// Bir makroyu KULLANILMADAN ÖNCE tanımlamak gerekir (ya da #[macro_use]); en üste koyuyoruz.
+// Makroyu KULLANILMADAN ÖNCE tanımla (ya da #[macro_use]); en üste koyuyoruz.
 macro_rules! benim_vec {
     // $( ... ),*  = virgülle ayrılmış SIFIR veya daha fazla tekrar. $x:expr bir ifade yakalar.
     ( $( $x:expr ),* ) => {{
@@ -80,8 +78,7 @@ fn main() {
 // etmek ustanın işidir. `unsafe` bloğu o açık kapaktır: "buranın doğru olduğunu derleyici
 // göremiyor, ben garanti ediyorum". İyi usta kapağı kısa süre açar ve işi bitince kapatır;
 // dışarıdan kullanan kişi (`ikiye_bol`u çağıran) kapağın açıldığını bilmek zorunda kalmaz.
-// Neden böyle? Derleyici temkinlidir: "aynı diziden iki ayrı değiştirme izni" görünce, parçalar
-// hiç çakışmasa bile kodu geri çevirir. unsafe yalnız birkaç işlemi açar; öteki kurallar sürer.
+// Derleyici "aynı diziden iki &mut" görünce çakışmasalar bile geri çevirir; unsafe birkaç işlemi açar.
 //   Mini örnek:
 //     let x = 42;
 //     let r = &x as *const i32;         // ✓ çıplak adres OLUŞTURMAK serbest
@@ -121,8 +118,7 @@ fn unsafe_rust() {
 // tartılacağını öğretmen gerekir. `+` işareti de sayıları toplamayı bilir; `Metre` gibi kendi
 // türün için ne yapacağını `impl Add for Metre` yazarak sen öğretirsin. Ondan sonra
 // `Metre(3) + Metre(4)` yazmak, aslında senin `add` fonksiyonunu çağırmaktır.
-// Neden böyle? Rust'ta işaretler birer trait'tir; böylece `+` yalnız senin izin verdiğin türler
-// arasında çalışır ve metre ile düz sayı yanlışlıkla toplanmaz.
+// İşaretler trait'tir; `+` yalnız izin verdiğin türlerde çalışır (Metre + düz sayı olmaz).
 //   Mini örnek:
 //     let t = Metre(3) + Metre(4);      // ✓ Metre(7) — `+`, yazdığımız add'i çağırır
 //     // let k = Metre(3) + 4;          // ✗ derlenmez: Metre ile düz sayıyı toplamayı öğretmedik
@@ -154,8 +150,7 @@ fn operator_overload() {
 // Rust'ta da `Vec` ve `Display` ikisi birden başkasının (std'nin) olduğu için onları doğrudan
 // bağlayamazsın. `Vec`'i tek alanlı kendi türünle (`Sarmal`) sararsın; tür artık senin olduğu
 // için `Display` yazabilirsin. Bu sarmaya newtype denir.
-// Neden böyle? Herkes başkasının türüne başkasının trait'ini yazabilseydi, iki kütüphanenin
-// yazdıkları çakışır ve hangisinin geçerli olduğu bilinemezdi.
+// Yoksa iki kütüphanenin impl'ı çakışır, hangisinin geçerli olduğu bilinemezdi.
 //   Mini örnek:
 //     // impl fmt::Display for Vec<String> { ... }   // ✗ derlenmez: ne Display ne Vec bizim
 //     struct Sarmal(Vec<String>);                    // ✓ kendi kutumuz
@@ -185,9 +180,8 @@ fn newtype_display() {
 // "şu sayıya ŞU işlemi uygula" derken işlemin kendisini de verirsin. Closure döndürmek: ayarı
 // önceden yapılmış bir alet üretmek; `ekleyici_impl(100)` içinde 100'ü saklayan yeni bir
 // fonksiyon verir.
-// Neden iki dönüş yolu var? Her closure'ın türü ayrıdır ve adı yoktur. `impl Fn` "tek bir tür
-// döndürüyorum, adını sen bilme" der ve hızlıdır; `Box<dyn Fn>` farklı closure'ları aynı kutuda
-// döndürmeni sağlar, bedeli heap'te bir kutudur.
+// Neden iki dönüş yolu? Her closure'ın türü ayrı ve adsızdır: `impl Fn` "tek tür, adını sen bilme"
+// der (hızlı); `Box<dyn Fn>` farklı closure'ları aynı kutuda döndürür, bedeli heap'te bir kutu.
 //   Mini örnek:
 //     let s: Metin = String::from("a");         // ✓ Metin yalnız lakap; String ile aynı tür
 //     let yirmi = uygula(carp_iki, 10);         // ✓ 20 — fonksiyonun adı değer gibi verildi
@@ -259,14 +253,12 @@ fn makro() {
 // ============================================================================
 //
 // • UNSAFE'İN 5 SÜPER GÜCÜ: (1) raw pointer dereference, (2) unsafe fonksiyon/metot çağırma,
-//   (3) değiştirilebilir static (global) erişimi/değiştirmesi, (4) unsafe trait uygulama,
-//   (5) union alanı okuma. BUNLAR DIŞINDAKİ her şey unsafe blokta da normal kurallara tabidir;
-//   unsafe borrow checker'ı KAPATMAZ, yalnız bu beş işlemi AÇAR. Derleyici bunları `unsafe`
-//   olmadan reddeder (E0133: "requires unsafe block"), çünkü doğruluklarını (null değil mi,
-//   çakışma yok mu) ancak insan garanti edebilir; ihlal = tanımsız davranış (UB: raw pointer
-//   null/dangling/hizasız olabilir, aliasing'i çiğneyip veri yarışı üretebilir — hepsi UB).
-//   Denetim: rustc_mir_build/src/check_unsafety.rs. Doğru kullanım: unsafe'i KÜÇÜK tut ve
-//   GÜVENLİ bir API'nin arkasına sar (ikiye_bol gibi) — güvensizlik tek yerde denetlenir.
+//   (3) değiştirilebilir static erişimi/değiştirmesi, (4) unsafe trait uygulama, (5) union alanı okuma.
+//   unsafe borrow checker'ı KAPATMAZ, yalnız bu beş işlemi AÇAR; geri kalan her şey normal kurallara tabidir.
+//   Derleyici bunları `unsafe` olmadan reddeder (E0133: "requires unsafe block"), çünkü doğruluklarını
+//   (null değil mi, çakışma yok mu) ancak insan garanti edebilir; ihlal = UB (null/dangling/hizasız
+//   pointer, aliasing ihlali → veri yarışı). Denetim: rustc_mir_build/src/check_unsafety.rs. Doğru
+//   kullanım: unsafe'i KÜÇÜK tut ve GÜVENLİ API arkasına sar (ikiye_bol gibi).
 //
 // • DEFAULT GENERIC TYPE PARAM: Add<Rhs = Self> gibi. Varsayılan sayesinde `impl Add for Metre`
 //   yazınca Rhs otomatik Metre olur; farklı tür toplamak istersen impl Add<Baska> for Metre.

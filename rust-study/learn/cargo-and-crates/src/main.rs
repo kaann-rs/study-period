@@ -1,3 +1,4 @@
+// Açıklama: learn/cargo-and-crates/ACIKLAMA.md
 // Demo: kütüphaneyi KÖK'ten (pub use sayesinde kısa yollarla) kullanıyoruz.
 // Asıl olay doc-test'ler + cargo doc: cargo test -p cargo-and-crates
 // SADE ANLATIM: Bu dosya boya setini kutusundan çıkarıp kullanan kişidir. Kütüphanedeki
