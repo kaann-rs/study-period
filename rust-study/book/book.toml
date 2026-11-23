@@ -1,0 +1,25 @@
+[book]
+title = "Rust Yolculuğu"
+authors = ["Kaan Bora Öz"]
+description = "Temelden ileri seviyeye, kaynaklarıyla Rust"
+language = "tr"
+src = "src"
+
+[build]
+build-dir = "book"
+
+[rust]
+edition = "2024"
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "navy"
+smart-punctuation = false
+no-section-label = true
+additional-css = ["tema/kitap.css"]
+git-repository-url = "https://github.com/kaann-rs/study-period"
+edit-url-template = "https://github.com/kaann-rs/study-period/edit/main/rust-study/book/{path}"
+
+[output.html.fold]
+enable = true
+level = 1

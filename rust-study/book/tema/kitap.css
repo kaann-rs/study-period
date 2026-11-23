@@ -1,0 +1,133 @@
+/* Rust Yolculuğu: okunabilirlik ayarları */
+
+.content main {
+    line-height: 1.65;
+}
+
+.content h2 {
+    margin-block-start: 2.2em;
+}
+
+.content h3 {
+    margin-block-start: 1.8em;
+}
+
+/* Kutu başlıkları mdBook'ta İngilizcedir; Türkçe karşılıkları burada verilir. */
+.blockquote-tag > .blockquote-tag-title {
+    font-size: 0;
+}
+
+.blockquote-tag > .blockquote-tag-title::after {
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.blockquote-tag > .blockquote-tag-title svg {
+    vertical-align: text-bottom;
+    margin-inline-end: 0.5rem;
+}
+
+.blockquote-tag-note > .blockquote-tag-title::after {
+    content: "Not";
+}
+
+.blockquote-tag-tip > .blockquote-tag-title::after {
+    content: "İpucu";
+}
+
+.blockquote-tag-important > .blockquote-tag-title::after {
+    content: "Önemli";
+}
+
+.blockquote-tag-warning > .blockquote-tag-title::after {
+    content: "Dikkat";
+}
+
+.blockquote-tag-caution > .blockquote-tag-title::after {
+    content: "Uyarı";
+}
+
+/* Bilerek hatalı verilen örnekler: okur, kodun derlenmeyeceğini daha okumadan görsün. */
+pre:has(> code.compile_fail),
+pre:has(> code.should_panic) {
+    border-inline-start: 4px solid #c0392b;
+    padding-block-start: 2.6rem;
+}
+
+pre:has(> code.should_panic) {
+    border-inline-start-color: #b9770e;
+}
+
+pre:has(> code.compile_fail)::before,
+pre:has(> code.should_panic)::before {
+    position: absolute;
+    inset-block-start: 0.45rem;
+    inset-inline-start: 1rem;
+    font-family: var(--main-font, "Open Sans", sans-serif);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #e06c5c;
+    content: "Bu kod derlenmez";
+}
+
+pre:has(> code.should_panic)::before {
+    content: "Bu kod çalışırken panikler";
+    color: #d9942b;
+}
+
+/* Açılır bölümler (sözlük, alıştırma çözümü) */
+.content details {
+    margin-block: 1.4rem;
+    padding: 0.2rem 1.2rem;
+    border: 1px solid var(--table-border-color);
+    border-radius: 6px;
+}
+
+.content details > summary {
+    cursor: pointer;
+    padding-block: 0.7rem;
+    font-weight: 600;
+}
+
+/* Sözlük listeleri */
+.content dl dt {
+    margin-block-start: 0.9rem;
+    font-weight: 600;
+}
+
+.content dl dt a.header {
+    color: inherit;
+}
+
+.content dl dd {
+    margin-inline-start: 1.4rem;
+}
+
+/* Tablolar sayfanın tamamını kullansın */
+.content .table-wrapper table {
+    width: 100%;
+}
+
+.content table td,
+.content table th {
+    text-align: start;
+    vertical-align: top;
+}
+
+/* İlk sütundaki kısa kodlar iki satıra bölünmesin */
+.content table td:first-child {
+    min-width: 7.5em;
+}
+
+/* Kaynaklar: dipnotlar "Kaynaklar" başlığının hemen altına gelir */
+.content hr:has(+ ol.footnote-definition) {
+    display: none;
+}
+
+.content ol.footnote-definition {
+    font-size: 0.92em;
+}
+
+.content ol.footnote-definition li p {
+    margin-block: 0.35em;
+}
