@@ -20,7 +20,7 @@ Her sayfa için üç yer okunur:
 
 - Asıl notlar: `22a3cca` commit'indeki `learn/<konu>/src/*.rs` yorumları, `tests/` ve `ACIKLAMA.md` (`git show 22a3cca:rust-study/learn/...`). Çalışma ağacındaki `learn/` yalnızca kodu ve dosya sonlarındaki `Learn more` kaynak listesini tutar; adlar kitapta Türkçe, `learn/` kodunda İngilizcedir.
 - Eski sayfa: `backup/book-first-version-2026-11-23.tar.gz` içinde `src/...` (notlarda olmayan bilgi içerebilir). Şu an `src/` altında duran hâli de aynıdır.
-- `reports/Rust dersleri doğruluk denetimi.md` ve `research_notes/` → bilinen yanlışlar ve düzeltmeleri. Bulgulara uyulur, ama yeniden doğrulanır: o rapor derleyici kaynağı için yanlışlıkla nightly ağacını (1.102) "1.99.1" sanmıştır; dosya yolları ve satır numaraları güvenilir değildir.
+- Denetim raporu: `22a3cca` commit'indeki `reports/Rust dersleri doğruluk denetimi.md` ve `research_notes/` (`git show 22a3cca:rust-study/reports/...`) → bilinen yanlışlar ve düzeltmeleri. Bulgulara uyulur, ama yeniden doğrulanır: o rapor derleyici kaynağı için yanlışlıkla nightly ağacını (1.102) "1.99.1" sanmıştır; dosya yolları ve satır numaraları güvenilir değildir.
 
 ## 3. Sayfa düzeni
 
