@@ -18,34 +18,34 @@ cargo install mdbook --locked
 
 ```text
 book.toml            mdBook ayarları
-dogrula.py           doğrulama aracı
-YAZAR-KILAVUZU.md    yazım ve kaynak kuralları (kitaba dâhil değildir)
-tema/kitap.css       ek stiller
-yedek/               kitabın ilk hâlinin arşivi
+verify.py            doğrulama aracı
+WRITING-GUIDE.md     yazım ve kaynak kuralları (kitaba dâhil değildir)
+styles/book.css      ek stiller
+backup/              kitabın ilk hâlinin arşivi
 src/
     SUMMARY.md       içindekiler
     index.md         önsöz
-    giris.md         kitabı kullanma rehberi
-    kaynaklar.md     kaynaklar ve doğrulama yöntemi
-    temel/           1–8. bölümler
-    orta/            9–20. bölümler
-    ileri/           21–29. bölümler
+    how-to-use.md    kitabı kullanma rehberi
+    sources.md       kaynaklar ve doğrulama yöntemi
+    basics/          1–8. bölümler
+    intermediate/    9–20. bölümler
+    advanced/        21–29. bölümler
 ```
 
 ## Doğrulama
 
 ```bash
-python3 dogrula.py
+python3 verify.py
 ```
 
 Araç bütün Rust bloklarını derleyip çalıştırır, yazılan çıktıları ve hata mesajlarını gerçekleriyle karşılaştırır, bağlantıları denetler. Python 3 ile `rustup` üzerinden kurulmuş Rust 1.99.0 ve `rust-docs` bileşeni gerekir. Tek bir sayfayı denetlemek için dosya yolunu yazın:
 
 ```bash
-python3 dogrula.py src/temel/03-ownership.md
+python3 verify.py src/basics/03-ownership.md
 ```
 
 Bir bölümde notlardan eksik kalan terimleri görmek için:
 
 ```bash
-python3 dogrula.py --kapsam src/temel/03-ownership.md src/temel/03-ownership-derinlesme.md
+python3 verify.py --kapsam src/basics/03-ownership.md src/basics/03-ownership-deep-dive.md
 ```

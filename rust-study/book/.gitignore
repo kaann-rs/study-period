@@ -1,4 +1,4 @@
 /book/
-/.onbellek/
+/.cache/
 __pycache__/
 /.claude/

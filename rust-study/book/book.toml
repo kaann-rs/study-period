@@ -16,7 +16,7 @@ default-theme = "rust"
 preferred-dark-theme = "navy"
 smart-punctuation = false
 no-section-label = true
-additional-css = ["tema/kitap.css"]
+additional-css = ["styles/book.css"]
 git-repository-url = "https://github.com/kaann-rs/study-period"
 edit-url-template = "https://github.com/kaann-rs/study-period/edit/main/rust-study/book/{path}"
 

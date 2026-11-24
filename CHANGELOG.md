@@ -6,6 +6,7 @@ Changes to this study workspace, newest first.
 
 ### Changed
 
+- Renamed the files and directories of `rust-study/book` to English: `temel`, `orta`, and `ileri` are now `basics`, `intermediate`, and `advanced`, `*-derinlesme.md` is `*-deep-dive.md`, `dogrula.py` is `verify.py`, `YAZAR-KILAVUZU.md` is `WRITING-GUIDE.md`, and `tema/kitap.css` is `styles/book.css`. The text of the book stays Turkish.
 
 - Renamed the functions, variables, types, modules, and tests in `rust-study/learn` from Turkish to simple English (A1–B1). Module files follow: `derinlesme.rs` is now `deep_dive.rs`, and in `advanced-concurrency-async` the files are `threads.rs`, `runtime.rs`, and `client.rs`. Behavior is the same; printed text stays Turkish, only names inside it changed. The `project` crates already used English names, and the book keeps its Turkish examples.
 - Renamed the nine `ileri-*` packages and their directories in `rust-study/learn/advanced-concepts` to `advanced-*`: `ileri-deref-metot` is now `advanced-deref-methods`, `ileri-eszamanlilik-async` is now `advanced-concurrency-async`, and the other seven only change their prefix (`cargo run -p ileri-future` becomes `cargo run -p advanced-future`). Older entries below keep the names used at the time.

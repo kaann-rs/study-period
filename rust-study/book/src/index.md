@@ -2,7 +2,7 @@
 
 Bu kitap, Rust öğrenirken tutulmuş notların baştan sona okunabilecek hâlidir. İlk programdan başlar, sahiplik ve ödünç alma gibi temel kuralları işler, eşzamanlılık ve asenkron programlamayı anlatır, sonunda da küçük bir asenkron çalışma zamanını sıfırdan kurar.
 
-Notların özgün hâli depodaki `learn/` dizinindedir. Orada her konu, yorumlarla dolu ayrı bir Cargo projesidir (crate). Kitap o yorumları düzyazıya çevirir: Her kavramı kısa bir açıklama, çalışan bir örnek, örneğin gerçek çıktısı ve gerektiğinde derleyicinin verdiği hata mesajıyla birlikte anlatır.
+Örneklerin kaynak kodu depodaki `learn/` dizinindedir. Orada her konu ayrı bir Cargo projesidir (crate) ve her dosyanın ilk satırında konunun kitaptaki bölümü yazar. Kitap, her kavramı kısa bir açıklama, çalışan bir örnek, örneğin gerçek çıktısı ve gerektiğinde derleyicinin verdiği hata mesajıyla birlikte anlatır.
 
 ## Kitabın üç kısmı
 
@@ -24,6 +24,6 @@ Rust'ı bilen ama belirli bir konunun içini görmek isteyenler doğrudan ilgili
 
 ## Doğruluk
 
-Kitaptaki teknik bilgiler resmî kaynaklardan doğrulanmış, her kavramın kaynağı dipnotla gösterilmiştir. Rust örnekleri derlenmiş, yazılan çıktılar ve hata mesajları gerçek çalıştırmalardan alınmıştır. Bu denetimin nasıl yapıldığı, hangi sürümlere dayandığı ve sınırları [Kaynaklar ve doğrulama](kaynaklar.md) sayfasında anlatılır.
+Kitaptaki teknik bilgiler resmî kaynaklardan doğrulanmış, her kavramın kaynağı dipnotla gösterilmiştir. Rust örnekleri derlenmiş, yazılan çıktılar ve hata mesajları gerçek çalıştırmalardan alınmıştır. Bu denetimin nasıl yapıldığı, hangi sürümlere dayandığı ve sınırları [Kaynaklar ve doğrulama](sources.md) sayfasında anlatılır.
 
-Kitabı ilk kez açıyorsanız [Kitabı nasıl kullanmalı?](giris.md) sayfasıyla başlayın.
+Kitabı ilk kez açıyorsanız [Kitabı nasıl kullanmalı?](how-to-use.md) sayfasıyla başlayın.
