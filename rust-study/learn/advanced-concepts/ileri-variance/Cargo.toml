@@ -1,6 +1,0 @@
-[package]
-name = "ileri-variance"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]

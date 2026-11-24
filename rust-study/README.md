@@ -5,26 +5,17 @@ Rust öğrenme çalışmam. Bir cargo workspace: `learn/*` kitabın bölümlerin
 `project/*` kitaplardan ve kendi denemelerimden gelen küçük projeleri tutar. `guide/` =
 referans için `rust-lang/rust` kaynak ağacı (workspace dışı).
 
-## Nasıl okunur? (hiç bilmeyenler için)
+## Nasıl okunur?
 
-Her dosya iki katmanlıdır:
-
-1. **SADE ANLATIM kutuları** — dosyanın başında bir *mini sözlük* (o dosyada geçen her terimin
-   gündelik dille karşılığı) ve her konunun üstünde, günlük hayattan bir benzetme ile birkaç
-   satırlık *mini örnek* içeren bir kutu. Konuyu ilk kez görüyorsan yalnız bunları okuyarak
-   ilerleyebilirsin.
-2. **Teknik açıklama** — kutunun altındaki özgün yorumlar: neden böyle tasarlandığı, olmasaydı
-   ne bozulurdu, derleyici bunu nerede denetliyor. Zor terimlerin yanında `(Sade: …)` notları var.
-
-Dosya sonlarındaki "DERLEYİCİ PERSPEKTİFİ" bölümleri ilk okuyuşta atlanabilir.
+Anlatım [`book/`](book/) altındaki kitaptadır (`mdbook serve --open`). `learn/` yalnızca kodu tutar:
+her `.rs` dosyasının ilk satırı, konunun kitaptaki bölümünü gösterir. Kodda fonksiyon, değişken ve tür
+adları İngilizce, program çıktıları ve kitaptaki örnekler Türkçedir. Aşağıdaki tablolardaki "Böl."
+sütunu ise resmî Rust Book'un bölüm numarasıdır.
 
 ## Rust Book yolculuğu (ch3–ch20)
 
 [doc.rust-lang.org/book](https://doc.rust-lang.org/book/) (2024 edition) tüm kavramsal
-bölümlerini sırayla birer crate olarak işledim. Her crate aynı derinlikte: **terim (İngilizce) +
-Türkçe açıklama + örnek + Neden? (tasarım kararı) + o tasarım olmasaydı çıkacak Sorun +
-gerektiğinde rustc'nin hangi aşamada nasıl uyguladığı** (gerçek `rust-lang/rust` kaynak
-referanslarıyla). Tüm iddialar rustc ile derlenip/test edilip doğrulandı.
+bölümlerini sırayla birer crate olarak işledim.
 
 | Böl. | Crate | Konu |
 | --- | --- | --- |
@@ -58,26 +49,22 @@ Orendorff).
 
 | Crate | Konu | Ana kaynak |
 | --- | --- | --- |
-| `learn/advanced-concepts/ileri-future` | Future gerçekte nedir: poll/wake döngüsü, Waker + vtable, Pin ve self-referential state machine | std (`core::future`, `core::task`) + RfR Böl. 8 |
-| `learn/advanced-concepts/ileri-variance` | Subtyping ve variance: covariant/invariant/contravariant, `&'a mut &'b T` neden iki lifetime ister | RfR Böl. 1 + Reference + Nomicon |
-| `learn/advanced-concepts/ileri-sized-dst` | Sized, DST (`str`/`[T]`/`dyn`), fat/wide pointer (ptr + uzunluk/vtable), `?Sized` | RfR Böl. 2 + std |
-| `learn/advanced-concepts/ileri-deref-metot` | Deref + metot çözümü: deref coercion, autoref/autoderef, inherent metot gölgeleme | RfR Böl. 3 + Reference + std |
-| `learn/advanced-concepts/ileri-send-sync` | UnsafeCell (iç değişkenliğin tek temeli) + Send/Sync auto-trait'leri, !Sync negatif impl | RfR Böl. 3 & 9 + std |
-| `learn/advanced-concepts/ileri-dropck` | Drop check: Drop + lifetime neden borrow'u aşmaya zorlar; PhantomData (ZST işaretçi); #[may_dangle] | RfR Böl. 9 + std |
-| `learn/advanced-concepts/ileri-coherence` | Coherence + orphan rule (tam kural), blanket impl, fundamental tipler, covered impl | RfR Böl. 2 + std |
-| `learn/advanced-concepts/ileri-lifetime-hrtb-gat` | İleri lifetime'lar: iki ayrı süre, `'a: 'b` / `T: 'a`, HRTB (`for<'a>`), GAT (ödünç veren iterator, tür ailesi), lifetime hata mesajı rehberi | Reference + Rustonomicon + RfR Böl. 1–2 |
-| `learn/advanced-concepts/ileri-eszamanlilik-async` | İleri eşzamanlılık + async: RwLock, Condvar, kilit sıralaması, atomikler; std ile mini runtime (görev kuyruğu, spawn, zamanlayıcı, zaman aşımı), Pin/Unpin pratikte, asenkron API istemcisi, yaygın async hataları | std + *Rust Atomics and Locks* + RfR Böl. 8 & 10 |
+| `learn/advanced-concepts/advanced-future` | Future gerçekte nedir: poll/wake döngüsü, Waker + vtable, Pin ve self-referential state machine | std (`core::future`, `core::task`) + RfR Böl. 8 |
+| `learn/advanced-concepts/advanced-variance` | Subtyping ve variance: covariant/invariant/contravariant, `&'a mut &'b T` neden iki lifetime ister | RfR Böl. 1 + Reference + Nomicon |
+| `learn/advanced-concepts/advanced-sized-dst` | Sized, DST (`str`/`[T]`/`dyn`), fat/wide pointer (ptr + uzunluk/vtable), `?Sized` | RfR Böl. 2 + std |
+| `learn/advanced-concepts/advanced-deref-methods` | Deref + metot çözümü: deref coercion, autoref/autoderef, inherent metot gölgeleme | RfR Böl. 3 + Reference + std |
+| `learn/advanced-concepts/advanced-send-sync` | UnsafeCell (iç değişkenliğin tek temeli) + Send/Sync auto-trait'leri, !Sync negatif impl | RfR Böl. 3 & 9 + std |
+| `learn/advanced-concepts/advanced-dropck` | Drop check: Drop + lifetime neden borrow'u aşmaya zorlar; PhantomData (ZST işaretçi); #[may_dangle] | RfR Böl. 9 + std |
+| `learn/advanced-concepts/advanced-coherence` | Coherence + orphan rule (tam kural), blanket impl, fundamental tipler, covered impl | RfR Böl. 2 + std |
+| `learn/advanced-concepts/advanced-lifetime-hrtb-gat` | İleri lifetime'lar: iki ayrı süre, `'a: 'b` / `T: 'a`, HRTB (`for<'a>`), GAT (ödünç veren iterator, tür ailesi), lifetime hata mesajı rehberi | Reference + Rustonomicon + RfR Böl. 1–2 |
+| `learn/advanced-concepts/advanced-concurrency-async` | İleri eşzamanlılık + async: RwLock, Condvar, kilit sıralaması, atomikler; std ile mini runtime (görev kuyruğu, spawn, zamanlayıcı, zaman aşımı), Pin/Unpin pratikte, asenkron API istemcisi, yaygın async hataları | std + *Rust Atomics and Locks* + RfR Böl. 8 & 10 |
 
-## Derinleşme modülleri (`src/derinlesme.rs`)
+## Derinleşme modülleri (`src/deep_dive.rs`)
 
-Zor konuların crate'lerinde `main.rs` kavramı tanıtır; yanındaki `derinlesme.rs` aynı konuyu
-PRATİĞE döker. `main.rs` dosyalarındaki kod ve yorumlar olduğu gibi duruyor; yalnız
-`mod derinlesme;` ve `derinlesme::calistir();` satırları ile — son gözden geçirmede rustc ve
-std kaynağıyla doğrulanan teknik yanlışların hemen altına — `↳ DÜZELTME NOTU` satırları eklendi: `cargo run -p <crate>` önce özgün bölümü, ardından
-derinleşme bölümünü çalıştırır. Her modülde: gerçekçi bir senaryo, adım adım kod analizi, sık
-yapılan hatalar (✗ derlenmeyen / ✓ doğru kullanım; hata kodları rustc ile doğrulandı), beklenen
-çıktılar, alıştırmalar, bir sonraki konuyla bağlantı ve `cargo test -p <crate>` ile çalışan
-birim testleri.
+Zor konuların crate'lerinde `main.rs` kavramı tanıtır; yanındaki `deep_dive.rs` aynı konuyu
+PRATİĞE döker. `cargo run -p <crate>` önce özgün bölümü, ardından derinleşme bölümünü çalıştırır;
+`cargo test -p <crate>` birim testlerini koşturur. Senaryolar, sık yapılan hatalar ve alıştırmalar
+kitabın derinleşme sayfalarındadır.
 
 | Crate | Derinleşmede ne var |
 | --- | --- |
@@ -93,10 +80,10 @@ birim testleri.
 | `learn/oop` | Genişletilebilir bildirim sistemi, dyn / generic / enum karşılaştırması, `&dyn` / `Box` / `Rc` / `Arc` seçimi, gizli `'static` sınırı, upcasting, `dyn Any`, bileşim |
 | `learn/patterns` | Komut ayrıştırıcı, bağlama modları, `@` ve guard, dilim desenleri, bütünlük (exhaustiveness) ve `matches!` |
 
-Önerilen sıra: bir bölümün `main.rs`'ini oku → çalıştır → `derinlesme.rs`'i oku → alıştırmaları
-çöz → sonraki bölüme geç. Kitap bölümleri bittikten sonra `ileri-*` crate'leri; lifetime ve
-eşzamanlılık için sırasıyla `ileri-variance` → `ileri-lifetime-hrtb-gat` ve `ileri-future` →
-`ileri-send-sync` → `ileri-eszamanlilik-async`.
+Önerilen sıra: kitabın bölümünü oku → crate'i çalıştır → derinleşme sayfasını oku → alıştırmaları
+çöz → sonraki bölüme geç. Kitap bölümleri bittikten sonra `advanced-*` crate'leri; lifetime ve
+eşzamanlılık için sırasıyla `advanced-variance` → `advanced-lifetime-hrtb-gat` ve `advanced-future` →
+`advanced-send-sync` → `advanced-concurrency-async`.
 
 ## Çalıştırma
 
@@ -107,7 +94,7 @@ cargo run -p common-concepts      # bir bölümü çalıştır
 cargo test -p writing-tests       # testleri olan crate'ler
 cargo run -p minigrep -- hiç learn/minigrep/siir.txt
 cargo test -p ownership           # derinleşme modüllerinin testleri
-cargo run -p ileri-eszamanlilik-async
+cargo run -p advanced-concurrency-async
 ```
 
 `guide/` referans kaynak ağacıdır, derlenmez (workspace'ten hariç).

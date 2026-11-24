@@ -202,7 +202,43 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "320119579fcad9c21884f5c4861d16174d0e06250625266f50fe6898340abefa"
 
 [[package]]
+name = "advanced-coherence"
+version = "0.1.0"
+
+[[package]]
+name = "advanced-concurrency-async"
+version = "0.1.0"
+
+[[package]]
+name = "advanced-deref-methods"
+version = "0.1.0"
+
+[[package]]
+name = "advanced-dropck"
+version = "0.1.0"
+
+[[package]]
 name = "advanced-features"
+version = "0.1.0"
+
+[[package]]
+name = "advanced-future"
+version = "0.1.0"
+
+[[package]]
+name = "advanced-lifetime-hrtb-gat"
+version = "0.1.0"
+
+[[package]]
+name = "advanced-send-sync"
+version = "0.1.0"
+
+[[package]]
+name = "advanced-sized-dst"
+version = "0.1.0"
+
+[[package]]
+name = "advanced-variance"
 version = "0.1.0"
 
 [[package]]
@@ -1162,42 +1198,6 @@ dependencies = [
  "icu_normalizer",
  "icu_properties",
 ]
-
-[[package]]
-name = "ileri-coherence"
-version = "0.1.0"
-
-[[package]]
-name = "ileri-deref-metot"
-version = "0.1.0"
-
-[[package]]
-name = "ileri-dropck"
-version = "0.1.0"
-
-[[package]]
-name = "ileri-eszamanlilik-async"
-version = "0.1.0"
-
-[[package]]
-name = "ileri-future"
-version = "0.1.0"
-
-[[package]]
-name = "ileri-lifetime-hrtb-gat"
-version = "0.1.0"
-
-[[package]]
-name = "ileri-send-sync"
-version = "0.1.0"
-
-[[package]]
-name = "ileri-sized-dst"
-version = "0.1.0"
-
-[[package]]
-name = "ileri-variance"
-version = "0.1.0"
 
 [[package]]
 name = "image"

@@ -2,18 +2,29 @@
 
 Changes to this study workspace, newest first.
 
+## 2026-11-24
+
+### Changed
+
+
+- Renamed the functions, variables, types, modules, and tests in `rust-study/learn` from Turkish to simple English (A1–B1). Module files follow: `derinlesme.rs` is now `deep_dive.rs`, and in `advanced-concurrency-async` the files are `threads.rs`, `runtime.rs`, and `client.rs`. Behavior is the same; printed text stays Turkish, only names inside it changed. The `project` crates already used English names, and the book keeps its Turkish examples.
+- Renamed the nine `ileri-*` packages and their directories in `rust-study/learn/advanced-concepts` to `advanced-*`: `ileri-deref-metot` is now `advanced-deref-methods`, `ileri-eszamanlilik-async` is now `advanced-concurrency-async`, and the other seven only change their prefix (`cargo run -p ileri-future` becomes `cargo run -p advanced-future`). Older entries below keep the names used at the time.
+- Formatted the `learn` crates with rustfmt.
+
 ## 2026-11-23
 
 ### Added
 
-- `rust-study/learn/*/src/derinlesme.rs`: deepening modules for eleven Rust Book chapters (ownership, structs, enums, error handling, generics/traits/lifetimes, closures/iterators, smart pointers, concurrency, async/await, trait objects, patterns) with realistic scenarios, common compiler errors, exercises, and unit tests. The existing `main.rs` files only gained the two lines that wire the module in.
+- `rust-study/learn/*/src/deep_dive.rs` (then named `derinlesme.rs`): deepening modules for eleven Rust Book chapters (ownership, structs, enums, error handling, generics/traits/lifetimes, closures/iterators, smart pointers, concurrency, async/await, trait objects, patterns) with realistic scenarios, common compiler errors, exercises, and unit tests. The existing `main.rs` files only gained the two lines that wire the module in.
 - `rust-study/learn/advanced-concepts/ileri-lifetime-hrtb-gat`: advanced lifetimes, higher-ranked trait bounds, and generic associated types.
 - `rust-study/learn/advanced-concepts/ileri-eszamanlilik-async`: advanced concurrency (RwLock, Condvar, lock ordering, atomics) and a dependency-free mini async runtime with a simulated API client.
 - `rust-study/README.md`: an index of the deepening modules and the two new advanced crates.
 - A plain-language layer in every `learn` source file: a mini glossary at the top and a `SADE ANLATIM` box (everyday analogy plus a mini example) above each topic. Only comment lines were added; code, program output, and tests are unchanged.
+- `rust-study/book`: the notes rewritten as a 43-page Turkish mdBook, with a script (`dogrula.py`) that compiles every example and checks outputs and links.
 
 ### Changed
 
+- Moved the explanations out of `rust-study/learn` into the book: `.rs` comments and the `ACIKLAMA.md` files are removed, and each source file now only names its book chapter. Code, tests, and program output are unchanged; the original notes are in commit `22a3cca`. The doc comments in `cargo-and-crates/src/lib.rs` stay because they are doc-tests.
 - Moved the nine `ileri-*` crates from `rust-study/learn/` into `rust-study/learn/advanced-concepts/`. Package names are unchanged, so `cargo run -p ileri-future` still works; the workspace manifest now lists them explicitly.
 - Correction notes (`↳ DÜZELTME NOTU`) under 17 technically inaccurate comments in the original chapter files, each verified against rustc 1.99 or the std source; the original comments are kept.
 

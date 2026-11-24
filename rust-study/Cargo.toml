@@ -2,23 +2,23 @@
 resolver = "3"
 # Her yeni konu/bölüm kendi crate'i olur:
 #   learn/*   → kitap bölümleri ve kavram çalışmaları (basic-concepts, struct, ...)
-#   learn/advanced-concepts/<crate> → ileri konular (ileri-*): kitabın ötesindeki derinleşmeler.
+#   learn/advanced-concepts/<crate> → ileri konular (advanced-*): kitabın ötesindeki derinleşmeler.
 #     Klasörün kendisi bir crate değildir; `learn/*` onu da yakaladığı için `exclude`a yazılır ve
 #     içindeki crate'ler aşağıda TEK TEK sayılır (açıkça yazılan üye, exclude'dan önce gelir).
-#     Yeni bir ileri-* crate'i eklerken buraya bir satır ekle.
+#     Yeni bir advanced-* crate'i eklerken buraya bir satır ekle.
 #   project/* → daha büyük, kendi başına projeler (lox-rs, ahtapot-rs, actix-gcd)
 # guide/ (rust-lang/rust) referans olarak durur, workspace'e dahil DEĞİL.
 members = [
     "learn/*",
-    "learn/advanced-concepts/ileri-coherence",
-    "learn/advanced-concepts/ileri-deref-metot",
-    "learn/advanced-concepts/ileri-dropck",
-    "learn/advanced-concepts/ileri-eszamanlilik-async",
-    "learn/advanced-concepts/ileri-future",
-    "learn/advanced-concepts/ileri-lifetime-hrtb-gat",
-    "learn/advanced-concepts/ileri-send-sync",
-    "learn/advanced-concepts/ileri-sized-dst",
-    "learn/advanced-concepts/ileri-variance",
+    "learn/advanced-concepts/advanced-coherence",
+    "learn/advanced-concepts/advanced-concurrency-async",
+    "learn/advanced-concepts/advanced-deref-methods",
+    "learn/advanced-concepts/advanced-dropck",
+    "learn/advanced-concepts/advanced-future",
+    "learn/advanced-concepts/advanced-lifetime-hrtb-gat",
+    "learn/advanced-concepts/advanced-send-sync",
+    "learn/advanced-concepts/advanced-sized-dst",
+    "learn/advanced-concepts/advanced-variance",
     "project/*",
 ]
 exclude = ["guide", "learn/advanced-concepts"]
