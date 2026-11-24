@@ -294,3 +294,35 @@ mod tests {
         assert_eq!(*b, [1, 2]);
     }
 }
+
+// Learn more
+//
+// You can learn trees with Rc and Weak from these sources:
+//   - The Rust Book, "Reference Cycles Can Leak Memory": https://doc.rust-lang.org/book/ch15-06-reference-cycles.html
+//   - Standard library docs, "std::rc": https://doc.rust-lang.org/std/rc/index.html
+//   - Comprehensive Rust, "Rc": https://google.github.io/comprehensive-rust/smart-pointers/rc.html
+//   - Easy: DEV Community, "What Is a Weak Pointer in Rust (and Why It Matters)?": https://dev.to/masteringbackend/what-is-a-weak-pointer-in-rust-and-why-it-matters-29m5
+//
+// You can learn reference cycles and memory leaks from these sources:
+//   - The Rust Book, "Reference Cycles Can Leak Memory": https://doc.rust-lang.org/book/ch15-06-reference-cycles.html
+//   - Rustonomicon, "Leaking": https://doc.rust-lang.org/nomicon/leaking.html
+//   - Standard library docs, "std::rc::Weak": https://doc.rust-lang.org/std/rc/struct.Weak.html
+//   - Easy: Let's Get Rusty (video), "Smart Pointers in Rust - Reference Cycles": https://www.youtube.com/watch?v=pIVZRDFAUyc
+//
+// You can learn interior mutability from these sources:
+//   - Standard library docs, "std::cell": https://doc.rust-lang.org/std/cell/index.html
+//   - Rust Reference, "Interior mutability": https://doc.rust-lang.org/reference/interior-mutability.html
+//   - Crust of Rust (video), "Smart Pointers and Interior Mutability": https://www.youtube.com/watch?v=8O0Nt9qY_vo
+//   - Easy: Easy Rust, "Interior mutability": https://dhghomon.github.io/easy_rust/Chapter_41.html
+//
+// You can learn RefCell traps from these sources:
+//   - Standard library docs, "std::cell::RefCell::try_borrow_mut": https://doc.rust-lang.org/std/cell/struct.RefCell.html#method.try_borrow_mut
+//   - The Rust Book, "Tracking Borrows at Runtime": https://doc.rust-lang.org/book/ch15-05-interior-mutability.html#tracking-borrows-at-runtime
+//   - Manish Goregaokar, "The Problem With Single-threaded Shared Mutability": https://manishearth.github.io/blog/2015/05/17/the-problem-with-shared-mutability/
+//   - Easy: Let's Get Rusty (video), "Smart Pointers in Rust - Interior Mutability": https://www.youtube.com/watch?v=77aRH6YBKyY
+//
+// You can learn copy only if shared (Rc::make_mut and Cow) from these sources:
+//   - Standard library docs, "std::rc::Rc::make_mut": https://doc.rust-lang.org/std/rc/struct.Rc.html#method.make_mut
+//   - Standard library docs, "std::borrow::Cow": https://doc.rust-lang.org/std/borrow/enum.Cow.html
+//   - Rust Performance Book, "Heap Allocations": https://nnethercote.github.io/perf-book/heap-allocations.html
+//   - Easy: Easy Rust, "Cow": https://dhghomon.github.io/easy_rust/Chapter_42.html

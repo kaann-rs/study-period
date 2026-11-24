@@ -148,3 +148,26 @@ fn show_lifetimes() {
     let s: &'static str = "program boyu yaşar";
     println!("{s} / etiket örneği: {}", 42.label());
 }
+
+// Learn more
+//
+// You can learn generics from these sources:
+//   - The Rust Book, "Generic Data Types": https://doc.rust-lang.org/book/ch10-01-syntax.html
+//   - Rust by Example, "Generics": https://doc.rust-lang.org/rust-by-example/generics.html
+//   - Comprehensive Rust, "Generic Functions": https://google.github.io/comprehensive-rust/generics/generic-functions.html
+//   - Easy: Programiz, "Rust Generics": https://www.programiz.com/rust/generics
+//   - Easy: Let's Get Rusty (video), "Generic Types in Rust": https://www.youtube.com/watch?v=6rcTSxPJ6Bw
+//
+// You can learn traits from these sources:
+//   - The Rust Book, "Defining Shared Behavior with Traits": https://doc.rust-lang.org/book/ch10-02-traits.html
+//   - Rust by Example, "Traits": https://doc.rust-lang.org/rust-by-example/trait.html
+//   - Comprehensive Rust, "Traits": https://google.github.io/comprehensive-rust/methods-and-traits/traits.html
+//   - Easy: Easy Rust, "Traits": https://dhghomon.github.io/easy_rust/Chapter_34.html
+//   - Easy: Let's Get Rusty (video), "Traits in Rust": https://www.youtube.com/watch?v=T0Xfltu4h3A
+//
+// You can learn lifetimes from these sources:
+//   - The Rust Book, "Validating References with Lifetimes": https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html
+//   - Rust by Example, "Lifetimes": https://doc.rust-lang.org/rust-by-example/scope/lifetime.html
+//   - Comprehensive Rust, "Lifetimes": https://google.github.io/comprehensive-rust/lifetimes.html
+//   - Easy: Easy Rust, "Lifetimes": https://dhghomon.github.io/easy_rust/Chapter_40.html
+//   - Easy: Let's Get Rusty (video), "Rust Lifetimes Finally Explained!": https://www.youtube.com/watch?v=juIINGuZyBc

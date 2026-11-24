@@ -89,3 +89,41 @@ fn show_control_flow() {
     }
     println!();
 }
+
+// Learn more
+//
+// You can learn variables and mutability from these sources:
+//   - The Rust Book, "Variables and Mutability": https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html
+//   - Rust by Example, "Mutability": https://doc.rust-lang.org/rust-by-example/variable_bindings/mut.html
+//   - Easy: W3Schools, "Rust Variables": https://www.w3schools.com/rust/rust_variables.php
+//   - Easy: Easy Rust, "Mutability (changing)": https://dhghomon.github.io/easy_rust/Chapter_11.html
+//
+// You can learn constants from these sources:
+//   - The Rust Book, "Declaring Constants": https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html#declaring-constants
+//   - Rust by Example, "constants": https://doc.rust-lang.org/rust-by-example/custom_types/constants.html
+//   - Easy: W3Schools, "Rust Constants": https://www.w3schools.com/rust/rust_constants.php
+//   - Easy: Easy Rust, "const and static": https://dhghomon.github.io/easy_rust/Chapter_15.html
+//
+// You can learn shadowing from these sources:
+//   - The Rust Book, "Shadowing": https://doc.rust-lang.org/book/ch03-01-variables-and-mutability.html#shadowing
+//   - Rust by Example, "Scope and Shadowing": https://doc.rust-lang.org/rust-by-example/variable_bindings/scope.html
+//   - Easy: Programiz, "Rust Variable Scope": https://www.programiz.com/rust/variable-scope
+//
+// You can learn data types from these sources:
+//   - The Rust Book, "Data Types": https://doc.rust-lang.org/book/ch03-02-data-types.html
+//   - Rust by Example, "Primitives": https://doc.rust-lang.org/rust-by-example/primitives.html
+//   - Easy: W3Schools, "Rust Data Types": https://www.w3schools.com/rust/rust_data_types.php
+//   - Easy: Let's Get Rusty (video), "Common Programming Concepts in Rust": https://www.youtube.com/watch?v=2V0JaMVjzws
+//
+// You can learn functions from these sources:
+//   - The Rust Book, "Functions": https://doc.rust-lang.org/book/ch03-03-how-functions-work.html
+//   - Rust by Example, "Functions": https://doc.rust-lang.org/rust-by-example/fn.html
+//   - Comprehensive Rust, "Functions": https://google.github.io/comprehensive-rust/control-flow-basics/functions.html
+//   - Easy: W3Schools, "Rust Functions": https://www.w3schools.com/rust/rust_functions.php
+//
+// You can learn control flow from these sources:
+//   - The Rust Book, "Control Flow": https://doc.rust-lang.org/book/ch03-05-control-flow.html
+//   - Rust by Example, "loop": https://doc.rust-lang.org/rust-by-example/flow_control/loop.html
+//   - Comprehensive Rust, "Loops": https://google.github.io/comprehensive-rust/control-flow-basics/loops.html
+//   - Easy: W3Schools, "Rust If .. Else Conditions": https://www.w3schools.com/rust/rust_if_else.php
+//   - Easy: Easy Rust, "Loops": https://dhghomon.github.io/easy_rust/Chapter_26.html

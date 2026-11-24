@@ -286,3 +286,35 @@ mod tests {
         assert_eq!(boxed.to_string(), "ada");
     }
 }
+
+// Learn more
+//
+// You can learn how lifetimes relate to each other from these sources:
+//   - The Rust Book, "Relationships": https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#relationships
+//   - Rust by Example, "Functions": https://doc.rust-lang.org/rust-by-example/scope/lifetime/fn.html
+//   - pretzelhammer, "Common Rust Lifetime Misconceptions": https://github.com/pretzelhammer/rust-blog/blob/master/posts/common-rust-lifetime-misconceptions.md
+//   - Easy: Tour of Rust, "Multiple Lifetimes": https://tourofrust.com/54_en.html
+//
+// You can learn zero-copy parsers from these sources:
+//   - Crust of Rust (video), "Lifetime Annotations": https://www.youtube.com/watch?v=rAl-9HwD858
+//   - Comprehensive Rust, "Lifetimes in Data Structures": https://google.github.io/comprehensive-rust/lifetimes/struct-lifetimes.html
+//   - Serde, "Deserializer lifetimes": https://serde.rs/lifetimes.html
+//   - Manish Goregaokar, "Not a Yoking Matter (Zero-Copy #1)": https://manishearth.github.io/blog/2022/08/03/zero-copy-1-not-a-yoking-matter/
+//
+// You can learn 'static from these sources:
+//   - Rust by Example, "Static": https://doc.rust-lang.org/rust-by-example/scope/lifetime/static_lifetime.html
+//   - pretzelhammer, "Common Rust Lifetime Misconceptions": https://github.com/pretzelhammer/rust-blog/blob/master/posts/common-rust-lifetime-misconceptions.md
+//   - The Rust Book, "The Static Lifetime": https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html#the-static-lifetime
+//   - Easy: Tour of Rust, "Static Lifetimes": https://tourofrust.com/55_en.html
+//
+// You can learn a generic cache with trait bounds from these sources:
+//   - Standard library docs, "std::collections::hash_map::Entry": https://doc.rust-lang.org/std/collections/hash_map/enum.Entry.html
+//   - The Rust Book, "Using Trait Bounds to Conditionally Implement Methods": https://doc.rust-lang.org/book/ch10-02-traits.html#using-trait-bounds-to-conditionally-implement-methods
+//   - Rust by Example, "Where clauses": https://doc.rust-lang.org/rust-by-example/generics/where.html
+//   - Easy: Let's Get Rusty (video), "Traits in Rust": https://www.youtube.com/watch?v=T0Xfltu4h3A
+//
+// You can learn how to choose associated types or generic parameters from these sources:
+//   - The Rust Book, "Defining Traits with Associated Types": https://doc.rust-lang.org/book/ch20-02-advanced-traits.html#defining-traits-with-associated-types
+//   - Rust by Example, "Associated types": https://doc.rust-lang.org/rust-by-example/generics/assoc_items/types.html
+//   - Comprehensive Rust, "Associated Types": https://google.github.io/comprehensive-rust/methods-and-traits/traits/associated-types.html
+//   - Easy: Let's Get Rusty (video), "Advanced Traits in Rust": https://www.youtube.com/watch?v=RDxz94tuxqM

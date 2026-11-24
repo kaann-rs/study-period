@@ -71,3 +71,23 @@ fn show_inherent_shadowing() {
         Inner::name(&wrapper)
     );
 }
+
+// Learn more
+//
+// You can learn deref coercion from these sources:
+//   - The Rust Book, "Using Deref Coercion in Functions and Methods": https://doc.rust-lang.org/book/ch15-02-deref.html#using-deref-coercion-in-functions-and-methods
+//   - Standard library docs, "Deref coercion": https://doc.rust-lang.org/std/ops/trait.Deref.html#deref-coercion
+//   - Rust Reference, "Type coercions": https://doc.rust-lang.org/reference/type-coercions.html
+//   - Easy: Let's Get Rusty (video), "Smart Pointers in Rust - The Deref Trait": https://www.youtube.com/watch?v=dYEC6NElVOg
+//
+// You can learn autoderef in method calls from these sources:
+//   - Rust Reference, "Method call expressions": https://doc.rust-lang.org/reference/expressions/method-call-expr.html
+//   - Rustonomicon, "The Dot Operator": https://doc.rust-lang.org/nomicon/dot-operator.html
+//   - Rust compiler guide, "Method lookup": https://rustc-dev-guide.rust-lang.org/hir-typeck/method-lookup.html
+//   - Easy: Easy Rust, "References and the dot operator": https://dhghomon.github.io/easy_rust/Chapter_29.html
+//
+// You can learn which method Rust calls (inherent or inner) from these sources:
+//   - Rust Reference, "Method call expressions": https://doc.rust-lang.org/reference/expressions/method-call-expr.html
+//   - Rust by Example, "Disambiguating overlapping traits": https://doc.rust-lang.org/rust-by-example/trait/disambiguating.html
+//   - Rust compiler guide, "Method lookup": https://rustc-dev-guide.rust-lang.org/hir-typeck/method-lookup.html
+//   - Easy: Let's Get Rusty (video), "Advanced Traits in Rust": https://www.youtube.com/watch?v=RDxz94tuxqM

@@ -407,3 +407,39 @@ mod tests {
         assert_eq!(box_template(&prefix).apply("başlık"), "# başlık");
     }
 }
+
+// Learn more
+//
+// You can learn open systems with trait objects from these sources:
+//   - The Rust Book, "Using Trait Objects to Abstract over Shared Behavior": https://doc.rust-lang.org/book/ch18-02-trait-objects.html
+//   - Comprehensive Rust, "Heterogeneous Collections": https://google.github.io/comprehensive-rust/idiomatic/polymorphism/dyn/heterogeneous.html
+//   - Learning Rust by quinedot, "dyn Trait overview": https://quinedot.github.io/rust-learning/dyn-trait-overview.html
+//   - Easy: Tour of Rust, "Trait Objects": https://tourofrust.com/82_en.html
+//
+// You can learn how to choose dyn, generics or enum from these sources:
+//   - Effective Rust, "Understand the trade-offs between generics and trait objects": https://effective-rust.com/generics.html
+//   - Learning Rust by quinedot, "dyn Trait vs. alternatives": https://quinedot.github.io/rust-learning/dyn-trait-vs.html
+//   - Comprehensive Rust, "Generics vs Trait Objects": https://google.github.io/comprehensive-rust/idiomatic/polymorphism/dyn/dyn-vs-generics.html
+//   - Easy: 0xpluie, "Static vs Dynamic Dispatch in Rust": https://pluiee.github.io/static-vs-dynamic-dispatch-in-rust/
+//
+// You can learn how to choose a pointer (&dyn, Box, Rc or Arc) from these sources:
+//   - Effective Rust, "Familiarize yourself with reference and pointer types": https://effective-rust.com/references.html
+//   - Rust Performance Book, "Standard Library Types": https://nnethercote.github.io/perf-book/standard-library-types.html
+//   - Crust of Rust (video), "Dispatch and Fat Pointers": https://www.youtube.com/watch?v=xcygqF5LVmM
+//   - Easy: Tour of Rust, "Combining Smart Pointers": https://tourofrust.com/103_en.html
+//
+// You can learn the hidden 'static in Box<dyn Trait> from these sources:
+//   - Rust Reference, "Default trait object lifetimes": https://doc.rust-lang.org/reference/lifetime-elision.html#default-trait-object-lifetimes
+//   - Learning Rust by quinedot, "Basic guidelines": https://quinedot.github.io/rust-learning/dyn-elision-basic.html
+//   - pretzelhammer, "Common Rust Lifetime Misconceptions": https://github.com/pretzelhammer/rust-blog/blob/master/posts/common-rust-lifetime-misconceptions.md
+//
+// You can learn upcasting and Any from these sources:
+//   - Armin Ronacher, "Rust Any Part 3: Finally we have Upcasts": https://lucumr.pocoo.org/2025/3/27/any-upcast/
+//   - Rust Blog, "Announcing Rust 1.86.0": https://blog.rust-lang.org/2025/04/03/Rust-1.86.0/
+//   - Standard library docs, "std::any": https://doc.rust-lang.org/std/any/index.html
+//   - Comprehensive Rust, "The Any Trait": https://google.github.io/comprehensive-rust/idiomatic/polymorphism/dyn/any-trait.html
+//
+// You can learn composition and cloning trait objects from these sources:
+//   - Learning Rust by quinedot, "Cloneable Box<dyn Trait>": https://quinedot.github.io/rust-learning/dyn-trait-clone.html
+//   - Comprehensive Rust, "Composition over Inheritance": https://google.github.io/comprehensive-rust/idiomatic/from-oop-to-rust/composition.html
+//   - docs.rs, "dyn_clone": https://docs.rs/dyn-clone/latest/dyn_clone/

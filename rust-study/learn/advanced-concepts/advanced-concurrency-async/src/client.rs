@@ -276,3 +276,28 @@ mod tests {
         assert_eq!(run_shared_counter(20), 20);
     }
 }
+
+// Learn more
+//
+// You can learn concurrent requests from these sources:
+//   - Async Book, "join!": https://rust-lang.github.io/async-book/06_multiple_futures/02_join.html
+//   - Comprehensive Rust, "Join": https://google.github.io/comprehensive-rust/concurrency/async-control-flow/join.html
+//   - docs.rs, "tokio::task::JoinSet": https://docs.rs/tokio/latest/tokio/task/struct.JoinSet.html
+//   - Easy: DEV Community, "Async/Await in Rust: A Beginner's Guide": https://dev.to/leapcell/asyncawait-in-rust-a-beginners-guide-237h
+//
+// You can learn retry with backoff from these sources:
+//   - AWS, "Exponential Backoff and Jitter": https://aws.amazon.com/blogs/architecture/exponential-backoff-and-jitter/
+//   - docs.rs, "backon": https://docs.rs/backon/latest/backon/
+//   - docs.rs, "tokio_retry": https://docs.rs/tokio-retry/latest/tokio_retry/
+//
+// You can learn blocking code in async from these sources:
+//   - Alice Ryhl, "Async: What is blocking?": https://ryhl.io/blog/async-what-is-blocking/
+//   - docs.rs, "tokio::task::spawn_blocking": https://docs.rs/tokio/latest/tokio/task/fn.spawn_blocking.html
+//   - Comprehensive Rust, "Blocking the Executor": https://google.github.io/comprehensive-rust/concurrency/async-pitfalls/blocking-executor.html
+//   - Easy: Learn by Building, "Sync / Async Bridge": https://its-saeed.github.io/learn-by-building/async/25-sync-async-bridge.html
+//
+// You can learn locks across await from these sources:
+//   - Tokio tutorial, "Holding a MutexGuard across an .await": https://tokio.rs/tokio/tutorial/shared-state#holding-a-mutexguard-across-an-await
+//   - docs.rs, "tokio::sync::Mutex": https://docs.rs/tokio/latest/tokio/sync/struct.Mutex.html
+//   - sunshowers, "Cancelling async Rust": https://sunshowers.io/posts/cancelling-async-rust/
+//   - Easy: Learn by Building, "tokio::sync Internals": https://its-saeed.github.io/learn-by-building/async/18-tokio-sync.html

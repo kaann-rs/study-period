@@ -70,3 +70,25 @@ fn show_fat_pointer() {
         println!("trait object (vtable ile dispatch): {}", object.draw());
     }
 }
+
+// Learn more
+//
+// You can learn sized types and dynamically sized types (DST) from these sources:
+//   - Rust Reference, "Dynamically sized types": https://doc.rust-lang.org/reference/dynamically-sized-types.html
+//   - Rustonomicon, "Exotically Sized Types": https://doc.rust-lang.org/nomicon/exotic-sizes.html
+//   - pretzelhammer, "Sizedness in Rust": https://github.com/pretzelhammer/rust-blog/blob/master/posts/sizedness-in-rust.md
+//   - Easy: DEV Community, "Sized &? Sized: A beginner's guide": https://dev.to/masteringbackend/sized-sized-a-beginners-guide-448e
+//   - Easy: Tour of Rust, "Handling Unsized Data": https://tourofrust.com/83_en.html
+//
+// You can learn the ?Sized bound from these sources:
+//   - The Rust Book, "Dynamically Sized Types and the Sized Trait": https://doc.rust-lang.org/book/ch20-03-advanced-types.html#dynamically-sized-types-and-the-sized-trait
+//   - pretzelhammer, "Sizedness in Rust": https://github.com/pretzelhammer/rust-blog/blob/master/posts/sizedness-in-rust.md
+//   - Comprehensive Rust, "Statically Sized and Dynamically Sized types": https://google.github.io/comprehensive-rust/idiomatic/polymorphism/generics/sized.html
+//   - Easy: DEV Community, "Sized &? Sized: A beginner's guide": https://dev.to/masteringbackend/sized-sized-a-beginners-guide-448e
+//   - Easy: Let's Get Rusty (video), "Advanced Types in Rust": https://www.youtube.com/watch?v=aI1oIFqh44Y
+//
+// You can learn fat pointers from these sources:
+//   - Crust of Rust (video), "Dispatch and Fat Pointers": https://www.youtube.com/watch?v=xcygqF5LVmM
+//   - Rustonomicon, "Exotically Sized Types": https://doc.rust-lang.org/nomicon/exotic-sizes.html
+//   - Rust Reference, "Trait object types": https://doc.rust-lang.org/reference/types/trait-object.html
+//   - Easy: 0xpluie, "Static vs Dynamic Dispatch in Rust": https://pluiee.github.io/static-vs-dynamic-dispatch-in-rust/

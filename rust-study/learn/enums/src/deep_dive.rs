@@ -382,3 +382,28 @@ mod tests {
         assert!(!strange_order.is_valid());
     }
 }
+
+// Learn more
+//
+// You can learn how to make bad states impossible from these sources:
+//   - Effective Rust, "Use the type system to express your data structures": https://effective-rust.com/use-types.html
+//   - Comprehensive Rust, "Enforce Invariants": https://google.github.io/comprehensive-rust/idiomatic/leveraging-the-type-system/newtype-pattern/parse-don-t-validate.html
+//   - Easy: corrode, "Make Illegal States Unrepresentable": https://corrode.dev/blog/illegal-state/
+//
+// You can learn state machines from these sources:
+//   - Hoverbear, "Pretty State Machine Patterns in Rust": https://hoverbear.org/blog/rust-state-machine-pattern/
+//   - The Rust Book, "Implementing an Object-Oriented Design Pattern": https://doc.rust-lang.org/book/ch18-03-oo-design-patterns.html
+//   - Comprehensive Rust, "Typestate Pattern": https://google.github.io/comprehensive-rust/idiomatic/leveraging-the-type-system/typestate-pattern.html
+//   - Easy: Let's Get Rusty (video), "State Design Pattern in Rust": https://www.youtube.com/watch?v=VFmPwvhubow
+//
+// You can learn Option and Result combinators from these sources:
+//   - Effective Rust, "Prefer Option and Result transforms over explicit match expressions": https://effective-rust.com/transform.html
+//   - Rust by Example, "Combinators: and_then": https://doc.rust-lang.org/rust-by-example/error/option_unwrap/and_then.html
+//   - Standard library docs, "std::option": https://doc.rust-lang.org/std/option/index.html
+//   - Easy: LogRocket, "Understanding Rust Option and Result enums": https://blog.logrocket.com/understanding-rust-option-results-enums/
+//
+// You can learn common Option mistakes from these sources:
+//   - Standard library docs, "std::option::Option::as_deref": https://doc.rust-lang.org/std/option/enum.Option.html#method.as_deref
+//   - Effective Rust, "Prefer Option and Result transforms over explicit match expressions": https://effective-rust.com/transform.html
+//   - Rust by Example, "Combinators: map": https://doc.rust-lang.org/rust-by-example/error/option_unwrap/map.html
+//   - Easy: Easy Rust, "Option and Result": https://dhghomon.github.io/easy_rust/Chapter_31.html

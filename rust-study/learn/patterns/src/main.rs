@@ -129,3 +129,24 @@ fn show_pattern_syntax() {
     }
     println!("shadowing: dıştaki y hâlâ {y}");
 }
+
+// Learn more
+//
+// You can learn where patterns are used from these sources:
+//   - The Rust Book, "All the Places Patterns Can Be Used": https://doc.rust-lang.org/book/ch19-01-all-the-places-for-patterns.html
+//   - Rust by Example, "structs": https://doc.rust-lang.org/rust-by-example/flow_control/match/destructuring/destructure_structures.html
+//   - Rust Reference, "Patterns": https://doc.rust-lang.org/reference/patterns.html
+//   - Easy: Let's Get Rusty (video), "Patterns and Matching": https://www.youtube.com/watch?v=NzeQbiiqhgo
+//
+// You can learn refutable patterns from these sources:
+//   - The Rust Book, "Refutability: Whether a Pattern Might Fail to Match": https://doc.rust-lang.org/book/ch19-02-refutability.html
+//   - Rust Reference, "Refutability": https://doc.rust-lang.org/reference/patterns.html#refutability
+//   - Rust error codes, "E0005": https://doc.rust-lang.org/error_codes/E0005.html
+//   - Easy: Let's Get Rusty (video), "Patterns and Matching": https://www.youtube.com/watch?v=NzeQbiiqhgo
+//
+// You can learn pattern syntax from these sources:
+//   - The Rust Book, "Pattern Syntax": https://doc.rust-lang.org/book/ch19-03-pattern-syntax.html
+//   - Rust by Example, "Guards": https://doc.rust-lang.org/rust-by-example/flow_control/match/guard.html
+//   - Comprehensive Rust, "Destructuring Structs": https://google.github.io/comprehensive-rust/pattern-matching/destructuring-structs.html
+//   - Easy: Easy Rust, "Destructuring": https://dhghomon.github.io/easy_rust/Chapter_28.html
+//   - Easy: Let's Get Rusty (video), "Pattern Syntax in Rust": https://www.youtube.com/watch?v=8_HPKGZGM5I

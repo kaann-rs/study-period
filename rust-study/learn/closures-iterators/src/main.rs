@@ -89,3 +89,31 @@ fn show_own_iterator() {
         .sum();
     println!("kendi iterator zinciri = {total}");
 }
+
+// Learn more
+//
+// You can learn closures from these sources:
+//   - The Rust Book, "Closures": https://doc.rust-lang.org/book/ch13-01-closures.html
+//   - Rust by Example, "Closures": https://doc.rust-lang.org/rust-by-example/fn/closures.html
+//   - Comprehensive Rust, "Closure Syntax": https://google.github.io/comprehensive-rust/closures/syntax.html
+//   - Easy: Easy Rust, "Closures": https://dhghomon.github.io/easy_rust/Chapter_37.html
+//   - Easy: Let's Get Rusty (video), "Closures in Rust": https://www.youtube.com/watch?v=kZXJvLfjUS4
+//
+// You can learn functions that take closures from these sources:
+//   - Rust by Example, "As input parameters": https://doc.rust-lang.org/rust-by-example/fn/closures/input_parameters.html
+//   - Comprehensive Rust, "Closure Traits": https://google.github.io/comprehensive-rust/closures/traits.html
+//   - Huon Wilson, "Finding Closure in Rust": https://huonw.github.io/blog/2015/05/finding-closure-in-rust/
+//   - Easy: Easy Rust, "Closures in functions": https://dhghomon.github.io/easy_rust/Chapter_47.html
+//
+// You can learn iterators from these sources:
+//   - The Rust Book, "Processing a Series of Items with Iterators": https://doc.rust-lang.org/book/ch13-02-iterators.html
+//   - Rust by Example, "Iterators": https://doc.rust-lang.org/rust-by-example/trait/iter.html
+//   - Comprehensive Rust, "Iterator Trait": https://google.github.io/comprehensive-rust/iterators/iterator.html
+//   - Easy: Easy Rust, "Iterators": https://dhghomon.github.io/easy_rust/Chapter_36.html
+//   - Easy: Let's Get Rusty (video), "Iterators in Rust": https://www.youtube.com/watch?v=4GcKrj4By8k
+//
+// You can learn how to write your own iterator from these sources:
+//   - Standard library docs, "Implementing Iterator": https://doc.rust-lang.org/std/iter/index.html#implementing-iterator
+//   - Rust by Example, "Iterators": https://doc.rust-lang.org/rust-by-example/trait/iter.html
+//   - Crust of Rust (video), "Iterators": https://www.youtube.com/watch?v=yozQ9C69pNs
+//   - Easy: Easy Rust, "Iterators": https://dhghomon.github.io/easy_rust/Chapter_36.html

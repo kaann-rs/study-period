@@ -260,3 +260,34 @@ mod tests {
         assert_eq!(*recovered, [1, 2]);
     }
 }
+
+// Learn more
+//
+// You can learn scoped threads from these sources:
+//   - Standard library docs, "std::thread::scope": https://doc.rust-lang.org/std/thread/fn.scope.html
+//   - Rust Atomics and Locks, "Basics of Rust Concurrency": https://mara.nl/atomics/basics.html#scoped-threads
+//   - Easy: Comprehensive Rust, "Scoped Threads": https://google.github.io/comprehensive-rust/concurrency/threads/scoped.html
+//
+// You can learn worker pools from these sources:
+//   - The Rust Book, "From Single-Threaded to Multithreaded Server": https://doc.rust-lang.org/book/ch21-02-multithreaded.html
+//   - docs.rs, "threadpool": https://docs.rs/threadpool/latest/threadpool/
+//   - Crust of Rust (video), "Channels": https://www.youtube.com/watch?v=b4mS5UPHh20
+//   - Easy: Let's Get Rusty (video), "Building a Web Server in Rust - Part 2": https://www.youtube.com/watch?v=1AamFJGAE8E
+//
+// You can learn sharing results with Arc and Mutex from these sources:
+//   - The Rust Book, "Shared-State Concurrency": https://doc.rust-lang.org/book/ch16-03-shared-state.html
+//   - Comprehensive Rust, "Example": https://google.github.io/comprehensive-rust/concurrency/shared-state/example.html
+//   - Rust Atomics and Locks, "Basics of Rust Concurrency": https://mara.nl/atomics/basics.html#mutexes
+//   - Easy: Let's Get Rusty (video), "Concurrency in Rust - Sharing State": https://www.youtube.com/watch?v=mupwF9jbVZ4
+//
+// You can learn atomic counters from these sources:
+//   - Rust Atomics and Locks, "Atomics": https://mara.nl/atomics/atomics.html
+//   - Standard library docs, "std::sync::atomic": https://doc.rust-lang.org/std/sync/atomic/index.html
+//   - cfsamson, "Explaining Atomics in Rust": https://cfsamsonbooks.gitbook.io/explaining-atomics-in-rust
+//   - Easy: DEV Community, "The Missing Guide to Rust's Atomic::Ordering": https://dev.to/aryan_getsrusty/the-missing-guide-to-rusts-atomicordering-1g9p
+//
+// You can learn deadlocks and poisoned locks from these sources:
+//   - Effective Rust, "Be wary of shared-state parallelism": https://effective-rust.com/deadlock.html
+//   - Standard library docs, "Poisoning": https://doc.rust-lang.org/std/sync/struct.Mutex.html#poisoning
+//   - Rustonomicon, "Poisoning": https://doc.rust-lang.org/nomicon/poisoning.html
+//   - Rust users forum, "Lock order reversals: how to prevent them?": https://users.rust-lang.org/t/lock-order-reversals-how-to-prevent-them/65016

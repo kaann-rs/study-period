@@ -101,3 +101,26 @@ fn show_hash_maps() {
     println!("kelime sayımı: {pairs:?}");
     println!("puan tablosu eleman sayısı: {}", scores.len());
 }
+
+// Learn more
+//
+// You can learn vectors from these sources:
+//   - The Rust Book, "Storing Lists of Values with Vectors": https://doc.rust-lang.org/book/ch08-01-vectors.html
+//   - Rust by Example, "Vectors": https://doc.rust-lang.org/rust-by-example/std/vec.html
+//   - Comprehensive Rust, "Vec": https://google.github.io/comprehensive-rust/std-types/vec.html
+//   - Easy: W3Schools, "Rust Vectors": https://www.w3schools.com/rust/rust_vectors.php
+//   - Easy: Easy Rust, "Vectors": https://dhghomon.github.io/easy_rust/Chapter_21.html
+//
+// You can learn strings from these sources:
+//   - The Rust Book, "Storing UTF-8 Encoded Text with Strings": https://doc.rust-lang.org/book/ch08-02-strings.html
+//   - Rust by Example, "Strings": https://doc.rust-lang.org/rust-by-example/std/str.html
+//   - Comprehensive Rust, "String": https://google.github.io/comprehensive-rust/std-types/string.html
+//   - Easy: W3Schools, "Rust Strings": https://www.w3schools.com/rust/rust_strings.php
+//   - Easy: Easy Rust, "Strings": https://dhghomon.github.io/easy_rust/Chapter_14.html
+//
+// You can learn hash maps from these sources:
+//   - The Rust Book, "Storing Keys with Associated Values in Hash Maps": https://doc.rust-lang.org/book/ch08-03-hash-maps.html
+//   - Rust by Example, "HashMap": https://doc.rust-lang.org/rust-by-example/std/hash.html
+//   - Comprehensive Rust, "HashMap": https://google.github.io/comprehensive-rust/std-types/hashmap.html
+//   - Easy: W3Schools, "Rust HashMap": https://www.w3schools.com/rust/rust_hashmap.php
+//   - Easy: Easy Rust, "Other collections": https://dhghomon.github.io/easy_rust/Chapter_32.html

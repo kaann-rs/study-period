@@ -404,3 +404,47 @@ mod tests {
         assert_eq!(stream.next(), None);
     }
 }
+
+// Learn more
+//
+// You can learn Fn, FnMut and FnOnce from these sources:
+//   - Comprehensive Rust, "Closure Traits": https://google.github.io/comprehensive-rust/closures/traits.html
+//   - Huon Wilson, "Finding Closure in Rust": https://huonw.github.io/blog/2015/05/finding-closure-in-rust/
+//   - Rust by Example, "As input parameters": https://doc.rust-lang.org/rust-by-example/fn/closures/input_parameters.html
+//   - Easy: DEV Community, "Rust Closures — Why Are There Three? Fn, FnMut, and FnOnce Finally Explained": https://dev.to/divyesh_kakadiya/rust-closures-why-are-there-three-fn-fnmut-and-fnonce-finally-explained-1mhp
+//
+// You can learn how to return and store closures from these sources:
+//   - The Rust Book, "Returning Closures": https://doc.rust-lang.org/book/ch20-04-advanced-functions-and-closures.html#returning-closures
+//   - Rust by Example, "As output parameters": https://doc.rust-lang.org/rust-by-example/fn/closures/output_parameters.html
+//   - Crust of Rust (video), "Functions, Closures, and Their Traits": https://www.youtube.com/watch?v=dHkzSZnYXmk
+//   - Easy: Let's Get Rusty (video), "Advanced Function and Closures in Rust": https://www.youtube.com/watch?v=rnxutl7t1hI
+//
+// You can learn data pipelines with iterators from these sources:
+//   - Effective Rust, "Consider using iterator transforms instead of explicit loops": https://effective-rust.com/iterators.html
+//   - The Rust Book, "Methods That Produce Other Iterators": https://doc.rust-lang.org/book/ch13-02-iterators.html#methods-that-produce-other-iterators
+//   - Comprehensive Rust, "Iterator Helper Methods": https://google.github.io/comprehensive-rust/iterators/helpers.html
+//   - Easy: Easy Rust, "Chaining methods": https://dhghomon.github.io/easy_rust/Chapter_35.html
+//
+// You can learn slice helpers (windows, chunks, chunk_by) from these sources:
+//   - Standard library docs, "slice::chunk_by": https://doc.rust-lang.org/std/primitive.slice.html#method.chunk_by
+//   - Standard library docs, "slice::windows": https://doc.rust-lang.org/std/primitive.slice.html#method.windows
+//   - Rust Performance Book, "Iterators": https://nnethercote.github.io/perf-book/iterators.html
+//   - Easy: Easy Rust, "Closures": https://dhghomon.github.io/easy_rust/Chapter_37.html
+//
+// You can learn endless iterators from these sources:
+//   - Standard library docs, "Infinity": https://doc.rust-lang.org/std/iter/index.html#infinity
+//   - Rust by Example, "Iterators": https://doc.rust-lang.org/rust-by-example/trait/iter.html
+//   - Standard library docs, "std::iter::successors": https://doc.rust-lang.org/std/iter/fn.successors.html
+//   - Easy: Easy Rust, "Iterators": https://dhghomon.github.io/easy_rust/Chapter_36.html
+//
+// You can learn lazy iterators and collect from these sources:
+//   - Standard library docs, "Laziness": https://doc.rust-lang.org/std/iter/index.html#laziness
+//   - The Rust Book, "Processing a Series of Items with Iterators": https://doc.rust-lang.org/book/ch13-02-iterators.html
+//   - Comprehensive Rust, "collect": https://google.github.io/comprehensive-rust/iterators/collect.html
+//   - Easy: Easy Rust, "Iterators": https://dhghomon.github.io/easy_rust/Chapter_36.html
+//
+// You can learn common closure errors from these sources:
+//   - Rust error codes, "E0373": https://doc.rust-lang.org/error_codes/E0373.html
+//   - Rust error codes, "E0525": https://doc.rust-lang.org/error_codes/E0525.html
+//   - Comprehensive Rust, "Capturing": https://google.github.io/comprehensive-rust/closures/capturing.html
+//   - Easy: DEV Community, "Rust Closures — Why Are There Three? Fn, FnMut, and FnOnce Finally Explained": https://dev.to/divyesh_kakadiya/rust-closures-why-are-there-three-fn-fnmut-and-fnonce-finally-explained-1mhp

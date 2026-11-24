@@ -435,3 +435,35 @@ mod tests {
         assert_eq!(describe(&letter), "harf: Z");
     }
 }
+
+// Learn more
+//
+// You can learn how to parse commands with match from these sources:
+//   - Comprehensive Rust, "Destructuring Enums": https://google.github.io/comprehensive-rust/pattern-matching/destructuring-enums.html
+//   - Rust by Example, "Argument parsing": https://doc.rust-lang.org/rust-by-example/std_misc/arg/matching.html
+//   - The Rust Book, "The match Control Flow Construct": https://doc.rust-lang.org/book/ch06-02-match.html
+//   - Easy: Programiz, "Rust Pattern Matching": https://www.programiz.com/rust/pattern-matching
+//
+// You can learn binding modes from these sources:
+//   - Rust Reference, "Binding modes": https://doc.rust-lang.org/reference/patterns.html#binding-modes
+//   - Edition Guide, "Match ergonomics reservations": https://doc.rust-lang.org/edition-guide/rust-2024/match-ergonomics.html
+//   - Rust by Example, "The ref pattern": https://doc.rust-lang.org/rust-by-example/scope/borrow/ref.html
+//   - Easy: Rust users forum, "Ref keyword versus &": https://users.rust-lang.org/t/ref-keyword-versus/18818
+//
+// You can learn @ bindings and match guards from these sources:
+//   - The Rust Book, "Using @ Bindings": https://doc.rust-lang.org/book/ch19-03-pattern-syntax.html#using--bindings
+//   - Rust by Example, "Binding": https://doc.rust-lang.org/rust-by-example/flow_control/match/binding.html
+//   - Rust by Example, "Guards": https://doc.rust-lang.org/rust-by-example/flow_control/match/guard.html
+//   - Easy: Let's Get Rusty (video), "Pattern Syntax in Rust": https://www.youtube.com/watch?v=8_HPKGZGM5I
+//
+// You can learn slice patterns from these sources:
+//   - Rust Reference, "Slice patterns": https://doc.rust-lang.org/reference/patterns.html#slice-patterns
+//   - Rust by Example, "arrays/slices": https://doc.rust-lang.org/rust-by-example/flow_control/match/destructuring/destructure_slice.html
+//   - Standard library docs, "slice::split_first": https://doc.rust-lang.org/std/primitive.slice.html#method.split_first
+//   - Easy: Michael F. Bryan, "Daily Rust: Slice Patterns": https://adventures.michaelfbryan.com/posts/daily/slice-patterns/
+//
+// You can learn exhaustive matching and matches! from these sources:
+//   - The Rust Book, "Matches Are Exhaustive": https://doc.rust-lang.org/book/ch06-02-match.html#matches-are-exhaustive
+//   - Standard library docs, "std::matches": https://doc.rust-lang.org/std/macro.matches.html
+//   - Rust error codes, "E0004": https://doc.rust-lang.org/error_codes/E0004.html
+//   - Easy: Tour of Rust, "match": https://tourofrust.com/18_en.html

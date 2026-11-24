@@ -8,8 +8,9 @@ referans için `rust-lang/rust` kaynak ağacı (workspace dışı).
 ## Nasıl okunur?
 
 Anlatım [`book/`](book/) altındaki kitaptadır (`mdbook serve --open`). `learn/` yalnızca kodu tutar:
-her `.rs` dosyasının ilk satırı, konunun kitaptaki bölümünü gösterir. Kodda fonksiyon, değişken ve tür
-adları İngilizce, program çıktıları ve kitaptaki örnekler Türkçedir. Aşağıdaki tablolardaki "Böl."
+her `.rs` dosyasının ilk satırı, konunun kitaptaki bölümünü gösterir; dosyanın sonundaki `Learn more`
+listesi, konu konu İngilizce öğrenme kaynaklarını verir (kolay anlatanlar `Easy:` ile işaretlidir). Kodda
+fonksiyon, değişken ve tür adları İngilizce, program çıktıları ve kitaptaki örnekler Türkçedir. Aşağıdaki tablolardaki "Böl."
 sütunu ise resmî Rust Book'un bölüm numarasıdır.
 
 ## Rust Book yolculuğu (ch3–ch20)

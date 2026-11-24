@@ -42,3 +42,18 @@ fn show_auto_traits() {
     needs_send::<MiniCell<i32>>();
     println!("MiniCell<i32>: Send ✓  (ama Sync değil — derleme-testi yorumda)");
 }
+
+// Learn more
+//
+// You can learn UnsafeCell from these sources:
+//   - Standard library docs, "std::cell::UnsafeCell": https://doc.rust-lang.org/std/cell/struct.UnsafeCell.html
+//   - Rust Reference, "Interior mutability": https://doc.rust-lang.org/reference/interior-mutability.html
+//   - Crust of Rust (video), "Smart Pointers and Interior Mutability": https://www.youtube.com/watch?v=8O0Nt9qY_vo
+//   - nyanpasu64, "An unsafe tour of Rust's Send and Sync": https://nyanpasu64.gitlab.io/blog/an-unsafe-tour-of-rust-s-send-and-sync/
+//
+// You can learn Send and Sync as auto traits from these sources:
+//   - Rustonomicon, "Send and Sync": https://doc.rust-lang.org/nomicon/send-and-sync.html
+//   - Rust Reference, "Auto traits": https://doc.rust-lang.org/reference/special-types-and-traits.html#auto-traits
+//   - Crust of Rust (video), "Send, Sync, and their implementors": https://www.youtube.com/watch?v=yOezcP-XaIw
+//   - Comprehensive Rust, "Marker Traits": https://google.github.io/comprehensive-rust/concurrency/send-sync/marker-traits.html
+//   - Easy: 0xpluie, "Making Sense of Send and Sync in Rust": https://pluiee.github.io/making-sense-of-send-and-sync-in-rust/

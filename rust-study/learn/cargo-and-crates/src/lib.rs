@@ -70,3 +70,23 @@ mod tests {
         assert_eq!(mix(PrimaryColor::Red, PrimaryColor::Red), None);
     }
 }
+
+// Learn more
+//
+// You can learn documentation comments from these sources:
+//   - The Rust Book, "Making Useful Documentation Comments": https://doc.rust-lang.org/book/ch14-02-publishing-to-crates-io.html#making-useful-documentation-comments
+//   - Rustdoc Book, "How to write documentation": https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html
+//   - Rust by Example, "Documentation": https://doc.rust-lang.org/rust-by-example/meta/doc.html
+//   - Easy: Easy Rust, "cargo doc": https://dhghomon.github.io/easy_rust/Chapter_65.html
+//
+// You can learn documentation tests from these sources:
+//   - Rustdoc Book, "Documentation tests": https://doc.rust-lang.org/rustdoc/write-documentation/documentation-tests.html
+//   - Rust by Example, "Documentation testing": https://doc.rust-lang.org/rust-by-example/testing/doc_testing.html
+//   - Comprehensive Rust, "Other Types of Tests": https://google.github.io/comprehensive-rust/testing/other.html
+//   - Easy: Let's Get Rusty (video), "Publishing a Rust Crate!": https://www.youtube.com/watch?v=4TI153PIEDQ
+//
+// You can learn re-exports with pub use from these sources:
+//   - The Rust Book, "Exporting a Convenient Public API": https://doc.rust-lang.org/book/ch14-02-publishing-to-crates-io.html#exporting-a-convenient-public-api
+//   - Rustdoc Book, "Re-exports": https://doc.rust-lang.org/rustdoc/write-documentation/re-exports.html
+//   - Effective Rust, "Re-export dependencies whose types appear in your API": https://effective-rust.com/re-export.html
+//   - Easy: Let's Get Rusty (video), "Publishing a Rust Crate!": https://www.youtube.com/watch?v=4TI153PIEDQ

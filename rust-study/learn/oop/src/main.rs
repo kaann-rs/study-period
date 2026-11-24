@@ -138,3 +138,24 @@ fn show_type_state_blog() {
     let published = draft_again.send_to_review().approve();
     println!("yayınlanan içerik: {}", published.content());
 }
+
+// Learn more
+//
+// You can learn encapsulation from these sources:
+//   - The Rust Book, "Characteristics of Object-Oriented Languages": https://doc.rust-lang.org/book/ch18-01-what-is-oo.html
+//   - Comprehensive Rust, "Encapsulation": https://google.github.io/comprehensive-rust/modules/encapsulation.html
+//   - Easy: Tour of Rust, "Abstraction With Selective Exposure": https://tourofrust.com/77_en.html
+//   - Easy: Let's Get Rusty (video), "Object Oriented Programming in Rust": https://www.youtube.com/watch?v=UGDa0P2PXrY
+//
+// You can learn trait objects from these sources:
+//   - The Rust Book, "Using Trait Objects to Abstract over Shared Behavior": https://doc.rust-lang.org/book/ch18-02-trait-objects.html
+//   - Rust by Example, "Returning Traits with dyn": https://doc.rust-lang.org/rust-by-example/trait/dyn.html
+//   - Comprehensive Rust, "dyn Trait": https://google.github.io/comprehensive-rust/generics/dyn-trait.html
+//   - Easy: Easy Rust, "Box around traits": https://dhghomon.github.io/easy_rust/Chapter_54.html
+//   - Easy: Let's Get Rusty (video), "Using Trait Objects in Rust": https://www.youtube.com/watch?v=ReBmm0eJg6g
+//
+// You can learn the type state pattern from these sources:
+//   - Cliff Biffle, "The Typestate Pattern in Rust": https://cliffle.com/blog/rust-typestate/
+//   - The Rust Book, "Encoding States and Behavior as Types": https://doc.rust-lang.org/book/ch18-03-oo-design-patterns.html#encoding-states-and-behavior-as-types
+//   - Comprehensive Rust, "Typestate Pattern": https://google.github.io/comprehensive-rust/idiomatic/leveraging-the-type-system/typestate-pattern.html
+//   - Easy: Let's Get Rusty (video), "State Design Pattern in Rust": https://www.youtube.com/watch?v=VFmPwvhubow

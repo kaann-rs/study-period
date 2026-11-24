@@ -38,3 +38,19 @@ fn show_phantom_data() {
         size_of::<u32>()
     );
 }
+
+// Learn more
+//
+// You can learn the drop check from these sources:
+//   - Rustonomicon, "Drop Check": https://doc.rust-lang.org/nomicon/dropck.html
+//   - Standard library docs, "Drop check": https://doc.rust-lang.org/std/ops/trait.Drop.html#drop-check
+//   - Crust of Rust (video), "The Drop Check": https://www.youtube.com/watch?v=TJOFSMpJdzg
+//   - std developers guide, "Drop and #[may_dangle]": https://std-dev-guide.rust-lang.org/tricky/may-dangle.html
+//   - Easy: Tour of Rust, "Dropping is Hierarchical": https://tourofrust.com/45_en.html
+//
+// You can learn PhantomData from these sources:
+//   - Rustonomicon, "PhantomData": https://doc.rust-lang.org/nomicon/phantom-data.html
+//   - Standard library docs, "std::marker::PhantomData": https://doc.rust-lang.org/std/marker/struct.PhantomData.html
+//   - Rust by Example, "Phantom type parameters": https://doc.rust-lang.org/rust-by-example/generics/phantom.html
+//   - Comprehensive Rust, "PhantomData and Types": https://google.github.io/comprehensive-rust/idiomatic/leveraging-the-type-system/borrow-checker-invariants/phantomdata-01-types.html
+//   - Easy: Rust by Example, "Testcase: unit clarification": https://doc.rust-lang.org/rust-by-example/generics/phantom/testcase_units.html

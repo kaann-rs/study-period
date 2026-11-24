@@ -358,3 +358,35 @@ mod tests {
         assert_eq!(arc.version_count(), 1);
     }
 }
+
+// Learn more
+//
+// You can learn lifetime relations ('a: 'b and T: 'a) from these sources:
+//   - Rust Reference, "Lifetime bounds": https://doc.rust-lang.org/reference/trait-bounds.html#lifetime-bounds
+//   - Rust by Example, "Bounds": https://doc.rust-lang.org/rust-by-example/scope/lifetime/lifetime_bounds.html
+//   - pretzelhammer, "Common Rust Lifetime Misconceptions": https://github.com/pretzelhammer/rust-blog/blob/master/posts/common-rust-lifetime-misconceptions.md
+//   - okryvyts, "Lifetime subtyping": https://okryvyts.github.io/lifetimes-book/lifetime_subtyping.html
+//   - Easy: Tour of Rust, "Multiple Lifetimes": https://tourofrust.com/54_en.html
+//
+// You can learn closures with for<'a> (HRTB) from these sources:
+//   - Rustonomicon, "Higher-Rank Trait Bounds": https://doc.rust-lang.org/nomicon/hrtb.html
+//   - Rust Reference, "Higher-ranked trait bounds": https://doc.rust-lang.org/reference/trait-bounds.html#higher-ranked-trait-bounds
+//   - Learning Rust by quinedot, "Higher-ranked types": https://quinedot.github.io/rust-learning/dyn-hr.html
+//   - Easy: Rust users forum, "What is the meaning of for<'a>": https://users.rust-lang.org/t/what-is-the-meaning-of-for-a/55929
+//
+// You can learn traits with for<'a> bounds from these sources:
+//   - Serde, "Deserializer lifetimes": https://serde.rs/lifetimes.html
+//   - Rust Reference, "Higher-ranked trait bounds": https://doc.rust-lang.org/reference/trait-bounds.html#higher-ranked-trait-bounds
+//   - Rustonomicon, "Higher-Rank Trait Bounds": https://doc.rust-lang.org/nomicon/hrtb.html
+//   - Easy: Rust users forum, "What is the meaning of for<'a>": https://users.rust-lang.org/t/what-is-the-meaning-of-for-a/55929
+//
+// You can learn lending iterators (GAT) from these sources:
+//   - Rust Blog, "Generic associated types to be stable in Rust 1.65": https://blog.rust-lang.org/2022/10/28/gats-stabilization/
+//   - GATs Initiative, "Iterable and lending iterators": https://rust-lang.github.io/generic-associated-types-initiative/design_patterns/iterable.html
+//   - Jack Huey, "A shiny future with GATs": https://jackhuey.me/rust/2022/05/04/a-shiny-future-with-gats.html
+//   - Easy: LogRocket, "Using Rust GATs to improve code and application performance": https://blog.logrocket.com/using-rust-gats-improve-code-app-performance/
+//
+// You can learn type families (GAT) from these sources:
+//   - Niko Matsakis, "Associated type constructors, part 2: family traits": https://smallcultfollowing.com/babysteps/blog/2016/11/03/associated-type-constructors-part-2-family-traits/
+//   - GATs Initiative, "Pointer types": https://rust-lang.github.io/generic-associated-types-initiative/design_patterns/pointer_types.html
+//   - Rust RFC 1598, "generic_associated_types": https://rust-lang.github.io/rfcs/1598-generic_associated_types.html

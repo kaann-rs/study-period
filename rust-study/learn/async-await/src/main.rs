@@ -98,3 +98,35 @@ async fn run_task(id: u32) {
     HandOver(false).await;
     println!("  görev {id}: bitti");
 }
+
+// Learn more
+//
+// You can learn how to write a small executor (block_on) from these sources:
+//   - Async Book, "Applied: Build an Executor": https://rust-lang.github.io/async-book/02_execution/04_executor.html
+//   - Philipp Oppermann, "Async/Await": https://os.phil-opp.com/async-await/
+//   - Crust of Rust (video), "async/await": https://www.youtube.com/watch?v=ThjvMReOXYM
+//   - Easy: Learn by Building, "A Minimal Executor": https://its-saeed.github.io/learn-by-building/async/05-executor.html
+//
+// You can learn wakers from these sources:
+//   - Async Book, "Task Wakeups with Waker": https://rust-lang.github.io/async-book/02_execution/03_wakeups.html
+//   - Standard library docs, "std::task::Waker": https://doc.rust-lang.org/std/task/struct.Waker.html
+//   - Tokio tutorial, "Wakers": https://tokio.rs/tokio/tutorial/async#wakers
+//   - Easy: Learn by Building, "Wakers & Waking": https://its-saeed.github.io/learn-by-building/async/03-wakers.html
+//
+// You can learn how to write a Future by hand from these sources:
+//   - Async Book, "The Future Trait": https://rust-lang.github.io/async-book/02_execution/02_future.html
+//   - Standard library docs, "std::future::Future": https://doc.rust-lang.org/std/future/trait.Future.html
+//   - natkr, "Async from scratch 1: What's in a Future, anyway?": https://natkr.com/2025-04-10-async-from-scratch-1/
+//   - Easy: Learn by Building, "Futures by Hand": https://its-saeed.github.io/learn-by-building/async/01-futures.html
+//
+// You can learn async and await from these sources:
+//   - The Rust Book, "Futures and the Async Syntax": https://doc.rust-lang.org/book/ch17-01-futures-and-syntax.html
+//   - Comprehensive Rust, "async/await": https://google.github.io/comprehensive-rust/concurrency/async/async-await.html
+//   - Rust Reference, "Await expressions": https://doc.rust-lang.org/reference/expressions/await-expr.html
+//   - Easy: DEV Community, "Async Rust, but less intimidating": https://dev.to/dotxlem/async-rust-but-less-intimidating-2c13
+//
+// You can learn how to run many tasks from these sources:
+//   - The Rust Book, "Applying Concurrency with Async": https://doc.rust-lang.org/book/ch17-02-concurrency-with-async.html
+//   - Comprehensive Rust, "Tasks": https://google.github.io/comprehensive-rust/concurrency/async/tasks.html
+//   - Tokio tutorial, "Spawning": https://tokio.rs/tokio/tutorial/spawning
+//   - Easy: DEV Community, "Async/Await in Rust: A Beginner's Guide": https://dev.to/leapcell/asyncawait-in-rust-a-beginners-guide-237h

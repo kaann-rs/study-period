@@ -295,3 +295,30 @@ mod tests {
         assert_eq!(block_on(wait_all(tasks)), [1, 2]);
     }
 }
+
+// Learn more
+//
+// You can learn lazy futures from these sources:
+//   - The Rust Book, "Futures and the Async Syntax": https://doc.rust-lang.org/book/ch17-01-futures-and-syntax.html
+//   - Comprehensive Rust, "Futures": https://google.github.io/comprehensive-rust/concurrency/async/futures.html
+//   - natkr, "Async from scratch 1: What's in a Future, anyway?": https://natkr.com/2025-04-10-async-from-scratch-1/
+//   - Easy: DEV Community, "Async Rust, but less intimidating": https://dev.to/dotxlem/async-rust-but-less-intimidating-2c13
+//
+// You can learn serial and concurrent await from these sources:
+//   - The Rust Book, "Applying Concurrency with Async": https://doc.rust-lang.org/book/ch17-02-concurrency-with-async.html
+//   - Async Book, "join!": https://rust-lang.github.io/async-book/06_multiple_futures/02_join.html
+//   - Comprehensive Rust, "Join": https://google.github.io/comprehensive-rust/concurrency/async-control-flow/join.html
+//   - Easy: DEV Community, "Async/Await in Rust: A Beginner's Guide": https://dev.to/leapcell/asyncawait-in-rust-a-beginners-guide-237h
+//
+// You can learn an async API client with error handling from these sources:
+//   - The Rust Book, "Futures and the Async Syntax": https://doc.rust-lang.org/book/ch17-01-futures-and-syntax.html
+//   - Async Book, "Async and await": https://rust-lang.github.io/async-book/part-guide/async-await.html
+//   - Ibraheem Ahmed, "Learning Async Rust With Entirely Too Many Web Servers": https://ibraheem.ca/posts/too-many-web-servers/
+//   - LogRocket, "A practical guide to async in Rust": https://blog.logrocket.com/a-practical-guide-to-async-in-rust/
+//   - Easy: DEV Community, "Async/Await in Rust: A Beginner's Guide": https://dev.to/leapcell/asyncawait-in-rust-a-beginners-guide-237h
+//
+// You can learn how to use Pin in daily code (pin! and Box::pin) from these sources:
+//   - The Rust Book, "The Pin Type and the Unpin Trait": https://doc.rust-lang.org/book/ch17-05-traits-for-async.html#the-pin-type-and-the-unpin-trait
+//   - Standard library docs, "std::pin::pin": https://doc.rust-lang.org/std/pin/macro.pin.html
+//   - Cloudflare, "Pin, Unpin, and why Rust needs them": https://blog.cloudflare.com/pin-and-unpin-in-rust/
+//   - Easy: Abstraction Haven, "Pinning in plain English": https://blog.schichler.dev/posts/Pinning-in-plain-English/

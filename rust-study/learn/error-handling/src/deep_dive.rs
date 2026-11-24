@@ -317,3 +317,43 @@ mod tests {
         assert!(matches!(load_from_file(&path), Err(SettingsError::Io(_))));
     }
 }
+
+// Learn more
+//
+// You can learn custom error types from these sources:
+//   - Rust by Example, "Defining an error type": https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/define_error_type.html
+//   - Effective Rust, "Prefer idiomatic Error types": https://effective-rust.com/errors.html
+//   - BurntSushi, "Error Handling in Rust": https://burntsushi.net/rust-error-handling/
+//   - Comprehensive Rust, "thiserror": https://google.github.io/comprehensive-rust/error-handling/thiserror.html
+//   - Easy: KodeKloud, "Creating Custom Error Types": https://notes.kodekloud.com/docs/Rust-Programming/Collections-Error-Handling/Creating-Custom-Error-Types
+//
+// You can learn Option and Result together from these sources:
+//   - Rust by Example, "Pulling Results out of Options": https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/option_result.html
+//   - Standard library docs, "std::option::Option::ok_or_else": https://doc.rust-lang.org/std/option/enum.Option.html#method.ok_or_else
+//   - Effective Rust, "Prefer Option and Result transforms over explicit match expressions": https://effective-rust.com/transform.html
+//   - Easy: LogRocket, "Understanding Rust Option and Result enums": https://blog.logrocket.com/understanding-rust-option-results-enums/
+//
+// You can learn how to stop at the first error or collect all errors from these sources:
+//   - Rust by Example, "Iterating over Results": https://doc.rust-lang.org/rust-by-example/error/iter_result.html
+//   - Standard library docs, "std::result": https://doc.rust-lang.org/std/result/index.html
+//   - Standard library docs, "std::iter::Iterator::partition": https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.partition
+//
+// You can learn how to load a file from these sources:
+//   - The Rust Book, "Reading a File": https://doc.rust-lang.org/book/ch12-02-reading-a-file.html
+//   - Rust by Example, "open": https://doc.rust-lang.org/rust-by-example/std_misc/file/open.html
+//   - Standard library docs, "std::fs::read_to_string": https://doc.rust-lang.org/std/fs/fn.read_to_string.html
+//   - Easy: Programiz, "Rust File Handling": https://www.programiz.com/rust/file-handling
+//   - Easy: Easy Rust, "Using files": https://dhghomon.github.io/easy_rust/Chapter_64.html
+//
+// You can learn Box<dyn Error> from these sources:
+//   - Rust by Example, "Boxing errors": https://doc.rust-lang.org/rust-by-example/error/multiple_error_types/boxing_errors.html
+//   - Comprehensive Rust, "Dynamic Error Types": https://google.github.io/comprehensive-rust/error-handling/error.html
+//   - Effective Rust, "Prefer idiomatic Error types": https://effective-rust.com/errors.html
+//   - The Rust Book, "Where to Use the ? Operator": https://doc.rust-lang.org/book/ch09-02-recoverable-errors-with-result.html#where-to-use-the--operator
+//   - Easy: Easy Rust, "Box around traits": https://dhghomon.github.io/easy_rust/Chapter_54.html
+//
+// You can learn when unwrap is OK from these sources:
+//   - BurntSushi, "Using unwrap() in Rust is Okay": https://burntsushi.net/unwrap/
+//   - The Rust Book, "To panic! or Not to panic!": https://doc.rust-lang.org/book/ch09-03-to-panic-or-not-to-panic.html
+//   - Effective Rust, "Don't panic": https://effective-rust.com/panic.html
+//   - Easy: Programiz, "Rust unwrap() and expect()": https://www.programiz.com/rust/unwrap-and-expect

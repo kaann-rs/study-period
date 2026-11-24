@@ -268,3 +268,33 @@ mod tests {
         assert_eq!(cart.use_coupon(), None);
     }
 }
+
+// Learn more
+//
+// You can learn how to choose function signatures (T, &T or &mut T) from these sources:
+//   - Brown University Rust Book, "Fixing Ownership Errors": https://rust-book.cs.brown.edu/ch04-03-fixing-ownership-errors.html
+//   - Rust Design Patterns, "Use borrowed types for arguments": https://rust-unofficial.github.io/patterns/idioms/coercion-arguments.html
+//   - Rust API Guidelines, "Flexibility": https://rust-lang.github.io/api-guidelines/flexibility.html
+//   - Easy: Easy Rust, "Giving references to functions": https://dhghomon.github.io/easy_rust/Chapter_18.html
+//
+// You can learn partial moves from these sources:
+//   - Rust by Example, "Partial moves": https://doc.rust-lang.org/rust-by-example/scope/move/partial_move.html
+//   - Rust Reference, "Moved and copied types": https://doc.rust-lang.org/reference/expressions.html#moved-and-copied-types
+//   - Rust error codes, "E0382": https://doc.rust-lang.org/error_codes/E0382.html
+//
+// You can learn how to lend values from a store from these sources:
+//   - Effective Rust, "Understand the borrow checker": https://effective-rust.com/borrows.html
+//   - Standard library docs, "std::vec::Vec::swap_remove": https://doc.rust-lang.org/std/vec/struct.Vec.html#method.swap_remove
+//   - Brown University Rust Book, "Fixing Ownership Errors": https://rust-book.cs.brown.edu/ch04-03-fixing-ownership-errors.html
+//   - Easy: Tour of Rust, "Passing Around Borrowed Data": https://tourofrust.com/51_en.html
+//
+// You can learn how to fix ownership errors from these sources:
+//   - Brown University Rust Book, "Fixing Ownership Errors": https://rust-book.cs.brown.edu/ch04-03-fixing-ownership-errors.html
+//   - Effective Rust, "Understand the borrow checker": https://effective-rust.com/borrows.html
+//   - Rust error codes, "E0505": https://doc.rust-lang.org/error_codes/E0505.html
+//   - Easy: Let's Get Rusty (video), "Understanding Ownership in Rust": https://www.youtube.com/watch?v=VFIOSWy93H0
+//
+// You can learn mem::take and Option::take from these sources:
+//   - Rust Design Patterns, "mem::{take(_), replace(_)}": https://rust-unofficial.github.io/patterns/idioms/mem-replace.html
+//   - Standard library docs, "std::mem::take": https://doc.rust-lang.org/std/mem/fn.take.html
+//   - Too Many Lists, "Option": https://rust-unofficial.github.io/too-many-lists/second-option.html

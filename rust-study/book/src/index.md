@@ -2,7 +2,7 @@
 
 Bu kitap, Rust öğrenirken tutulmuş notların baştan sona okunabilecek hâlidir. İlk programdan başlar, sahiplik ve ödünç alma gibi temel kuralları işler, eşzamanlılık ve asenkron programlamayı anlatır, sonunda da küçük bir asenkron çalışma zamanını sıfırdan kurar.
 
-Örneklerin kaynak kodu depodaki `learn/` dizinindedir. Orada her konu ayrı bir Cargo projesidir (crate) ve her dosyanın ilk satırında konunun kitaptaki bölümü yazar. Kitap, her kavramı kısa bir açıklama, çalışan bir örnek, örneğin gerçek çıktısı ve gerektiğinde derleyicinin verdiği hata mesajıyla birlikte anlatır.
+Örneklerin kaynak kodu depodaki `learn/` dizinindedir. Orada her konu ayrı bir Cargo projesidir (crate) ve her dosyanın ilk satırında konunun kitaptaki bölümü, sonunda da konu konu İngilizce öğrenme kaynakları yazar. Kitap, her kavramı kısa bir açıklama, çalışan bir örnek, örneğin gerçek çıktısı ve gerektiğinde derleyicinin verdiği hata mesajıyla birlikte anlatır.
 
 ## Kitabın üç kısmı
 

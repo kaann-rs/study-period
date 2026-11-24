@@ -320,3 +320,29 @@ mod tests {
         assert_eq!(english.page_size, base.page_size);
     }
 }
+
+// Learn more
+//
+// You can learn how to keep a value valid (newtype with a private field) from these sources:
+//   - Comprehensive Rust, "Enforce Invariants": https://google.github.io/comprehensive-rust/idiomatic/leveraging-the-type-system/newtype-pattern/parse-don-t-validate.html
+//   - How To Code It, "The Ultimate Guide to Rust Newtypes": https://www.howtocodeit.com/guides/ultimate-guide-rust-newtypes
+//   - Effective Rust, "Embrace the newtype pattern": https://effective-rust.com/newtype.html
+//   - Easy: Rustfinity, "Parse, Don't validate: An Effective Error Handling Strategy": https://www.rustfinity.com/blog/parse-dont-validate
+//
+// You can learn the builder pattern from these sources:
+//   - Rust Design Patterns, "Builder": https://rust-unofficial.github.io/patterns/patterns/creational/builder.html
+//   - Effective Rust, "Use builders for complex types": https://effective-rust.com/builders.html
+//   - Rust API Guidelines, "Type safety": https://rust-lang.github.io/api-guidelines/type-safety.html#c-builder
+//   - Easy: Easy Rust, "Default and the builder pattern": https://dhghomon.github.io/easy_rust/Chapter_55.html
+//
+// You can learn how to choose self, &self or &mut self from these sources:
+//   - The Rust Book, "Methods": https://doc.rust-lang.org/book/ch05-03-method-syntax.html
+//   - Comprehensive Rust, "Methods": https://google.github.io/comprehensive-rust/methods-and-traits/methods.html
+//   - Rust by Example, "Methods": https://doc.rust-lang.org/rust-by-example/fn/methods.html
+//   - Easy: Easy Rust, "Implementing structs and enums": https://dhghomon.github.io/easy_rust/Chapter_27.html
+//
+// You can learn the struct update trap (moved fields) from these sources:
+//   - The Rust Book, "Creating Instances with Struct Update Syntax": https://doc.rust-lang.org/book/ch05-01-defining-structs.html#creating-instances-with-struct-update-syntax
+//   - Rust Reference, "Functional update syntax": https://doc.rust-lang.org/reference/expressions/struct-expr.html#functional-update-syntax
+//   - Rust by Example, "Partial moves": https://doc.rust-lang.org/rust-by-example/scope/move/partial_move.html
+//   - Easy: Let's Get Rusty (video), "Structs in Rust": https://www.youtube.com/watch?v=n3bPhdiJm9I

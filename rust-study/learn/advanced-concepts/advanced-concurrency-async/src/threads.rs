@@ -399,3 +399,34 @@ mod tests {
         }
     }
 }
+
+// Learn more
+//
+// You can learn RwLock from these sources:
+//   - Standard library docs, "std::sync::RwLock": https://doc.rust-lang.org/std/sync/struct.RwLock.html
+//   - Rust Atomics and Locks, "Basics of Rust Concurrency": https://mara.nl/atomics/basics.html#reader-writer-lock
+//   - Easy: TutorialEdge, "Using RwLock and CondVars in Rust": https://tutorialedge.net/rust/using-rwlocks-and-condvars-rust/
+//
+// You can learn Condvar (a limited queue) from these sources:
+//   - Standard library docs, "std::sync::Condvar": https://doc.rust-lang.org/std/sync/struct.Condvar.html
+//   - Rust Atomics and Locks, "Basics of Rust Concurrency": https://mara.nl/atomics/basics.html#condvar
+//   - Easy: TutorialEdge, "Using RwLock and CondVars in Rust": https://tutorialedge.net/rust/using-rwlocks-and-condvars-rust/
+//
+// You can learn lock order and deadlocks from these sources:
+//   - Effective Rust, "Be wary of shared-state parallelism": https://effective-rust.com/deadlock.html
+//   - Standard library docs, "std::sync::Mutex": https://doc.rust-lang.org/std/sync/struct.Mutex.html
+//   - Rust users forum, "Lock order reversals: how to prevent them?": https://users.rust-lang.org/t/lock-order-reversals-how-to-prevent-them/65016
+//
+// You can learn atomics and memory ordering from these sources:
+//   - Rust Atomics and Locks, "Memory Ordering": https://mara.nl/atomics/memory-ordering.html
+//   - Rustonomicon, "Atomics": https://doc.rust-lang.org/nomicon/atomics.html
+//   - Crust of Rust (video), "Atomics and Memory Ordering": https://www.youtube.com/watch?v=rMGWeSjctlY
+//   - Vorner's blog, "Atomics": https://vorner.github.io/2018/03/25/Atomics.html
+//   - Easy: DEV Community, "The Missing Guide to Rust's Atomic::Ordering": https://dev.to/aryan_getsrusty/the-missing-guide-to-rusts-atomicordering-1g9p
+//
+// You can learn which types are Send and Sync from these sources:
+//   - Comprehensive Rust, "Examples": https://google.github.io/comprehensive-rust/concurrency/send-sync/examples.html
+//   - Rustonomicon, "Send and Sync": https://doc.rust-lang.org/nomicon/send-and-sync.html
+//   - Crust of Rust (video), "Send, Sync, and their implementors": https://www.youtube.com/watch?v=yOezcP-XaIw
+//   - Easy: 0xpluie, "Making Sense of Send and Sync in Rust": https://pluiee.github.io/making-sense-of-send-and-sync-in-rust/
+//   - Easy: Let's Get Rusty (video), "Concurrency in Rust - Sharing State": https://www.youtube.com/watch?v=mupwF9jbVZ4

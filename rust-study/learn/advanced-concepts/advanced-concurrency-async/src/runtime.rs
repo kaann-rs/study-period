@@ -295,3 +295,36 @@ mod tests {
         assert_eq!(slow, Err(TimeoutError));
     }
 }
+
+// Learn more
+//
+// You can learn task queues and spawners from these sources:
+//   - Async Book, "Applied: Build an Executor": https://rust-lang.github.io/async-book/02_execution/04_executor.html
+//   - Tokio blog, "Making the Tokio scheduler 10x faster": https://tokio.rs/blog/2019-10-scheduler
+//   - Philipp Oppermann, "Async/Await": https://os.phil-opp.com/async-await/
+//   - Easy: Learn by Building, "A Minimal Executor": https://its-saeed.github.io/learn-by-building/async/05-executor.html
+//   - Easy: Learn by Building, "Tasks": https://its-saeed.github.io/learn-by-building/async/04-tasks.html
+//
+// You can learn join handles from these sources:
+//   - docs.rs, "tokio::task::JoinHandle": https://docs.rs/tokio/latest/tokio/task/struct.JoinHandle.html
+//   - Tokio tutorial, "Spawning": https://tokio.rs/tokio/tutorial/spawning
+//   - The Rust Book, "Applying Concurrency with Async": https://doc.rust-lang.org/book/ch17-02-concurrency-with-async.html
+//   - Easy: Learn by Building, "Tasks": https://its-saeed.github.io/learn-by-building/async/04-tasks.html
+//
+// You can learn sleep timers from these sources:
+//   - Async Book, "Task Wakeups with Waker": https://rust-lang.github.io/async-book/02_execution/03_wakeups.html
+//   - Tokio tutorial, "Async in depth": https://tokio.rs/tokio/tutorial/async
+//   - docs.rs, "tokio::time::sleep": https://docs.rs/tokio/latest/tokio/time/fn.sleep.html
+//   - Easy: Learn by Building, "Timers": https://its-saeed.github.io/learn-by-building/async/12-timers.html
+//
+// You can learn timeouts from these sources:
+//   - docs.rs, "tokio::time::timeout": https://docs.rs/tokio/latest/tokio/time/fn.timeout.html
+//   - sunshowers, "Cancelling async Rust": https://sunshowers.io/posts/cancelling-async-rust/
+//   - The Rust Book, "Working With Any Number of Futures": https://doc.rust-lang.org/book/ch17-03-more-futures.html
+//   - Easy: Learn by Building, "Cancellation Safety": https://its-saeed.github.io/learn-by-building/async/24-cancellation.html
+//
+// You can learn backpressure from these sources:
+//   - Tokio tutorial, "Backpressure and bounded channels": https://tokio.rs/tokio/tutorial/channels#backpressure-and-bounded-channels
+//   - Comprehensive Rust, "Bounded Channels": https://google.github.io/comprehensive-rust/concurrency/channels/bounded.html
+//   - docs.rs, "tokio::sync::mpsc": https://docs.rs/tokio/latest/tokio/sync/mpsc/index.html
+//   - Easy: Learn by Building, "Backpressure": https://its-saeed.github.io/learn-by-building/async/23-backpressure.html

@@ -118,3 +118,24 @@ fn show_pin_and_self_reference() {
     );
     println!("   iki yol da aynı adresi görüyor (Pin değeri yerinden oynatmadığı için geçerli)");
 }
+
+// Learn more
+//
+// You can learn the poll and wake loop from these sources:
+//   - Async Book, "The Future Trait": https://rust-lang.github.io/async-book/02_execution/02_future.html
+//   - Standard library docs, "std::future::Future": https://doc.rust-lang.org/std/future/trait.Future.html
+//   - Tokio tutorial, "Async in depth": https://tokio.rs/tokio/tutorial/async
+//   - Easy: Learn by Building, "Futures by Hand": https://its-saeed.github.io/learn-by-building/async/01-futures.html
+//
+// You can learn wakers from these sources:
+//   - Standard library docs, "std::task::Waker": https://doc.rust-lang.org/std/task/struct.Waker.html
+//   - Async Book, "Task Wakeups with Waker": https://rust-lang.github.io/async-book/02_execution/03_wakeups.html
+//   - Philipp Oppermann, "Async/Await": https://os.phil-opp.com/async-await/
+//   - Easy: Learn by Building, "Wakers & Waking": https://its-saeed.github.io/learn-by-building/async/03-wakers.html
+//
+// You can learn Pin and self-references from these sources:
+//   - Cloudflare, "Pin, Unpin, and why Rust needs them": https://blog.cloudflare.com/pin-and-unpin-in-rust/
+//   - fasterthanlime, "Pin and suffering": https://fasterthanli.me/articles/pin-and-suffering
+//   - Standard library docs, "std::pin": https://doc.rust-lang.org/std/pin/index.html
+//   - Easy: Abstraction Haven, "Pinning in plain English": https://blog.schichler.dev/posts/Pinning-in-plain-English/
+//   - Easy: Learn by Building, "Pinning": https://its-saeed.github.io/learn-by-building/async/06-pinning.html

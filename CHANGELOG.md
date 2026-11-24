@@ -4,6 +4,10 @@ Changes to this study workspace, newest first.
 
 ## 2026-11-24
 
+### Added
+
+- Learning sources at the end of every `rust-study/learn` source file: a `Learn more` comment lists, topic by topic, two or more sources from different sites. Beginner-friendly ones are marked `Easy:` and come last. It covers 194 topics in 48 files; every link was opened and its page and anchor checked.
+
 ### Changed
 
 - Renamed the files and directories of `rust-study/book` to English: `temel`, `orta`, and `ileri` are now `basics`, `intermediate`, and `advanced`, `*-derinlesme.md` is `*-deep-dive.md`, `dogrula.py` is `verify.py`, `YAZAR-KILAVUZU.md` is `WRITING-GUIDE.md`, and `tema/kitap.css` is `styles/book.css`. The text of the book stays Turkish.
